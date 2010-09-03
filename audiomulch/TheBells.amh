@@ -1,0 +1,1158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<audiomulch-document version="0.98" application-path="C:\Programme\AudioMulch 0.9b17" document-path="C:\works\EEG\BrainBay\debug\CONFIGURATIONS">
+	<patch>
+		<clock tempo="45" loop-start="480" loop-end="864" loop-enabled="1"></clock>
+		<contraption class="10Harmonics" name="10Harmonics_1">
+			<properties>
+				<property index="0" name="Frequency">
+					<double>161.729384959926</double>
+				</property>
+				<property index="1" name="Gain">
+					<double>0.0386963934547121</double>
+				</property>
+				<property index="2" name="Amp_1">
+					<double>0.794872</double>
+				</property>
+				<property index="3" name="Amp_2">
+					<double>0.995888631546521</double>
+				</property>
+				<property index="4" name="Amp_3">
+					<double>0</double>
+				</property>
+				<property index="5" name="Amp_4">
+					<double>0</double>
+				</property>
+				<property index="6" name="Amp_5">
+					<double>0.00428290464291766</double>
+				</property>
+				<property index="7" name="Amp_6">
+					<double>0.865390217940555</double>
+				</property>
+				<property index="8" name="Amp_7">
+					<double>0</double>
+				</property>
+				<property index="9" name="Amp_8">
+					<double>0.865390217940555</double>
+				</property>
+				<property index="10" name="Amp_9">
+					<double>0</double>
+				</property>
+				<property index="11" name="Amp_10">
+					<double>8.39053570823387E-05</double>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources>
+				<property-sources property-name="Frequency" property-index="0">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	183.368
+96	183
+2247.14	121.538
+2364.75	183
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Gain" property-index="1">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+96	0.128205
+348.567	0.128205
+912.207	0.025641
+1742.83	0.0769231
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Amp_1" property-index="2">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+30	0.025641
+96	0.871795
+144	0.205128
+144	0.794872
+168	0.794872
+168	0.179487
+192	0.179487
+192	1
+216	1
+216	0.025641
+240	0
+240	0.564103
+264	0.923077
+264	0.0512821
+288	0.025641
+312	1
+312	0.581197
+336	0.871795
+384	0.205128
+384	0.794872
+408	0.794872
+408	0.179487
+432	0.179487
+432	1
+456	1
+456	0.025641
+480	0
+480	0.564103
+504	0.923077
+504	0.0512821
+528	0.025641
+552	1
+552	0
+576	0
+576	0.948718
+648	0
+696	0
+696	1
+720	0.393013
+744	0.00436681
+768	0
+768	0.581197
+792	0.871795
+840	0.205128
+840	0.794872
+864	0.794872
+864	0.179487
+888	0.179487
+888	1
+912	1
+912	0.025641
+936	0
+936	0.564103
+960	0.923077
+960	0.0512821
+984	0.025641
+1008	1
+1008	0
+1032	0
+1032	0.948718
+1104	0
+1152	0
+1152	1
+1176	0.393013
+1200	0.00436681
+1224	0
+1224	1
+1248	0.825328
+1248	0
+1272	0.00436681
+1272	0.956332
+1320	0
+1320	1
+1368	0.572052
+1368	0.995633
+1392	0
+1416	0.580786
+1440	0.58952
+1440	0
+1512	0
+1512	0
+1536	0.825328
+1536	0
+1560	0.00436681
+1560	0.956332
+1608	0
+1608	1
+1656	0.572052
+1656	0.995633
+1680	0
+1704	0.580786
+1728	0.58952
+1728	0
+1800	0
+1800	1
+1824	0
+1824	0.948718
+1896	0
+1944	0
+1944	1
+1968	0.393013
+1992	0.00436681
+2016	0
+2016	0.581197
+2040	0.871795
+2088	0.205128
+2088	0.794872
+2112	0.794872
+2112	0.179487
+2136	0.179487
+2136	1
+2160	1
+2160	0.025641
+2184	0
+2184	0.564103
+2208	0.923077
+2208	0.0512821
+2232	0.025641
+2256	1
+2256	0
+2280	0
+2280	0.948718
+2352	0
+2370	0
+2370	0
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Amp_2" property-index="3">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+35.6156	0.205128
+192	0
+192	0.581197
+216	0.871795
+264	0.205128
+264	0.794872
+288	0.794872
+288	0.581197
+312	0.871795
+360	0.205128
+360	0.794872
+384	0.794872
+384	0.179487
+408	0.179487
+408	1
+432	1
+432	0.025641
+456	0
+456	0.564103
+480	0.923077
+480	0.0512821
+504	0.025641
+528	1
+528	0
+552	0
+552	0.948718
+624	0
+672	0
+672	1
+696	0.393013
+720	0.00436681
+744	0
+744	1
+768	0.825328
+768	0
+792	0.00436681
+792	0.956332
+840	0
+840	1
+888	0.572052
+888	0.995633
+912	0
+936	0.580786
+960	0.58952
+960	0
+1032	0
+1032	0.794872
+1056	0.179487
+1056	1
+1080	1
+1080	0.025641
+1104	0
+1104	0.564103
+1128	0.923077
+1128	0.0512821
+1152	0.025641
+1176	1
+1176	0
+1200	0
+1200	0.948718
+1272	0
+1320	0
+1320	1
+1344	0.393013
+1368	0.00436681
+1368	0.581197
+1392	0.871795
+1440	0.205128
+1440	0.794872
+1464	0.794872
+1464	0.179487
+1488	0.179487
+1488	1
+1512	1
+1512	0.025641
+1536	0
+1536	0.564103
+1560	0.923077
+1560	0.0512821
+1584	0.025641
+1608	1
+1608	0
+1632	0
+1632	0.948718
+1704	0
+1752	0
+1752	1
+1776	0.393013
+1800	0.00436681
+1824	0
+1824	1
+1848	0.825328
+1848	0
+1872	0.00436681
+1872	0.956332
+1920	0
+1920	1
+1968	0.572052
+1968	0.995633
+1992	0
+2016	0.580786
+2040	0.58952
+2040	0
+2112	0
+2112	0.00436681
+2136	0
+2136	1
+2160	0.825328
+2160	0
+2184	0.00436681
+2184	0.956332
+2232	0
+2232	1
+2280	0.572052
+2280	0.995633
+2304	0
+2328	0.580786
+2352	0.58952
+2352	0
+2370	0
+2370	0
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Amp_5" property-index="6">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+35.6156	0.538462
+120	0
+120	0.581197
+144	0.871795
+192	0.205128
+192	0.794872
+216	0.794872
+216	0.179487
+240	0.179487
+240	1
+264	1
+264	0.025641
+288	0
+288	0.564103
+312	0.923077
+312	0.0512821
+336	0.025641
+360	1
+360	0
+384	0
+384	0.948718
+408	0.632479
+408	0.581197
+432	0.871795
+480	0.205128
+480	0.794872
+504	0.794872
+504	0.179487
+528	0.179487
+528	1
+552	1
+552	0.025641
+576	0
+576	0.564103
+600	0.923077
+600	0.0512821
+624	0.025641
+648	1
+648	0
+672	0
+672	0.948718
+744	0
+792	0
+792	1
+816	0.393013
+840	0.00436681
+864	0
+864	1
+888	0.825328
+888	0
+912	0.00436681
+912	0.956332
+960	0
+960	1
+1008	0.572052
+1008	0.995633
+1032	0
+1056	0.580786
+1080	0.58952
+1080	0
+1152	0
+1152	0.632479
+1200	0
+1248	0
+1248	1
+1272	0.393013
+1296	0.00436681
+1320	0
+1320	1
+1344	0.825328
+1344	0
+1368	0.00436681
+1368	0.956332
+1416	0
+1416	1
+1464	0.572052
+1464	0.995633
+1488	0
+1512	0.580786
+1536	0.58952
+1536	0
+1608	0
+1608	0
+1872	0
+1872	0.581197
+1896	0.871795
+1944	0.205128
+1944	0.794872
+1968	0.794872
+1968	0.179487
+1992	0.179487
+1992	1
+2016	1
+2016	0.025641
+2040	0
+2040	0.564103
+2064	0.923077
+2064	0.0512821
+2088	0.025641
+2112	1
+2112	0
+2136	0
+2136	0.948718
+2208	0
+2256	0
+2256	1
+2280	0.393013
+2304	0.00436681
+2328	0
+2328	1
+2352	0.825328
+2352	0
+2370	0.00327511
+2370	0
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Amp_6" property-index="7">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+72	0.205128
+72	0.794872
+96	0.794872
+96	0.179487
+120	0.179487
+120	1
+144	1
+144	0.025641
+168	0
+168	0.564103
+192	0.923077
+192	0.0512821
+216	0.025641
+240	1
+240	0
+264	0
+264	0.948718
+336	0
+360	0
+360	0.581197
+384	0.871795
+432	0.205128
+432	0.794872
+456	0.794872
+456	0.179487
+480	0.179487
+480	1
+504	1
+504	0.025641
+528	0
+528	0.564103
+552	0.923077
+552	0.0512821
+576	0.025641
+600	1
+600	0
+624	0
+624	0.948718
+655.088	0.538462
+672	0.315873
+672	0.581197
+696	0.871795
+744	0.205128
+744	0.794872
+768	0.794872
+768	0.179487
+792	0.179487
+792	1
+816	1
+816	0.581197
+840	0.871795
+888	0.205128
+888	0.794872
+912	0.794872
+912	0.179487
+936	0.179487
+936	1
+960	1
+960	0.025641
+984	0
+984	0.564103
+1008	0.923077
+1008	0.0512821
+1032	0.025641
+1056	1
+1056	0
+1080	0
+1080	0.948718
+1152	0
+1200	0
+1200	1
+1224	0.393013
+1248	0.00436681
+1272	0
+1272	1
+1296	0.825328
+1296	0
+1320	0.00436681
+1320	0.956332
+1368	0
+1368	1
+1416	0.572052
+1416	0.995633
+1440	0
+1464	0.580786
+1488	0.58952
+1488	0
+1560	0
+1560	1
+1584	0
+1584	0.564103
+1608	0.923077
+1608	0.0512821
+1632	0.025641
+1656	1
+1656	0
+1680	0
+1680	0.948718
+1752	0
+1800	0
+1800	1
+1824	0.393013
+1848	0.00436681
+1872	0
+1872	1
+1896	0.825328
+1896	0
+1920	0.00436681
+1920	0.956332
+1968	0
+1968	1
+2016	0.572052
+2016	0.995633
+2040	0
+2064	0.580786
+2088	0.58952
+2088	0
+2160	0
+2160	0.315873
+2184	0
+2232	0
+2232	1
+2256	0.393013
+2280	0.00436681
+2304	0
+2304	1
+2328	0.825328
+2328	0
+2352	0.00436681
+2352	0.956332
+2370	0.597707
+2370	0
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Amp_8" property-index="9">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+21.3694	0.461538
+72	0
+72	0.581197
+96	0.871795
+144	0.205128
+144	0.794872
+168	0.794872
+168	0.179487
+192	0.179487
+192	1
+216	1
+216	0.025641
+240	0
+240	0.564103
+264	0.923077
+264	0.0512821
+288	0.025641
+312	1
+312	0
+336	0
+336	0.948718
+408	0
+456	0
+456	1
+480	0.393013
+504	0.00436681
+528	0
+528	1
+552	0.825328
+552	0
+576	0.00436681
+576	0.956332
+624	0
+624	1
+672	0.572052
+672	0.995633
+696	0
+720	0.580786
+744	0.58952
+744	0
+816	0
+816	0.581197
+840	0.871795
+888	0.205128
+888	0.794872
+912	0.794872
+912	0.179487
+936	0.179487
+936	1
+960	1
+960	0.025641
+984	0
+984	0.564103
+1008	0.923077
+1008	0.0512821
+1032	0.025641
+1056	1
+1056	0
+1080	0
+1080	0.948718
+1152	0
+1200	0
+1200	1
+1224	0.393013
+1248	0.00436681
+1272	0
+1272	1
+1296	0.825328
+1296	0
+1320	0.00436681
+1320	0.956332
+1368	0
+1368	1
+1416	0.572052
+1416	0.995633
+1440	0
+1464	0.580786
+1488	0.58952
+1488	0
+1560	0
+1560	0
+1632	0
+1632	0.581197
+1656	0.871795
+1704	0.205128
+1704	0.794872
+1728	0.794872
+1728	0.179487
+1752	0.179487
+1752	1
+1776	1
+1776	0.025641
+1800	0
+1800	0.564103
+1824	0.923077
+1824	0.0512821
+1848	0.025641
+1872	1
+1872	0
+1896	0
+1896	0.948718
+1968	0
+2016	0
+2016	1
+2040	0.393013
+2064	0.00436681
+2088	0
+2088	1
+2112	0.825328
+2112	0
+2136	0.00436681
+2136	0.956332
+2184	0
+2184	1
+2232	0.572052
+2232	0.995633
+2256	0
+2280	0.580786
+2304	0.58952
+2304	0
+2370	0
+2370	0
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+				<property-sources property-name="Amp_10" property-index="11">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	0
+60.5465	0.538462
+120	0
+120	0.581197
+144	0.871795
+192	0.205128
+192	0.794872
+216	0.794872
+216	0.179487
+240	0.179487
+240	1
+264	1
+264	0.025641
+288	0
+288	0.564103
+312	0.923077
+312	0.0512821
+336	0.025641
+360	1
+360	0.581197
+384	0.871795
+432	0.205128
+432	0.794872
+456	0.794872
+456	0.179487
+480	0.179487
+480	1
+504	1
+504	0.025641
+528	0
+528	0.564103
+552	0.923077
+552	0.0512821
+576	0.025641
+600	1
+600	0
+624	0
+624	0.948718
+696	0
+744	0
+744	1
+768	0.393013
+792	0.00436681
+816	0
+816	1
+840	0.825328
+840	0
+864	0.00436681
+864	0.956332
+912	0
+912	1
+960	0.572052
+960	0.995633
+984	0
+1008	0.580786
+1032	0.58952
+1032	0
+1104	0
+1104	1
+1128	0
+1128	0.948718
+1200	0
+1248	0
+1248	1
+1272	0.393013
+1296	0.00436681
+1320	0
+1320	1
+1344	0.825328
+1344	0
+1368	0.00436681
+1368	0.956332
+1416	0
+1416	1
+1440	0.786026
+1440	0.581197
+1464	0.871795
+1512	0.205128
+1512	0.794872
+1536	0.794872
+1536	0.179487
+1560	0.179487
+1560	1
+1584	1
+1584	0.025641
+1608	0
+1608	0.564103
+1632	0.923077
+1632	0.0512821
+1656	0.025641
+1680	1
+1680	0
+1704	0
+1704	0.948718
+1776	0
+1824	0
+1824	1
+1848	0.393013
+1872	0.00436681
+1896	0
+1896	1
+1920	0.825328
+1920	0
+1944	0.00436681
+1944	0.956332
+1992	0
+1992	1
+2040	0.572052
+2040	0.995633
+2064	0
+2088	0.580786
+2112	0.58952
+2112	0
+2184	0
+2184	0.786026
+2208	0.572052
+2208	0.995633
+2232	0
+2256	0.580786
+2280	0.58952
+2280	0
+2352	0
+2352	0
+2370	0
+2370	0
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+			</modulation-sources>
+		</contraption>
+		<contraption class="SoundOut" name="SoundOut">
+			<properties>
+				<property index="0" name="File">
+					<soundfile></soundfile>
+				</property>
+				<property index="2" name="FileMode">
+					<enum>0</enum>
+				</property>
+				<property index="5" name="PunchMode">
+					<enum>0</enum>
+				</property>
+				<property index="6" name="RecordDuration">
+					<double>300000</double>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources></modulation-sources>
+		</contraption>
+		<contraption class="RingAM" name="RingAM_1">
+			<properties>
+				<property index="0" name="Frequency">
+					<double>417.132189481781</double>
+				</property>
+				<property index="1" name="AM">
+					<bool>1</bool>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources>
+				<property-sources property-name="Frequency" property-index="0">
+					<automation-controller mute="0" record="0">
+						<double-timepoints>0	360.4
+96	360
+1105.03	437.436
+2252.09	361.538
+2364.31	360
+</double-timepoints>
+					</automation-controller>
+				</property-sources>
+			</modulation-sources>
+		</contraption>
+		<contraption class="Flanger" name="Flanger_1">
+			<properties>
+				<property index="0" name="FrequencyRange">
+					<range>
+						<min>31.112699508667</min>
+						<max>113.137001037598</max>
+					</range>
+				</property>
+				<property index="1" name="Rate">
+					<double>0.00148096</double>
+				</property>
+				<property index="2" name="Feedback">
+					<double>0.891085</double>
+				</property>
+				<property index="3" name="WetDryMix">
+					<double>0.7</double>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources></modulation-sources>
+		</contraption>
+		<contraption class="Flanger" name="Flanger_2">
+			<properties>
+				<property index="0" name="FrequencyRange">
+					<range>
+						<min>31.112699508667</min>
+						<max>113.137001037598</max>
+					</range>
+				</property>
+				<property index="1" name="Rate">
+					<double>0.00148096</double>
+				</property>
+				<property index="2" name="Feedback">
+					<double>0.868992</double>
+				</property>
+				<property index="3" name="WetDryMix">
+					<double>0.7</double>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources></modulation-sources>
+		</contraption>
+		<contraption class="SDelay" name="SDelay_1">
+			<properties>
+				<property index="0" name="DelayUnits">
+					<enum>1</enum>
+				</property>
+				<property index="1" name="LeftDelay">
+					<double>5</double>
+				</property>
+				<property index="2" name="RightDelay">
+					<double>7</double>
+				</property>
+				<property index="3" name="Feedback">
+					<double>0.54</double>
+				</property>
+				<property index="4" name="WetDryMix">
+					<double>0.55</double>
+				</property>
+				<property index="5" name="FeedbackMode">
+					<enum>3</enum>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources></modulation-sources>
+		</contraption>
+		<contraption class="S2Mixer" name="S2Mixer_1">
+			<properties>
+				<property index="0" name="MasterGain">
+					<double>0.86</double>
+				</property>
+				<property index="1" name="MasterMute">
+					<bool>0</bool>
+				</property>
+				<property index="2" name="Mute_1-2">
+					<bool>0</bool>
+				</property>
+				<property index="3" name="Mute_3-4">
+					<bool>0</bool>
+				</property>
+				<property index="4" name="Solo_1-2">
+					<bool>0</bool>
+				</property>
+				<property index="5" name="Solo_3-4">
+					<bool>0</bool>
+				</property>
+				<property index="6" name="Gain_1-2">
+					<double>0.187500032346208</double>
+				</property>
+				<property index="7" name="Gain_3-4">
+					<double>0.204090772607251</double>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources>
+				<property-sources property-name="Gain_1-2" property-index="6">
+					<midi-controller smoothing="0" map-minimum="3.98107170553497E-08" map-maximum="1">
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-mapping-curve>
+							<mapping-point in="0" out="0"/>
+							<mapping-point in="16384" out="1"/>
+						</midi-mapping-curve>
+					</midi-controller>
+				</property-sources>
+				<property-sources property-name="Gain_3-4" property-index="7">
+					<midi-controller smoothing="0" map-minimum="2.51188643150958E-10" map-maximum="0.251188643150958">
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-mapping-curve>
+							<mapping-point in="0" out="1"/>
+							<mapping-point in="16384" out="0"/>
+						</midi-mapping-curve>
+					</midi-controller>
+				</property-sources>
+			</modulation-sources>
+		</contraption>
+		<contraption class="DLGranulator" name="DLGranulator_1">
+			<properties>
+				<property index="0" name="InputGain">
+					<double>1.36</double>
+				</property>
+				<property index="1" name="Amplitude">
+					<range>
+						<min>1</min>
+						<max>1</max>
+					</range>
+				</property>
+				<property index="2" name="Panning">
+					<range>
+						<min>0</min>
+						<max>1</max>
+					</range>
+				</property>
+				<property index="3" name="DelayTime">
+					<range>
+						<min>1400</min>
+						<max>2000</max>
+					</range>
+				</property>
+				<property index="5" name="Feedback">
+					<double>0.36</double>
+				</property>
+				<property index="6" name="WetDryMix">
+					<double>1</double>
+				</property>
+				<property index="7" name="PitchScaler">
+					<range>
+						<min>0.271341055631638</min>
+						<max>0.271341055631638</max>
+					</range>
+				</property>
+				<property index="8" name="InteronsetTime">
+					<range>
+						<min>2.93901705741882</min>
+						<max>2.93901705741882</max>
+					</range>
+				</property>
+				<property index="9" name="QuantizeAmount">
+					<double>0</double>
+				</property>
+				<property index="10" name="QuantizeClocks">
+					<int>4</int>
+				</property>
+				<property index="11" name="GrainDuration">
+					<range>
+						<min>10.8595571517944</min>
+						<max>25.9871997833252</max>
+					</range>
+				</property>
+				<property index="12" name="AttDecRatio">
+					<range>
+						<min>0.5</min>
+						<max>0.5</max>
+					</range>
+				</property>
+				<property index="13" name="GrainSkew">
+					<range>
+						<min>0.5</min>
+						<max>0.5</max>
+					</range>
+				</property>
+				<property index="14" name="MaxGrains">
+					<int>20</int>
+				</property>
+				<property index="15" name="Decorrelation">
+					<double>1</double>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources>
+				<property-sources property-name="PitchScaler" property-index="7">
+					<midi-controller use-non-linear-scale="1" smoothing="0" map-minimum="0.25" map-maximum="0.840896415141472" mode="min-max">
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-mapping-curve>
+							<mapping-point in="0" out="0"/>
+							<mapping-point in="16384" out="1"/>
+						</midi-mapping-curve>
+					</midi-controller>
+				</property-sources>
+				<property-sources property-name="InteronsetTime" property-index="8">
+					<midi-controller use-non-linear-scale="1" smoothing="0" map-minimum="240" map-maximum="1240" mode="min-max">
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-mapping-curve>
+							<mapping-point in="0" out="0"/>
+							<mapping-point in="16384" out="1"/>
+						</midi-mapping-curve>
+					</midi-controller>
+				</property-sources>
+			</modulation-sources>
+		</contraption>
+		<contraption class="TestGen" name="TestGen_1">
+			<properties>
+				<property index="0" name="Amplitude">
+					<double>1</double>
+				</property>
+				<property index="1" name="Frequency">
+					<double>1350</double>
+				</property>
+				<property index="2" name="Waveform">
+					<enum>1</enum>
+				</property>
+			</properties>
+			<presets></presets>
+			<modulation-sources>
+				<property-sources property-name="Frequency" property-index="1">
+					<midi-controller smoothing="0" map-minimum="1200" map-maximum="2000">
+						<midi-message-spec type="7-bit-control-change" channel="1" number="2"/>
+						<midi-mapping-curve>
+							<mapping-point in="0" out="0"/>
+							<mapping-point in="16384" out="1"/>
+						</midi-mapping-curve>
+					</midi-controller>
+				</property-sources>
+			</modulation-sources>
+		</contraption>
+		<audio-connection from="10Harmonics_1" from-outlet="0" to="RingAM_1" to-inlet="0"/>
+		<audio-connection from="RingAM_1" from-outlet="0" to="Flanger_1" to-inlet="0"/>
+		<audio-connection from="RingAM_1" from-outlet="0" to="Flanger_2" to-inlet="0"/>
+		<audio-connection from="Flanger_2" from-outlet="0" to="SDelay_1" to-inlet="0"/>
+		<audio-connection from="Flanger_1" from-outlet="0" to="SDelay_1" to-inlet="1"/>
+		<audio-connection from="SDelay_1" from-outlet="1" to="S2Mixer_1" to-inlet="1"/>
+		<audio-connection from="SDelay_1" from-outlet="0" to="S2Mixer_1" to-inlet="0"/>
+		<audio-connection from="S2Mixer_1" from-outlet="0" to="SoundOut" to-inlet="0"/>
+		<audio-connection from="S2Mixer_1" from-outlet="1" to="SoundOut" to-inlet="1"/>
+		<audio-connection from="DLGranulator_1" from-outlet="0" to="S2Mixer_1" to-inlet="2"/>
+		<audio-connection from="DLGranulator_1" from-outlet="1" to="S2Mixer_1" to-inlet="3"/>
+		<audio-connection from="TestGen_1" from-outlet="0" to="DLGranulator_1" to-inlet="0"/>
+	</patch>
+	<application-view patcher-visible="1" properties-visible="1" automation-visible="1" vertical-split="147" horizontal-split="310" automation-grid-visible="1">
+		<notes visible="1" left="766" top="73" width="308" height="177">
+			<para>Automation cut and paste is a quick way to create similar  control curves for different parameters.</para>
+		</notes>
+	</application-view>
+	<contraption-views>
+		<contraption-view contraption-name="10Harmonics_1" patcher-x="36" patcher-y="6" editor-visible="1" editor-x="0" editor-y="0"/>
+		<contraption-view contraption-name="SoundOut" patcher-x="24" patcher-y="228" editor-visible="1" editor-x="30" editor-y="30"/>
+		<contraption-view contraption-name="RingAM_1" patcher-x="36" patcher-y="51" editor-visible="1" editor-x="470" editor-y="0"/>
+		<contraption-view contraption-name="Flanger_1" patcher-x="79" patcher-y="98" editor-visible="1" editor-x="660" editor-y="0"/>
+		<contraption-view contraption-name="Flanger_2" patcher-x="13" patcher-y="92" editor-visible="1" editor-x="660" editor-y="130"/>
+		<contraption-view contraption-name="SDelay_1" patcher-x="24" patcher-y="138" editor-visible="1" editor-x="490" editor-y="100"/>
+		<contraption-view contraption-name="S2Mixer_1" patcher-x="22" patcher-y="189" editor-visible="1" editor-x="10" editor-y="10"/>
+		<contraption-view contraption-name="DLGranulator_1" patcher-x="84" patcher-y="155" editor-visible="1" editor-x="20" editor-y="20"/>
+		<contraption-view contraption-name="TestGen_1" patcher-x="89" patcher-y="37" editor-visible="1" editor-x="40" editor-y="40"/>
+	</contraption-views>
+	<automation-views>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="2" property-name="Amp_1" index="0" height="50" snap-to="1"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="3" property-name="Amp_2" index="1" height="50" snap-to="0"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="7" property-name="Amp_6" index="2" height="50" snap-to="0"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="6" property-name="Amp_5" index="3" height="50" snap-to="0"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="9" property-name="Amp_8" index="4" height="50" snap-to="0"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="11" property-name="Amp_10" index="5" height="50" snap-to="0"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="0" property-name="Frequency" index="6" height="50" snap-to="1"/>
+		<automation-view contraption-name="RingAM_1" target-type="property" property-index="0" property-name="Frequency" index="7" height="50" snap-to="1"/>
+		<automation-view contraption-name="10Harmonics_1" target-type="property" property-index="1" property-name="Gain" index="8" height="50" snap-to="1"/>
+	</automation-views>
+</audiomulch-document>
