@@ -1,0 +1,66 @@
+Neurobit API Pub software developer license
+------------------------------------------------
+
+THIS DOCUMENT IS A LEGAL AND ENFORCABLE CONTRACT BETWEEN YOU AND NEUROBIT 
+SYSTEMS, CONCERNING THE SOFTWARE CODE AND RELATED DOCUMENTATION (COLLECTIVELY 
+"THE SOFTWARE"). PLEASE READ THIS DOCUMENT CAREFULLY BEFORE USING THE SOFTWARE. 
+IF YOU DO NOT AGREE TO ANY OF ITS TERMS AND CONDITIONS, YOU SHOULD NOT USE THE 
+SOFTWARE AND SHOULD REMOVE ALL ITS COPIES.
+
+The API enables interoperation between neurofeedback/biofeedback and 
+physiological data acquisition equipment by Neurobit Systems ("the Hardware") 
+and computer applications running under Microsoft Windows.
+
+1. Copyright
+The Software is the property of Neurobit Systems and is protected by copyright 
+law and international treaty provisions. All rights reserved.
+
+2. License
+Neurobit Systems is willing to grant you non-exclusive, royalty-free license 
+after your acceptance of all its terms and conditions. Your rights and 
+obligations with respect to the use of the Software:
+
+YOU MAY:
+A. use the Software for your personal, educational or scientific purposes 
+with the Hardware, which you own or lease.
+
+B. make two working copies and one archival copy of the Software;
+
+C. use parts of delivered software source code (text) in your non-commercial 
+application, provided that all the following conditions are met:
+   (i)   all files included in the original Software package are preserved
+         without changes,
+   (ii)  source files of your application, which use parts of the Software 
+         source code, modified or not, include information about the Software 
+         manufacturer and about author(s) of the rest of code,
+   (iii) no part of the Software source code or its documentation is delivered 
+         with your application.
+
+D. use and redistribute with your non-commercial application a package of 
+runtime files included in the Software, which are necessary for interope-
+ration with the Hardware, provided that the package delivered to end user 
+is complete and without any changes. The runtime package consists of: 
+   (i)   Neurobit Driver binary file, 
+   (ii)  its help file for end user, 
+   (iii) End User License for the driver,
+   (iv)  application(s) supporting device service functions.
+
+YOU MAY NOT:
+A. sublicense, sell, rent, lease, replicate or distribute any portion of the 
+Software in any form, apart from cases explicitly specified in this license;
+
+B. decompile, disassemble, or reverse engineer in other ways any parts of 
+the Software;
+
+C. use the Software with equipment not manufactured by Neurobit Systems;
+
+D. use the Software in any manner not authorized by this license.
+
+3. Limited liability
+In no event shall Neurobit Systems be held liable for any loss or damages 
+arising from the use of the Software.
+
+4. Disclaimer of warranties
+We have made effort to ensure that this Software operates correctly.
+Nevertheless the Software is provided "as is," without express or implied 
+warranty of any kind.
