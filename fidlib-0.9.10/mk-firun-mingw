@@ -1,0 +1,7 @@
+#!/bin/bash
+
+OPT="-O6 -s"
+[ "$1" = "-d" ] && OPT="-g"
+
+gcc -DT_MINGW $OPT fidlib.c firun.c -lm -o firun.exe
+

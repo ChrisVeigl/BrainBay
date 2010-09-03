@@ -1,0 +1,7 @@
+Fidlib change log   -*- text -*-
+-----------------
+
+0.9.9   First separate release of fidlib with its own docs.  
+	Previous versions of fidlib were part of Fiview.  
+	First release of firun.
+

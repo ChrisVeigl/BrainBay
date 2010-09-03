@@ -1,0 +1,45 @@
+<html>
+<body>
+<pre>
+<h1>Erstellungsprotokoll</h1>
+<h3>
+--------------------Konfiguration: matheval - Win32 Debug--------------------
+</h3>
+<h3>Befehlszeilen</h3>
+Erstellen der temporären Datei  "C:\DOKUME~1\chris\LOKALE~1\Temp\RSP54.tmp" mit Inhalten
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /Fp"Debug/matheval.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"C:\works\EEG\BrainBay\Matheval\error.c"
+"C:\works\EEG\BrainBay\Matheval\matheval.c"
+"C:\works\EEG\BrainBay\Matheval\node.c"
+"C:\works\EEG\BrainBay\Matheval\parser.c"
+"C:\works\EEG\BrainBay\Matheval\scanner.c"
+"C:\works\EEG\BrainBay\Matheval\symbol_table.c"
+"C:\works\EEG\BrainBay\Matheval\xmalloc.c"
+"C:\works\EEG\BrainBay\Matheval\xmath.c"
+]
+Creating command line "cl.exe @C:\DOKUME~1\chris\LOKALE~1\Temp\RSP54.tmp" 
+Erstellen der Befehlzeile "link.exe -lib /nologo /out:"Debug\matheval.lib"  .\Debug\error.obj .\Debug\matheval.obj .\Debug\node.obj .\Debug\parser.obj .\Debug\scanner.obj .\Debug\symbol_table.obj .\Debug\xmalloc.obj .\Debug\xmath.obj "
+<h3>Ausgabefenster</h3>
+Kompilierung läuft...
+error.c
+matheval.c
+node.c
+parser.c
+c:\works\eeg\brainbay\matheval\node.c(156) : warning C4715: 'node_copy' : Nicht alle Steuerelementpfade geben einen Wert zurück
+c:\works\eeg\brainbay\matheval\node.c(310) : warning C4715: 'node_simplify' : Nicht alle Steuerelementpfade geben einen Wert zurück
+c:\works\eeg\brainbay\matheval\node.c(1352) : warning C4715: 'node_derivative' : Nicht alle Steuerelementpfade geben einen Wert zurück
+scanner.c
+scanner.c(1440) : warning C4013: 'isatty' undefiniert; Annahme: extern mit Rueckgabetyp int
+symbol_table.c
+xmalloc.c
+xmath.c
+Bibliothek wird erstellt...
+
+
+
+<h3>Ergebnisse</h3>
+matheval.lib - 0 Fehler, 4 Warnung(en)
+</pre>
+</body>
+</html>

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Cross-compile from Linux to Win32 using mingw32 cross-compiler as
+# provided by Debian.  Rather hard-coded to my setup here; will need
+# adapting anywhere else.
+
+OPT="-O6 -s"
+[ "$1" = "-d" ] && OPT="-g"
+
+GCC=i586-mingw32msvc-gcc
+#INCL="-I /home/jim/win/msys/1.0/mingw/include"
+#LIBS="-L/home/jim/win/msys/1.0/mingw/lib -lmingw32"
+INCL="-I /usr/i586-mingw32msvc/include"
+LIBS="-L/usr/i586-mingw32msvc/lib -lmingw32"
+
+$GCC -DT_MINGW $OPT $INCL fidlib.c firun.c $LIBS -lm -o firun.exe
+

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+OPT="-O6 -s"
+[ "$1" = "-d" ] && OPT="-g"
+
+gcc -DT_LINUX $OPT fidlib.c firun-tmp.c -lm -o firun-tmp
