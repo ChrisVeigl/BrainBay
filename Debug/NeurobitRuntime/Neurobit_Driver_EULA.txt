@@ -1,0 +1,49 @@
+Neurobit Driver end user license (EULA)
+--------------------------------------------
+
+THIS DOCUMENT IS A LEGAL AND ENFORCABLE CONTRACT BETWEEN YOU AND NEUROBIT 
+SYSTEMS, CONCERNING THE SOFTWARE CODE AND RELATED DOCUMENTATION (COLLECTIVELY 
+"THE SOFTWARE"). PLEASE READ THIS DOCUMENT CAREFULLY BEFORE USING THE SOFTWARE. 
+IF YOU DO NOT AGREE TO ANY OF ITS TERMS AND CONDITIONS, YOU SHOULD NOT USE THE 
+SOFTWARE AND SHOULD REMOVE ALL ITS COPIES.
+
+The Neurobit Driver enables interoperation between neurofeedback/biofeedback 
+and physiological data acquisition equipment by Neurobit Systems (the "Hardware") 
+and computer applications running under Microsoft Windows.
+
+1. Copyright
+The Software is the property of Neurobit Systems and is protected by copyright 
+law and international treaty provisions. All rights reserved.
+
+2. License
+Neurobit Systems is willing to grant you non-exclusive, royalty-free license 
+after your acceptance of all its terms and conditions. Your rights and 
+obligations with respect to the use of the Software:
+
+YOU MAY:
+A. use the Software with computer application supporting the Hardware;
+
+B. make one archival copy of the Software.
+
+YOU MAY NOT:
+A. sublicense, sell, rent, lease, replicate or distribute any portion of the 
+Software in any form, apart from cases explicitly specified in this license;
+
+B. decompile, disassemble, or reverse engineer in other ways any parts of 
+the Software;
+
+C. use the Software with application not supporting the Hardware;
+
+D. keep any copy of the Software, if you transfer ownership of application
+including the Software;
+
+E. use the Software in any manner not authorized by this license.
+
+3. Limited liability
+In no event shall Neurobit Systems be held liable for any loss or damages 
+arising from the use of the Software.
+
+4. Disclaimer of warranties
+We have made effort to ensure that this Software operates correctly.
+Nevertheless the Software is provided "as is," without express or implied 
+warranty of any kind.

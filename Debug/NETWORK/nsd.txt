@@ -1,0 +1,30 @@
+commands: 
+
+display       to enter Display role
+eeg           to enter EEG role
+control       to enter Controller role
+
+In order for a client to determine its current role, it can use the role          to print out the current role for this client
+
+Another important command available to all roles is status        to print a table showing the client id numbers and roles for all
+
+For example, if you do display
+status
+
+You will get from the nsd: 200 OK
+200 OK
+1 clients connected
+0:Display
+
+For EEG role devices, these are useful: setheader <EDFHeaderPacket>\n
+
+For example, setheader 0                                                                                                                                                                       26.01.0418.36.01768     NEUROSD                                     -1      1       2   Elec 00         Elec 01         Active Electrode                                                                Active Electrode                                                                uV      uV      0       0       1023    1023    0       0       1023    1023    HP: DC; LP:  49 Hz                                                              HP: DC; LP:  49 Hz                                                              2048    2048    Reserved                        Reserved                        \n
+
+Would use a 2048-Hz sampling rate dual-channel format, which ranges from 0 to 1023 in each channel.
+Another option for EEG's alone is the data frame command, spelled '!': 
+
+! <packetCounter> <channelCount> <sample[0]> <sample[1]> ... \n
+
+For instance, ! 45 2 123 125
+
+Means a sample frame with 2 channels and packet counter 45, with two data channels: 123 is sampled from one, and 125 from the other.
