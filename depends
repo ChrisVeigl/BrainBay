@@ -1,0 +1,114 @@
+brainBay.o: brainBay.cpp brainBay.h fidlib.h resource.h base.h ob_osci.h \
+  ob_skindialog.h Skinstyle\SkinObject.h Skinstyle\KWindow.h \
+  Skinstyle\Bitmap.h Skinstyle\SkinDialog.h Skinstyle\SkinObject.h \
+  Skinstyle\SkinButton.h Skinstyle\IniFile.h Skinstyle\TransLabel.h \
+  Skinstyle\KToolTip.h Skinstyle\DynArray.h Skinstyle\SkinButton.h \
+  Skinstyle\TransLabel.h Skinstyle\KToolTip.h
+dialogs.o: dialogs.cpp brainBay.h fidlib.h resource.h base.h
+draw.o: draw.cpp brainBay.h fidlib.h resource.h base.h ob_evaluator.h \
+  ob_compare.h
+files.o: files.cpp brainBay.h fidlib.h resource.h base.h ob_midi.h
+globals.o: globals.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_evaluator.h ob_fft.h ob_midi.h ob_osci.h ob_eeg.h ob_filter.h \
+  ob_threshold.h ob_magnitude.h ob_signal.h ob_particle.h ob_translate.h \
+  ob_and.h ob_avi.h ob_or.h ob_not.h ob_wav.h SDL_sound.h \
+  ob_tcp_receive.h SDL_net.h ob_doku.h ob_average.h ob_correlation.h \
+  ob_edf_reader.h ob_edf_writer.h ob_tcp_sender.h ob_compare.h \
+  ob_ballgame.h ob_mixer4.h ob_mouse.h ob_erpdetect.h ob_com_writer.h \
+  ob_cam.h ob_integrate.h ob_debounce.h ob_sample_hold.h ob_constant.h \
+  ob_matlab.h ob_counter.h ob_skindialog.h Skinstyle\SkinObject.h \
+  Skinstyle\KWindow.h Skinstyle\Bitmap.h Skinstyle\SkinDialog.h \
+  Skinstyle\SkinObject.h Skinstyle\SkinButton.h Skinstyle\IniFile.h \
+  Skinstyle\TransLabel.h Skinstyle\KToolTip.h Skinstyle\DynArray.h \
+  Skinstyle\SkinButton.h Skinstyle\TransLabel.h Skinstyle\KToolTip.h \
+  ob_file_writer.h ob_deviation.h ob_mci.h ob_keystrike.h ob_peakdetect.h \
+  ob_speller.h ob_martini.h ob_file_reader.h ob_port_io.h
+midi.o: midi.cpp brainBay.h fidlib.h resource.h base.h ob_midi.h
+ob_and.o: ob_and.cpp brainBay.h fidlib.h resource.h base.h ob_and.h
+ob_average.o: ob_average.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_average.h
+ob_avi.o: ob_avi.cpp brainBay.h fidlib.h resource.h base.h ob_avi.h
+ob_ballgame.o: ob_ballgame.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_ballgame.h
+ob_cam.o: ob_cam.cpp brainbay.h fidlib.h resource.h base.h ob_cam.h \
+  brainBay.h cv.h cxcore.h cxtypes.h cxerror.h cvtypes.h cvcompat.h \
+  cvcam.h highgui.h
+ob_com_writer.o: ob_com_writer.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_com_writer.h
+ob_compare.o: ob_compare.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_compare.h
+ob_constant.o: ob_constant.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_constant.h
+ob_correlation.o: ob_correlation.cpp brainBay.h fidlib.h resource.h \
+  base.h ob_correlation.h
+ob_counter.o: ob_counter.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_counter.h
+ob_debounce.o: ob_debounce.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_debounce.h
+ob_deviation.o: ob_deviation.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_deviation.h
+ob_doku.o: ob_doku.cpp brainBay.h fidlib.h resource.h base.h ob_doku.h
+ob_edf_reader.o: ob_edf_reader.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_edf_reader.h
+ob_edf_writer.o: ob_edf_writer.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_edf_writer.h
+ob_eeg.o: ob_eeg.cpp brainBay.h fidlib.h resource.h base.h ob_eeg.h
+ob_erpdetect.o: ob_erpdetect.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_erpdetect.h
+ob_evaluator.o: ob_evaluator.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_evaluator.h matheval.h
+ob_fft.o: ob_fft.cpp brainBay.h fidlib.h resource.h base.h ob_fft.h
+ob_file_reader.o: ob_file_reader.cpp brainBay.h fidlib.h resource.h \
+  base.h ob_file_reader.h
+ob_file_writer.o: ob_file_writer.cpp brainBay.h fidlib.h resource.h \
+  base.h ob_file_writer.h
+ob_filter.o: ob_filter.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_filter.h
+ob_integrate.o: ob_integrate.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_integrate.h
+ob_keystrike.o: ob_keystrike.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_keystrike.h
+ob_magnitude.o: ob_magnitude.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_magnitude.h
+ob_martini.o: ob_martini.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_martini.h
+ob_matlab.o: ob_matlab.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_matlab.h
+ob_mci.o: ob_mci.cpp brainBay.h fidlib.h resource.h base.h ob_mci.h
+ob_midi.o: ob_midi.cpp brainBay.h fidlib.h resource.h base.h ob_midi.h
+ob_mixer4.o: ob_mixer4.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_mixer4.h
+ob_mouse.o: ob_mouse.cpp brainBay.h fidlib.h resource.h base.h ob_mouse.h
+ob_not.o: ob_not.cpp brainBay.h fidlib.h resource.h base.h ob_not.h
+ob_or.o: ob_or.cpp brainBay.h fidlib.h resource.h base.h ob_or.h
+ob_osci.o: ob_osci.cpp brainBay.h fidlib.h resource.h base.h ob_osci.h
+ob_particle.o: ob_particle.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_particle.h
+ob_peakdetect.o: ob_peakdetect.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_peakdetect.h
+ob_port_io.o: ob_port_io.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_port_io.h porttalk/pt_ioctl.c
+ob_sample_hold.o: ob_sample_hold.cpp brainBay.h fidlib.h resource.h \
+  base.h ob_sample_hold.h
+ob_signal.o: ob_signal.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_signal.h
+ob_skindialog.o: ob_skindialog.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_skindialog.h Skinstyle\SkinObject.h Skinstyle\KWindow.h \
+  Skinstyle\Bitmap.h Skinstyle\SkinDialog.h Skinstyle\SkinObject.h \
+  Skinstyle\SkinButton.h Skinstyle\IniFile.h Skinstyle\TransLabel.h \
+  Skinstyle\KToolTip.h Skinstyle\DynArray.h Skinstyle\SkinButton.h \
+  Skinstyle\TransLabel.h Skinstyle\KToolTip.h
+ob_speller.o: ob_speller.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_speller.h
+ob_tcp_receive.o: ob_tcp_receive.cpp brainBay.h fidlib.h resource.h \
+  base.h ob_tcp_receive.h SDL_net.h
+ob_tcp_sender.o: ob_tcp_sender.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_tcp_sender.h SDL_net.h
+ob_threshold.o: ob_threshold.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_threshold.h
+ob_translate.o: ob_translate.cpp brainBay.h fidlib.h resource.h base.h \
+  ob_translate.h
+ob_wav.o: ob_wav.cpp brainBay.h fidlib.h resource.h base.h OB_WAV.h \
+  SDL_sound.h
+timer.o: timer.cpp brainBay.h fidlib.h resource.h base.h
+tty.o: tty.cpp brainBay.h fidlib.h resource.h base.h
