@@ -1,25 +1,25 @@
 Welcome to BrainBay !
 ---------------------
 
-BrainBay is an open source Bio- and Neurofeedback application. It also offers
-some features for the creation of alternative Human-Computer-Interfaced 
-like facetracking, EMG signal pattern recognition and mouse / keyboard control.
+BrainBay is an open source bio- and neurofeedback application. It also offers
+some features for the creation of alternative Human-Computer-Interfaces (HCIs) 
+lsuch as facetracking via webcam, EMG signal pattern recognition or mouse-/keyboard control.
 
 All source code is licensed under GPL, for copyright information 
 please have a look at ReadMe_License.txt
 
-Release Info
+Version Info
 ------------
  
-* The current release version is 1.9 (27-12-2013).Recent changes include support of biosignal amplifiers (Emotiv Epoc, OpenBCI)
+* The current release version is 1.9 (27-12-2013). Recent changes include support of biosignal amplifiers (Emotiv Epoc, OpenBCI)
 some GUI-cleanup, fixed issues (webcam/facetracking and particle animation)
 and new signal processing elements.
 
-* In case you just want to use the software, you find executable BrainBay.exe 
-in the bin folder, where also a user manual is available.
+* In case you just want to use the software, you find the executable file BrainBay.exe 
+in the bin folder, where also the user- and developer manuals are available.
 
 * If you want to modifiy or extend the software, the Visual Studio 2010
-project files and all source files are located in the src folder.
+project files and all source modules are located in the src folder.
 
 
 Credits
