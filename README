@@ -1,19 +1,19 @@
-#H2 BrainBay Open Source Bio- and Neurpfeedback application
+<H2>BrainBay Open Source Bio- and Neurofeedback application</H2>
 
 Welcome to the BrainBay Github repository !
 The current release version is 1.9 (27-12-2013)
 
-Recent changes include support of new biosignal amplifiers,
-some GUI-cleanup and new signal processing elements.
+Recent changes include support of biosignal amplifiers (Emotiv Epoc, OpenBCI)
+some GUI-cleanup, fixed issues (webcam/facetracking and particle animation)
+and new signal processing elements.
 
-In case you just want to use the executable software, you find
-the binary file BrainBay.exe in the bin folder. There is also a
-user manual pdf available.
+In case you just want to use the software, you find executable BrainBay.exe 
+in the \bin folder, where also a user manual is available.
 
-If you want to modifiy or extend the software, the Visual Studio
-project files and all the source files are in the src folder.
+If you want to modifiy or extend the software, the Visual Studio 2010
+project files and all source files are located in the \src folder.
 
-All source code is licensed under GPL, for Copyright information 
+All source code is licensed under GPL, for copyright information 
 please have a look at ReadMe_License.txt
 
 
@@ -30,26 +30,17 @@ BIG CREDITS go to:
    Stephan Gerhard for the QDS parser
 
 
-Find further documentation on the Project hompage http://brainbay.lo-res.org
+Find further documentation on the project hompage http://brainbay.lo-res.org
 and in the user and developer manuals.
+I also recommend having a look at the OpenEEG site http://openeeg.sf.net
+or the new OpenBCI project: http://www.openbci.org
+
+If you want to share your BrainBay design files for neurofeedback or biofeedback
+protocols, I would be happy to include them in the release.
+
 
 Enjoy :-)
 
 Chris Veigl
 contact: chris@shifz.org
-
-
-
-
-
-
-This is part of the GPLv3-licences soure code of the BrainBay Software Application for Neurofeedback, Biofeedback and alternative Human Computer Interfaces.
-
-Use the Software at your own risk.
-
-For more inforamtion see:
-
-http://brainbay.lo-res.org
-http://openeeg.sf.net
-
 
