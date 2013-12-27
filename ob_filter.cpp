@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_FILTER.CPP:  contains assisting functions for the Filter-Object
   Authors: Jim Peters, Chris Veigl
@@ -58,8 +58,8 @@ int test_filterparams(int type,int p0,float p1,float p2)
 {
 	if ((type<0)||(type>=FILTERTYPES)) return FALSE;
 	if (p0<1) return FALSE;
-	if ((p1<0.001f)||(p1>=1024.0f)) return FALSE;
-	if ((p2<0.001f)||(p2>=1024.0f)) return FALSE;
+	if ((p1<0.000001f)||(p1>=1024.0f)) return FALSE;
+	if ((p2<0.000001f)||(p2>=1024.0f)) return FALSE;
 	switch (type)
 	{
 		case 0: if (p0>=100) return FALSE; break; 
@@ -163,9 +163,9 @@ LRESULT CALLBACK FilterboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				SetDlgItemInt(hDlg,IDC_FROMFREQ, st->dispfrom,0);
 				SetDlgItemInt(hDlg,IDC_TOFREQ, st->dispto,0);
 				SetDlgItemInt(hDlg,IDC_FILTERPAR0, st->par0,0);
-				sprintf(sztemp,"%.2f",st->par1);
+				sprintf(sztemp,"%.5f",st->par1);
 				SetDlgItemText(hDlg,IDC_FILTERPAR1, sztemp);
-				sprintf(sztemp,"%.2f",st->par2);
+				sprintf(sztemp,"%.5f",st->par2);
 				SetDlgItemText(hDlg,IDC_FILTERPAR2, sztemp);
 				acttype=st->filtertype;
 				dinit=FALSE;

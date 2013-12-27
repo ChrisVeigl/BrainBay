@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------------------
   
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   MODULE: OB_MATLAB.CPP:  functions for the Matlab-Object
   Authors: Lester John, Chris Veigl
 

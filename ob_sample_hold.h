@@ -7,6 +7,7 @@ class SAMPLE_HOLDOBJ : public BASE_CL
 
 	float hold,act, trigger, old_value;
 	int mode;
+	float resetvalue;
 
 	SAMPLE_HOLDOBJ(int num);
 
@@ -18,6 +19,10 @@ class SAMPLE_HOLDOBJ : public BASE_CL
 
 	void save(HANDLE hFile);
 	
+	void session_reset(void);
+
+	void session_start(void);
+
 	void work(void);
 
 	~SAMPLE_HOLDOBJ();

@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.7, GPL 2003-2010 
+  BrainBay  -  Version 1.9, GPL 2003-2014 
                OpenSource Application for realtime BodySignalProcessing & HCI
                with the OpenEEG hardware
 			   
@@ -122,6 +122,21 @@ extern "C" {
 #define OB_ARRAY3600    46
 #define OB_COMREADER    47
 #define OB_NEUROBIT     48
+#define OB_MIN          49
+#define OB_MAX          50
+#define OB_ROUND        51
+#define OB_DIFFERENTIATE 52
+#define OB_DELAY        53
+#define OB_LIMITER      54
+#define OB_EMOTIV		55
+#define OB_FLOATVECTOR	56
+#define OB_VECTORFLOAT	57
+#define OB_DISPLAYVECTOR 58
+#define OB_BUFFER       59
+
+
+#define OBJECT_COUNT 	60
+
 
 
 
@@ -134,7 +149,9 @@ extern "C" {
 				 "DEBOUNCE", "SAMPLE_HOLD", "CONSTANT", "MATLAB","COUNTER", \
 				 "SKINDIALOG", "FILEWRITE", "DEVIATION", "MEDIAPLAYER", "KEYSTRIKE", \
 				 "PEAKDETECT", "SPELLER", "MARTINI", "FILEREAD", "PORT_IO", \
-				 "ARRAY-3600", "COMREADER", "NEUROBIT"
+				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
+				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
+				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -165,9 +182,10 @@ extern "C" {
 #define FT_DIC          10
 #define FT_NB4          11
 #define FT_NB_ARCHIVE   12
+#define FT_MCI          13
 
 
-#define MAX_COMPORT				20
+#define MAX_COMPORT				80
 #define DEFAULT_PORT            0
 #define DEF_BAUDRATE            CBR_57600
 #define MAX_WRITE_BUFFER        1024
@@ -193,12 +211,15 @@ extern "C" {
 #define DEV_MODEEG_P2 0
 #define DEV_MODEEG_P3 1
 #define DEV_RAW 2
-#define DEV_P21 3
-#define DEV_SBG 4
+#define DEV_MONOLITHEEG_P21 3
+#define DEV_SBT4 4
 #define DEV_RAW8BIT 5
 #define DEV_PENDANT3 6
 #define DEV_QDS 7
 #define DEV_NIA 8
+#define DEV_IBVA 9
+#define DEV_SBT2 10
+#define DEV_OPENBCI8 11
 
 #define MAX_TEMPSTRING    512
 #define MAX_LOADSTRING    512
@@ -248,7 +269,7 @@ extern int PACKETSPERSECOND;
 extern char   midi_instnames[256][30];
 extern char   captfiletypes[10][40];
 extern char   devicetypes[20][40];
-extern char   objnames[50][20];
+extern char   objnames[OBJECT_COUNT][20];
 extern char   dimensions[10][10];
 extern int    BYTES_PER_PACKET[20];
 extern int    AMOUNT_TO_READ[20];
@@ -308,6 +329,7 @@ typedef struct GLOBALStruct
 	int os_version;
 
 	int neurobit_available;
+	int emotiv_available;
 
 	int P3ALC1;
 	int P3ALC2;
@@ -320,6 +342,7 @@ typedef struct GLOBALStruct
 	char configbuffer[50000];
 	char resourcepath[256];
 	char configfile[256];
+	char emotivpath[256];
 
 	long session_length;
 	long session_start;
@@ -489,6 +512,7 @@ typedef struct CAPTFILEHEADERStruct
 typedef struct CAPTFILEStruct
 {
 	char    filename[MAX_PATH];
+	char    devicetype[100];
     HANDLE  filehandle;
 	int     filetype;
     int	    file_action;
@@ -547,6 +571,7 @@ void   register_classes (HINSTANCE);
 void   GlobalInitialize( void );
 void   GlobalCleanup( void );
 int    write_to_comport ( unsigned char byte);
+void   write_string_to_comport ( char * s);
 void   init_system_time( void );
 void   init_draw(void);
 void   init_channels(void);
@@ -619,7 +644,7 @@ BOOL	save_settings(void);
 BOOL	load_settings(void);
 void	save_property(HANDLE , char * ,int , void * );
 int		load_next_config_buffer(HANDLE);
-void	load_property(char * ,int , void * ); 
+int		load_property(char * ,int , void * ); 
 void	store_links(HANDLE,BASE_CL *);
 void	load_object_basics(BASE_CL *);
 void	save_object_basics(HANDLE , BASE_CL * );
@@ -636,7 +661,7 @@ void  update_statusinfo( void );
 void  reset_oscilloscopes(void);
 void  add_to_listbox(HWND , int , char * );
 void  color_button(HWND, COLORREF );
-COLORREF  select_color(HWND);
+COLORREF  select_color(HWND, COLORREF);
 int check_keys(void);
 
 
@@ -731,7 +756,10 @@ void report(char * Message);
 void report_error( char * Message );
 void critical_error( char * Message );
 
-
+//for array_data_ports
+void set_inports(BASE_CL *st, int num);
+void set_outports(BASE_CL *st, int num);
+void delete_connection(LINKStruct *myactconnect);
 
 #endif
 

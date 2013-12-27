@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_SAMPLE_HOLD.CPP:  functions for the Sample-and-hold-Object
 
@@ -24,9 +24,10 @@ SAMPLE_HOLDOBJ::SAMPLE_HOLDOBJ(int num) : BASE_CL()
 	strcpy(in_ports[0].in_name,"in");
 	strcpy(in_ports[1].in_name,"trigger");
 
-
     hold = 0;
 	trigger=0;mode=0;
+    resetvalue=0;
+
 }
 	
 void SAMPLE_HOLDOBJ::make_dialog(void)
@@ -39,6 +40,7 @@ void SAMPLE_HOLDOBJ::load(HANDLE hFile)
 	load_object_basics(this);
     load_property("hold",P_FLOAT,&hold);
     load_property("trigmode",P_INT,&mode);
+    load_property("resetvalue",P_FLOAT,&resetvalue);
 }
 
 void SAMPLE_HOLDOBJ::save(HANDLE hFile) 
@@ -46,9 +48,23 @@ void SAMPLE_HOLDOBJ::save(HANDLE hFile)
 	save_object_basics(hFile, this);
     save_property(hFile,"hold",P_FLOAT,&hold);
 	save_property(hFile,"trigmode",P_INT,&mode);
+	save_property(hFile,"resetvalue",P_FLOAT,&resetvalue);
 }
 	
 
+void SAMPLE_HOLDOBJ::session_start(void)
+{
+	hold = resetvalue;
+	trigger=0;
+
+}
+
+void SAMPLE_HOLDOBJ::session_reset(void)
+{
+	hold = resetvalue;
+	trigger=0;
+
+}
 
   	
 void SAMPLE_HOLDOBJ::incoming_data(int port, float value)
@@ -61,7 +77,8 @@ void SAMPLE_HOLDOBJ::incoming_data(int port, float value)
 	}
 
 }
-	
+
+
 void SAMPLE_HOLDOBJ::work(void)
 {
 	if ((mode==1) && (trigger!=INVALID_VALUE) && (old_value==INVALID_VALUE)) 
@@ -88,8 +105,10 @@ LRESULT CALLBACK Sample_HoldDlgHandler(HWND hDlg, UINT message, WPARAM wParam, L
 	switch( message )
 	{
 		case WM_INITDIALOG:
-				sprintf(tmp,"%.2f",st->hold);
+				sprintf(tmp,"%.4f",st->hold);
 				SetDlgItemText(hDlg, IDC_HOLD, tmp);
+				sprintf(tmp,"%.4f",st->resetvalue);
+				SetDlgItemText(hDlg, IDC_RESETVALUE, tmp);
 				switch (st->mode) 
 				{
 					case 0: CheckDlgButton(hDlg, IDC_TRG_MANUAL,TRUE); break;
@@ -109,6 +128,14 @@ LRESULT CALLBACK Sample_HoldDlgHandler(HWND hDlg, UINT message, WPARAM wParam, L
 					sprintf(tmp,"%.2f",st->hold);
 					SetDlgItemText(hDlg,IDC_HOLD,tmp);
 					break;
+
+				case IDC_RESETVALUE:
+				  if (HIWORD(wParam) == EN_KILLFOCUS)
+				  {
+					GetDlgItemText(hDlg,IDC_RESETVALUE,tmp,sizeof(tmp));
+					st->resetvalue=(float)atof(tmp);
+				  }
+				  break;
 
 				case IDC_TRG_MANUAL:
 					st->mode=0;

@@ -1,5 +1,5 @@
 
-BrainBay release version 1.7, 30-08-2010 
+BrainBay release version 1.8, 18-07-2011 
 written by Chris Veigl under GPL, contact: chris@shifz.org
 
 Please read the Copyright information (GNU GENERAL PUBLIC LICENSE) in the file ReadMe_License.txt

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
                OpenSource Application for realtime BodySignalProcessing & HCI
                with the OpenEEG hardware
 			   
@@ -99,19 +99,16 @@
 #define VINFO_PROTOCOL_SUBNUMBER 9 	// view sub version of protocoll 21 (read only)
 
 
-  char devicetypes[20][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.1","\0"};
-  int  AMOUNT_TO_READ   [20]  = {     68,               66,               8           ,  21 ,            32   ,                  4   ,                  32,              80         ,    3 };
-  int  BYTES_PER_PACKET [20]  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    3 };
+  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "\0"};
+  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         60               };
+  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         30               };
 
 
 
-char captfiletypes[10][40] = {"Text (Debug Mode)","Integer Values","\0"};
+char captfiletypes[][40] = {"Text (Debug Mode)","Integer Values","\0"};
 
-char * szBaud[] = {"9600", "19200", "38400", "57600", "115200", "230400", "460800", "\0"};  // Combobox - Items for Baudrate
-DWORD   BaudTable[] =  {9600, 19200, 38400, 57600, 115200, 230400, 460800,0 } ;  // Constants for Baudrate Setting
-
-char * samplingrates[] = {"256","300","512","600","1024","1200", "\0"};  // Combobox - Items for Samplingrate
-int    SamplingRateTable[] =  { 256,300,512,600,1024,1200 } ;  // Constants for Samplingrate Setting
+char * szBaud[] = {"9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600", "\0"};  // Combobox - Items for Baudrate
+DWORD   BaudTable[] =  {9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600, 0 } ;  // Constants for Baudrate Setting
 
 #define NIASAMPLINGRATE 1000			// NIA Sampling Rate = 1000/sec.
 int cc=0;
@@ -129,47 +126,7 @@ void check_sync(unsigned int num)
 }
 
 
-/********************************************************************
 
-  ModularEEG Packet Format NIA
- 
-
-  One packet has a 55 byte 
-     	16 Samples (three bytes each: 48 Bytes total)
-	2 Byte Sync sequence (56, 189)
-	2 Byte Latency Timing information
-	2 Byte Total number of samples read
-	1 Byte number of valid samples within this packet
- giving a total of 55 bytes.
-
- **********************************************************************/
-
-
-
-void parse_byte_NIA(unsigned char actbyte)
-{
-	switch (PACKET.readstate) {
-		case 0:
-			PACKET.buffer[PACKET.extract_pos]=actbyte ;
-			PACKET.extract_pos=0;
-			PACKET.readstate++; 
-			break;
-		case 1:
-			PACKET.buffer[PACKET.extract_pos]+=actbyte*0x100 ;
-			PACKET.readstate++; 
-			break;
-		case 2:
-			PACKET.buffer[PACKET.extract_pos]+=actbyte*0x10000;	// 24-Bit Werte
-			PACKET.buffer[PACKET.extract_pos]/=0x100;			// auf 16 Bit beschränken!!
-			PACKET.extract_pos++;
-			PACKET.readstate=0; 
-			process_packets();
-			break;
-		default: PACKET.readstate=0;
-
-
-	}
-}
 
 /********************************************************************
 
@@ -316,45 +273,11 @@ void parse_byte_P3(unsigned char actbyte)
 		  default: PACKET.readstate=0;
 		}
 	
-/*
-switch (PACKET.readstate) 
-	{
-		  case 0: if (actbyte & 0x80) {PACKET.extract_pos=0;PACKET.readstate++;}
-				  break;
-		  case 1: PACKET.buffer[PACKET.extract_pos]=actbyte;
-			      PACKET.extract_pos++;
-				  if (PACKET.extract_pos==11) 
-				  {
-				    PACKET.number= (PACKET.buffer[0] >> 1) & 0x3f;
-				    PACKET.aux = (PACKET.buffer[0] << 7) & 0x80 | PACKET.buffer[1] & 0x7f;
-				    if ((PACKET.number & 7)==4) PACKET.switches = PACKET.aux;
-				    sync = (PACKET.buffer[0] >> 6) & 2 | (PACKET.buffer[1] >> 7) & 1;
-
-				    for (i = 0, j = 2; i < (6 >> 1); i++, j += 3)
-					{
-					// Decode and store even-channel sample
-			        PACKET.buffer[i << 1] = ((unsigned short) PACKET.buffer[j]) & 0x7f | (((unsigned short) PACKET.buffer[j+2]) << 3) & 0x380;
-			        // Decode and store odd-channel sample
-			        PACKET.buffer[(i << 1) + 1] = ((unsigned short) PACKET.buffer[j+1]) & 0x7f | (((unsigned short) PACKET.buffer[j+2]) << 7) & 0x380;
-					// Decode and store the sync bits
-					sync = (sync << 3) | (int) ((PACKET.buffer[j] >> 5) & 4 | (PACKET.buffer[j+1] >> 6) & 2 | (PACKET.buffer[j+2] >> 7) & 1);
-					}	
-  				    
-				    if (sync==1) // The sync marker is last, so sync should be == 1, or there was an error.
-					{   
-						PACKET.extract_pos=0;
-						process_packets();
-					} else PACKET.readstate=0;
-				  }
-				  break;
-		  default: PACKET.readstate=0;
-		}
-*/
 }
 
 /********************************************************************
 
-  Raw binary Data Format:
+  16 bit Raw binary Data Format:
    
 	 1 channel, ´given in two byte (low byte first)
 
@@ -473,7 +396,7 @@ void parse_byte_P21(unsigned char actbyte)
 
 /********************************************************************
 
-  SBG - Smart BrainGames / Pocket Neurobics A3 Protocol
+  SBT 4chn - Smart Brain Technologies / Pocket Neurobics A3 Protocol
 
   The two most significant bits of the framing byte are used for 
   synchronisation. They sequence, frame by frame, 00..11. 
@@ -490,7 +413,7 @@ void parse_byte_P21(unsigned char actbyte)
 
  **********************************************************************/
 
-void parse_byte_SBG(unsigned char actbyte)
+void parse_byte_SBT4(unsigned char actbyte)
 {
 	static char synctry=0;
 	static int syncval=3;
@@ -538,6 +461,45 @@ void parse_byte_SBG(unsigned char actbyte)
 	if (++syncpos>4) syncpos=0;
 		  
 }
+
+
+/********************************************************************
+
+  SBT 2chn BT- Smart Brain Technologies 
+
+  3 bytes data chn 0 (MSB first, 2's complement)  
+  3 bytes data chn 1 (MSB first, 2's complement)  
+  1 status byte
+
+ **********************************************************************/
+
+void parse_byte_SBT2(unsigned char actbyte)
+{
+	static int syncpos=0;
+    switch (syncpos) 
+	{
+		  case 0: PACKET.buffer[0]= ((unsigned int)actbyte) << 16;
+				  break;
+		  case 1: PACKET.buffer[0]+= ((unsigned int)actbyte) << 8; 
+				  break;
+		  case 2: PACKET.buffer[0]+=actbyte; 
+				  break;
+		  case 3: PACKET.buffer[1]=  ((unsigned int)actbyte) << 16;
+				  break;
+		  case 4: PACKET.buffer[2]+= ((unsigned int)actbyte) << 8; 
+				  break;
+		  case 5: PACKET.buffer[3]+=actbyte; 
+				  break;
+		  case 6: PACKET.aux=actbyte;
+				  if (PACKET.buffer[0] & (1<<23)) PACKET.buffer[0]-=(1<<23);
+				  else PACKET.buffer[0]+=(1<<23);
+				  if (PACKET.buffer[1] & (1<<23)) PACKET.buffer[1]-=(1<<23);
+				  else PACKET.buffer[1]+=(1<<23);
+				  process_packets();
+				  break;
+	}		  
+}
+
 
 
 
@@ -641,12 +603,12 @@ void parse_byte_PendantV3(unsigned char actbyte)
     Byte 3      Unknown meaning  = 0x00
     Byte 4/5    Channel 1 data
     Byte 6/7    Channel 2 data
-    Byte 8/9    Channel 3 data, not used
-    Byte 10/11  Channel 4 data, not used
-    Byte 12/13  Channel 5 data, not used
-    Byte 14/15  Channel 6 data, not used
-    Byte 16/17  Channel 6 data, not used
-    Byte 18/19  Channel 6 data, not used
+    Byte 8/9    Channel 3 data (only used in some devices)
+    Byte 10/11  Channel 4 data (only used in some devices)
+    Byte 12/13  Channel 5 data (only used in some devices)
+    Byte 14/15  Channel 6 data (only used in some devices)
+    Byte 16/17  Channel 7 data (only used in some devices)
+    Byte 18/19  Channel 8 data (only used in some devices)
 
     LSB is sent first, then MSB
     Data is 16 bits in 2's complement (15-bits + sign)
@@ -656,20 +618,25 @@ void parse_byte_PendantV3(unsigned char actbyte)
 
 void parse_byte_QDS(unsigned char actbyte)
 {
+	static short buff=0;
+
     switch (PACKET.readstate) 
 	{
 		  case 0: if (actbyte==204) PACKET.readstate++;  break;
 		  case 1: if (actbyte==51)  PACKET.readstate++;  break;
 		  case 2: if (actbyte==204) PACKET.readstate++;  break;
-		  case 3: PACKET.readstate++;  break;
-		  case 4: if (PACKET.extract_pos < 16)
-				  {   if ((PACKET.extract_pos & 1) == 0)
-					     PACKET.buffer[PACKET.extract_pos>>1]=actbyte*256;
-			          else PACKET.buffer[PACKET.extract_pos>>1]+=actbyte;
-					  PACKET.extract_pos++;
+		  case 3: PACKET.extract_pos=0; PACKET.readstate++; break;
+		  case 4: if ((PACKET.extract_pos & 1) == 0) {
+						buff =  actbyte;
+					     PACKET.buffer[PACKET.extract_pos>>1]=buff;
 				  }
-				  else
-				  {  PACKET.switches= actbyte;
+			      else {
+					  buff =  actbyte*256;
+					  PACKET.buffer[PACKET.extract_pos>>1]+=buff+32768;
+				  }
+				  PACKET.extract_pos++;
+				  if (PACKET.extract_pos>=16)
+				  { 
 					 PACKET.readstate=0;
 		  	  	     process_packets();
 				  }
@@ -679,10 +646,151 @@ void parse_byte_QDS(unsigned char actbyte)
 		}		
 }
 
+/********************************************************************
+
+    Package the data according to the "IBVA 2 Channel" protocol
+
+********************************************************************/
+void parse_byte_IBVA(unsigned char actbyte)
+{
+	static int chn_index=0;
+	static int digit=3;
+	int val;
+
+	if (actbyte == 0x0d) { digit=3;chn_index=0;}
+	else if (((actbyte >='0') && (actbyte <='9')) || ((actbyte >='a') && (actbyte <='f')))
+	{
+		if (actbyte <='9') val=actbyte-'0'; else val=actbyte-'a'+10;
+		if (digit==3) {
+			if (actbyte=='b') {chn_index=5;val=0;digit++;}
+			PACKET.buffer[chn_index]=0;
+		}
+		digit--;
+		PACKET.buffer[chn_index]+= val << (digit*4);
+		if (digit==0) {
+//			PACKET.buffer[chn_index]-=0x200;
+			digit=3; chn_index++;
+			if (chn_index ==4) { process_packets(); chn_index=0; }
+		}
+	}
+}
+
+
+/********************************************************************
+
+  Packet Format for OCZ NIA:
+  One packet has a 55 byte 
+    16 Samples (three bytes each: 48 Bytes total)
+	2 Byte Sync sequence (56, 189)
+	2 Byte Latency Timing information
+	2 Byte Total number of samples read
+	1 Byte number of valid samples within this packet
+ giving a total of 55 bytes.
+
+ **********************************************************************/
+
+void parse_byte_NIA(unsigned char actbyte)
+{
+
+	switch (PACKET.readstate) {
+		case 0:
+			PACKET.buffer[0]=actbyte ;
+			PACKET.readstate++; 
+			break;
+		case 1:
+			PACKET.buffer[0]+=actbyte*256 ;
+			PACKET.readstate++; 
+			break;
+		case 2:
+			PACKET.buffer[0]+=actbyte * 65536;
+			PACKET.readstate++; 
+//			PACKET.readstate=0;     // 2 channel version
+//			process_packets();
+			break;
+		case 3:
+			PACKET.buffer[1]=actbyte ;
+			PACKET.readstate++; 
+			break;
+		case 4:
+			PACKET.buffer[1]+=actbyte * 256;
+			PACKET.readstate++; 
+			break;
+		case 5:
+			PACKET.buffer[1]+=actbyte * 65536;
+			PACKET.readstate=0; 
+			process_packets();
+			break;
+		default: PACKET.readstate=0;
+
+
+	}
+
+}
+
+/********************************************************************
+
+  Packet Parser for OpenBCI (1-8 channel binary format):
+
+  4-byte (long) integers are stored in 'little endian' formant in AVRs
+  so this protocol parser expects the lower bytes first.
+
+  Start Indicator: 0xA0
+  Packet_length  : 1 byte  (lenght = 4 bytes per active channel + 4 bytes framenumber)
+  Framenumber    : 4 bytes (currently not used - will be a sequential counter ?)
+  Channel1 data  : 4 bytes 
+  Channel2 data  : 4 bytes
+  Channel3 data  : 4 bytes
+  Channel4 data  : 4 bytes
+  Channel5 data  : 4 bytes
+  Channel6 data  : 4 bytes
+  Channel7 data  : 4 bytes
+  Channel8 data  : 4 bytes
+  End Indcator:    0xC0
+ **********************************************************************/
+
+void parse_byte_OPENBCI8(unsigned char actbyte)
+{
+	static int channelsInPacket=0;
+	static int framenumber=0;
+	static int bytecounter=0;
+	static int channelcounter=0;
+
+	switch (PACKET.readstate) {
+		case 0:  if (actbyte == 0xA0) {          // look for start indicator
+					bytecounter=framenumber=0; 
+					PACKET.readstate++;
+				 } 
+				 break;
+		case 1:  channelsInPacket = (int)actbyte / 4 - 1;   // get number of channels
+				 if ((channelsInPacket<1) || (channelsInPacket>8)) PACKET.readstate=0;
+				 else PACKET.readstate++;
+				 break;
+		case 2: framenumber+= ((unsigned int)actbyte << (bytecounter*8));  // get framenumber
+				if (++bytecounter==4) {
+					bytecounter=channelcounter=PACKET.buffer[channelcounter]=0;
+					PACKET.readstate++;
+				} 
+				break;
+		case 3: // get channel values 
+				PACKET.buffer[channelcounter]+= ((unsigned int)actbyte << (bytecounter*8));
+				if (++bytecounter==4) {
+					if (++channelcounter==channelsInPacket) {  // all channels arrived !
+						PACKET.readstate++;
+					}
+					else bytecounter=PACKET.buffer[channelcounter]=0;
+				}
+				break;
+		case 4: if (actbyte == 0xc0)     // if correct end delimiter found:
+					process_packets();   // call message pump  
+		default: PACKET.readstate=0;  // look for next packet
+	}
+}
+
+
+
 void ParseLocalInput(int BufLen)
 {
 	unsigned char actbyte;
-
 	unsigned int pbufcnt;
 	
 	for (pbufcnt=0;pbufcnt<(unsigned int)BufLen;pbufcnt++)
@@ -694,22 +802,23 @@ void ParseLocalInput(int BufLen)
 			case DEV_MODEEG_P2:	parse_byte_P2 (actbyte); break;
 			case DEV_MODEEG_P3:	parse_byte_P3 (actbyte); break;
 			case DEV_RAW:       parse_byte_raw(actbyte); break;
-			case DEV_P21:       parse_byte_P21(actbyte); break;
-			case DEV_SBG:       parse_byte_SBG(actbyte); break;
+			case DEV_MONOLITHEEG_P21: parse_byte_P21(actbyte); break;
+			case DEV_SBT2:      parse_byte_SBT2(actbyte); break;
+			case DEV_SBT4:      parse_byte_SBT4(actbyte); break;
 			case DEV_RAW8BIT:   parse_byte_raw_8bit(actbyte); break;
 			case DEV_PENDANT3:  parse_byte_PendantV3(actbyte); break;
 			case DEV_QDS:       parse_byte_QDS(actbyte); break;
 			case DEV_NIA:		parse_byte_NIA(actbyte); break;
-
+			case DEV_IBVA:		parse_byte_IBVA(actbyte); break;
+			case DEV_OPENBCI8:	parse_byte_OPENBCI8(actbyte); break;
 		}
 	}
-	
 	return;
 }
 
 
 
-void enable_buttons(HWND hDlg)
+void update_captfile_guibuttons(HWND hDlg)
 {
 	EnableWindow(GetDlgItem(hDlg, IDC_REC_ARCHIVE), FALSE);
 	EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_REC), FALSE);
@@ -748,182 +857,138 @@ void enable_buttons(HWND hDlg)
 	}
 }
 
-int sendcommand(unsigned char cmd, unsigned char data1, unsigned char data2)
+int sendP21Command(unsigned char cmd, unsigned char data1, unsigned char data2)
 {
-
-
-/*	if (!TTY.BIDIRECT)  report("not bidirect");
-	if (TTY.COMDEV==INVALID_HANDLE_VALUE)  report("inv. comdev");
-	if (!TTY.CONNECTED) report("not connected");
-
-  	if (data1==VINFO_CHANNELS_MATRIX)
-	{
-		char tmp[200];
-
-		wsprintf(tmp,"chnmatix: %04X",data2);
-		report(tmp);
-	}
-
-*/
-
 	if ((!TTY.BIDIRECT) || (TTY.COMDEV==INVALID_HANDLE_VALUE) || (!TTY.CONNECTED)) return(0);
-
-	//if (data1!=VINFO_CHANNELS_MATRIX)
 	{
 		write_to_comport(cmd);
 		write_to_comport(data1);
 		write_to_comport(data2);
    	    PACKET.readstate=0;
 	}
-
-	return(1); //WriterProc(NULL));
+	return(1);
 }
-
-void update_ports(HWND hDlg, EEGOBJ * st)
-{
-	int i,x;
-
-	switch (TTY.devicetype)
-	{	
-
-	case DEV_PENDANT3:
-		st->chnmatrix=0x0f;
-		x=0;
-  	    sprintf(st->out_ports[x].out_name,"Chn1");
-	    sprintf(st->out_ports[x].out_desc,"EEG Channel1");
-	    strcpy(st->out_ports[x].out_dim,"none");
-	    st->out_ports[x].get_range=-1;
-     	st->out_ports[x].out_min=-1000.0f;
-	    st->out_ports[x].out_max=1000.0f;
-        x++;
- 	    sprintf(st->out_ports[x].out_name,"Chn2");
-	    sprintf(st->out_ports[x].out_desc,"EEG Channel2");
-	    strcpy(st->out_ports[x].out_dim,"none");
-	    st->out_ports[x].get_range=-1;
-     	st->out_ports[x].out_min=-1000.0f;
-	    st->out_ports[x].out_max=1000.0f;
-        x++;
- 	    sprintf(st->out_ports[x].out_name,"valid");
-	    sprintf(st->out_ports[x].out_desc,"Signal valid indication");
-	    strcpy(st->out_ports[x].out_dim,"none");
-	    st->out_ports[x].get_range=-1;
-     	st->out_ports[x].out_min=0.0f;
-	    st->out_ports[x].out_max=100.0f;
-        x++;
- 	    sprintf(st->out_ports[x].out_name,"bt1+2");
-	    sprintf(st->out_ports[x].out_desc,"Button 1+2 state");
-	    strcpy(st->out_ports[x].out_dim,"none");
-	    st->out_ports[x].get_range=-1;
-     	st->out_ports[x].out_min=0.0f;
-	    st->out_ports[x].out_max=3.0f;
-		break;
-
-	default:
-		if (hDlg)
-		{
-		  st->chnmatrix=0;
-		  if (IsDlgButtonChecked(hDlg,IDC_CH1)) st->chnmatrix|=1; 
-		  if (IsDlgButtonChecked(hDlg,IDC_CH2)) st->chnmatrix|=2; 
-		  if (IsDlgButtonChecked(hDlg,IDC_CH3)) st->chnmatrix|=4; 
-		  if (IsDlgButtonChecked(hDlg,IDC_CH4)) st->chnmatrix|=8; 
-		  if (IsDlgButtonChecked(hDlg,IDC_CH5)) st->chnmatrix|=16;
-		  if (IsDlgButtonChecked(hDlg,IDC_CH6)) st->chnmatrix|=32; 
-		  if (IsDlgButtonChecked(hDlg,IDC_EXTEND)) st->chnmatrix|=128;
-		}
-
-		//st->chnmatrix=127;
-		for (i=0,x=0;i<6;i++)
-		{
-		  if (st->chnmatrix&(1<<i))
-		  {
-			  sprintf(st->out_ports[x].out_name,"chn %d",i+1);
-			  sprintf(st->out_ports[x].out_desc,"EEG Channel %d",i+1);
-			  strcpy(st->out_ports[x].out_dim,"uV");
-			  //st->out_ports[x].get_range=-1;
-			  //st->out_ports[x].out_min=-256.0f;
-			  //st->out_ports[x].out_max=256.0f;
-			  x++;
-		  }
-		}
-		sprintf(st->out_ports[x].out_name,"b1-b4");
-		sprintf(st->out_ports[x].out_desc,"EEG Buttons");
-		strcpy(st->out_ports[x].out_dim,"none");
-		st->out_ports[x].get_range=-1;
-		st->out_ports[x].out_min=0.0f;
-		st->out_ports[x].out_max=15.0f;
-		break;
-	}
-
-	st->outports=x+1;
-	st->height=CON_START+st->outports*CON_HEIGHT+5;
-
-	if ((st->chnmatrix)&128)
-	{
-		/* extend buttons */
-		x++;
-		sprintf(st->out_ports[x].out_name,"b1");
-		sprintf(st->out_ports[x].out_desc,"EEG Button 1");
-		strcpy(st->out_ports[x].out_dim,"none");
-		st->out_ports[x].get_range=-1;
-		st->out_ports[x].out_min=0.0f;
-		st->out_ports[x].out_max=1.0f;
-
-		x++;
-		sprintf(st->out_ports[x].out_name,"b2");
-		sprintf(st->out_ports[x].out_desc,"EEG Button 2");
-		strcpy(st->out_ports[x].out_dim,"none");
-		st->out_ports[x].get_range=-1;
-		st->out_ports[x].out_min=0.0f;
-		st->out_ports[x].out_max=1.0f;
-
-		x++;
-		sprintf(st->out_ports[x].out_name,"b3");
-		sprintf(st->out_ports[x].out_desc,"EEG Button 3");
-		strcpy(st->out_ports[x].out_dim,"none");
-		st->out_ports[x].get_range=-1;
-		st->out_ports[x].out_min=0.0f;
-		st->out_ports[x].out_max=1.0f;
-
-		x++;
-		sprintf(st->out_ports[x].out_name,"b4");
-		sprintf(st->out_ports[x].out_desc,"EEG Button 4");
-		strcpy(st->out_ports[x].out_dim,"none");
-		st->out_ports[x].get_range=-1;
-		st->out_ports[x].out_min=0.0f;
-		st->out_ports[x].out_max=1.0f;
-  
-		st->outports=x+1;
-		st->height=CON_START+st->outports*CON_HEIGHT+5; 
-	}
-
-}
-
 
 void update_p21state(void)
 {
-	if ((TTY.devicetype!=DEV_P21) && (TTY.devicetype!=DEV_MODEEG_P2)) return;
+	if (TTY.devicetype!=DEV_MONOLITHEEG_P21) return;
+	sendP21Command(CMD_SET_VINFO, VINFO_PROTOCOL_NUMBER, 21);
+    // sendP21Command(CMD_SET_VINFO,VINFO_CHANNELS_MATRIX,(unsigned char) (st->chnmatrix&63));
 
-	if (TTY.devicetype==DEV_P21) sendcommand(CMD_SET_VINFO, VINFO_PROTOCOL_NUMBER, 21);	
-	if (TTY.devicetype==DEV_MODEEG_P2) sendcommand(CMD_SET_VINFO, VINFO_PROTOCOL_NUMBER, 2);
-
-	switch(SamplingRateTable[TTY.samplingrate])
+	switch(PACKETSPERSECOND)
 	{
-		case 256:  sendcommand(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 0);break;
-		case 300:  sendcommand(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 1);break;
-		case 512:  sendcommand(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 2);break;
-		case 600:  sendcommand(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 3);break;
-		case 1024: sendcommand(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 4);break;
-		case 1200: sendcommand(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 5);break;
+		case 256:  sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 0);break;
+		case 300:  sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 1);break;
+		case 512:  sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 2);break;
+		case 600:  sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 3);break;
+		case 1024: sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 4);break;
+		case 1200: sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 5);break;
+		default:   sendP21Command(CMD_SET_VINFO, VINFO_SAMPLE_RATE, 0);break;
+
 	}
 	switch(TTY.BAUDRATE)
 	{
-		case 57600:   sendcommand(CMD_SET_VINFO, VINFO_BAUD_RATE, 0);break;
-		case 115200:  sendcommand(CMD_SET_VINFO, VINFO_BAUD_RATE, 1);break;
-		case 230400:  sendcommand(CMD_SET_VINFO, VINFO_BAUD_RATE, 2);break;
+		case 57600:   sendP21Command(CMD_SET_VINFO, VINFO_BAUD_RATE, 0);break;
+		case 115200:  sendP21Command(CMD_SET_VINFO, VINFO_BAUD_RATE, 1);break;
+		case 230400:  sendP21Command(CMD_SET_VINFO, VINFO_BAUD_RATE, 2);break;
+	}
+}
+
+
+void setEEGDeviceDefaults(EEGOBJ * st)
+{
+	int i,numChannels=0;
+
+	TTY.BIDIRECT=false;
+	for (i=0;i<32;i++)
+	{
+	  	sprintf(st->out_ports[i].out_name,"Chn%d",i+1);
+		sprintf(st->out_ports[i].out_desc,"EEG Channel%d",i+1);
+		strcpy(st->out_ports[i].out_dim,"uV");
+		st->out_ports[i].get_range=-1;
+     	st->out_ports[i].out_min=-500.0f;
+		st->out_ports[i].out_max=500.0f;
 	}
 
+	switch (TTY.devicetype)
+	{	
+		case DEV_RAW:
+			numChannels=1;
+			st->resolution=16;
+			break;
 
+		case DEV_RAW8BIT:
+			numChannels=1;
+			st->resolution=8;
+			break;
+
+		case DEV_PENDANT3:
+			numChannels=4;
+			st->resolution=13;
+	 		sprintf(st->out_ports[2].out_name,"valid");
+			sprintf(st->out_ports[2].out_desc,"Signal valid indication");
+			strcpy(st->out_ports[2].out_dim,"none");
+			st->out_ports[2].get_range=-1;
+     		st->out_ports[2].out_min=0.0f;
+			st->out_ports[2].out_max=100.0f;
+	 		sprintf(st->out_ports[3].out_name,"bt1+2");
+			sprintf(st->out_ports[3].out_desc,"Button 1+2 state");
+			strcpy(st->out_ports[3].out_dim,"none");
+			st->out_ports[3].get_range=-1;
+     		st->out_ports[3].out_min=0.0f;
+			st->out_ports[3].out_max=3.0f;
+			break;
+
+		case DEV_SBT4:
+			numChannels=4;
+			st->resolution=8;
+			break;
+
+		case DEV_QDS:
+			numChannels=8;
+			st->resolution=16;
+			for (numChannels=0;numChannels<8;numChannels++) 
+			{
+     				st->out_ports[numChannels].out_min=-16485.0f;
+					st->out_ports[numChannels].out_max=16485.0f;
+			}
+			break;
+
+		case DEV_IBVA:
+			st->resolution=10;
+			numChannels=2;
+			break;
+
+		case DEV_NIA:
+		case DEV_SBT2:
+			st->resolution=24;
+			numChannels=2;
+			break;
+
+		case DEV_OPENBCI8:
+			st->resolution=24;
+			numChannels=8;
+			break;
+
+		case DEV_MONOLITHEEG_P21:
+			 TTY.BIDIRECT=true;
+			 update_p21state();
+		case DEV_MODEEG_P2:
+		case DEV_MODEEG_P3:
+			st->resolution=10;
+			sprintf(st->out_ports[6].out_name,"b1-b4");
+			sprintf(st->out_ports[6].out_desc,"EEG Buttons");
+			strcpy(st->out_ports[6].out_dim,"none");
+			st->out_ports[6].get_range=-1;
+			st->out_ports[6].out_min=0.0f;
+			st->out_ports[6].out_max=15.0f;
+			numChannels=7;
+			break;
+	}
+	st->outports=numChannels;
+	st->height=CON_START+st->outports*CON_HEIGHT+5;
 }
+
 
 /*--------------------------------------------------------------------------------
 
@@ -959,13 +1024,8 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				SendDlgItemMessage( hDlg, IDC_BAUDCOMBO, CB_SETITEMDATA, (WPARAM) wPosition, (LPARAM) BaudTable[t]) ;
 				if (BaudTable[t] == TTY.BAUDRATE) SendDlgItemMessage( hDlg, IDC_BAUDCOMBO, CB_SETCURSEL, (WPARAM) wPosition, 0L ) ;
 			}
-			for (t=0; devicetypes[t][0]!=0;t++)
-				SendDlgItemMessage( hDlg, IDC_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) devicetypes[t]) ;
-			SendDlgItemMessage( hDlg, IDC_DEVICECOMBO, CB_SETCURSEL, TTY.devicetype, 0L ) ;
 
-			for (t=0; samplingrates[t][0]!=0;t++)
-				SendDlgItemMessage( hDlg, IDC_SAMPLINGCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) samplingrates[t]) ;
-			SendDlgItemMessage( hDlg, IDC_SAMPLINGCOMBO, CB_SETCURSEL, TTY.samplingrate, 0L ) ;
+			SetDlgItemText(hDlg,IDC_DEVICETYPE,devicetypes[TTY.devicetype]);
 
 			for (t=0; captfiletypes[t][0]!=0;t++)
 				SendDlgItemMessage( hDlg, IDC_FILEMODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) captfiletypes[t]) ;
@@ -977,24 +1037,19 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			SetScrollInfo(GetDlgItem(hDlg,IDC_ARCHIVE_POSBAR),SB_CTL,&lpsi,TRUE);
  			SetScrollPos(GetDlgItem(hDlg, IDC_ARCHIVE_POSBAR), SB_CTL, 0, 1);
 
-			if(st->chnmatrix&1) CheckDlgButton(hDlg,IDC_CH1, TRUE); 
-			if(st->chnmatrix&2) CheckDlgButton(hDlg,IDC_CH2, TRUE); 
-			if(st->chnmatrix&4) CheckDlgButton(hDlg,IDC_CH3, TRUE); 
-			if(st->chnmatrix&8) CheckDlgButton(hDlg,IDC_CH4, TRUE); 
-			if(st->chnmatrix&16) CheckDlgButton(hDlg,IDC_CH5, TRUE); 
-			if(st->chnmatrix&32) CheckDlgButton(hDlg,IDC_CH6, TRUE); 
-			if(st->chnmatrix&128) CheckDlgButton(hDlg,IDC_EXTEND, TRUE); 
-
 			CheckDlgButton(hDlg, IDC_CONNECTED, TTY.CONNECTED);
-			CheckDlgButton(hDlg, IDC_BIDIRECT, TTY.BIDIRECT);
-			CheckDlgButton(hDlg, IDC_FLOW_CONTROL, TTY.FLOW_CONTROL);
-			SetDlgItemText(hDlg,IDC_ARCHIVE_FILENAME,CAPTFILE.filename);
-			SetDlgItemInt(hDlg,IDC_SAMPLINGRATE,PACKETSPERSECOND,0);
+			SetDlgItemText(hDlg, IDC_ARCHIVE_FILENAME,CAPTFILE.filename);
+
 			sprintf(strfloat,"%.2f",(float)CAPTFILE.offset/(float)PACKETSPERSECOND);
 			SetDlgItemText(hDlg,IDC_OFFSET,strfloat);
-			SetDlgItemInt(hDlg,IDC_RESOLUTION,(long)st->resolution,0);
-			enable_buttons(hDlg);
+			SetDlgItemInt(hDlg,IDC_RESOLUTION,st->resolution,0);
 
+			// only for IBVA:
+			SetDlgItemText(hDlg, IDC_CUTOFF,"0.33");
+			SetDlgItemText(hDlg, IDC_BATTERY,"0.00 V");
+			//
+
+			update_captfile_guibuttons(hDlg);
 			return TRUE;
 		}
 		case WM_COMMAND:
@@ -1008,7 +1063,7 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 						TTY.PORT=SendDlgItemMessage(hDlg, IDC_PORTCOMBO, CB_GETCURSEL, 0, 0 )+1 ;
 
 						CheckDlgButton(hDlg,IDC_CONNECTED,FALSE);
-						enable_buttons(hDlg);
+						update_captfile_guibuttons(hDlg);
 					}
 					break;
 				case IDC_BAUDCOMBO:
@@ -1026,15 +1081,7 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 							CheckDlgButton(hDlg, IDC_CONNECTED, TTY.CONNECTED);
 						}
 						
-						enable_buttons(hDlg);
-					}
-					break;
-				case IDC_SAMPLINGCOMBO:
-					if (HIWORD(wParam)==CBN_SELCHANGE)
-					{						
-						TTY.samplingrate=SendMessage(GetDlgItem(hDlg, IDC_SAMPLINGCOMBO), CB_GETCURSEL , 0, 0);
-						update_samplingrate(SamplingRateTable[TTY.samplingrate]);
-						update_p21state();						
+						update_captfile_guibuttons(hDlg);
 					}
 					break;
 
@@ -1055,25 +1102,24 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 									report_error("No NIA found!");
 									break;
 								}
-								update_samplingrate(NIASAMPLINGRATE);
 							} else {
 								if (TTY.COMDEV!=INVALID_HANDLE_VALUE) 
 									BreakDownCommPort();								
 								TTY.CONNECTED=SetupCommPort(TTY.PORT);
+								if ((TTY.COMDEV!=INVALID_HANDLE_VALUE) && (TTY.devicetype==DEV_IBVA))
+								{
+									write_string_to_comport("SR 256\r");
+								}
 							}
 							CheckDlgButton(hDlg, IDC_CONNECTED, TTY.CONNECTED);
 						}
-						enable_buttons(hDlg);
+						update_captfile_guibuttons(hDlg);
 					break;
 
-				case IDC_CONNECTED:
-						CheckDlgButton(hDlg,IDC_CONNECTED, TTY.CONNECTED);
-					break;
-
-				case IDC_BIDIRECT:
+				case IDC_BIDIRECT:   // currently not supported in GUI
 						TTY.BIDIRECT=IsDlgButtonChecked(hDlg,IDC_BIDIRECT);
 					break;
-				case IDC_FLOW_CONTROL:
+				case IDC_FLOW_CONTROL:  // currently not supported in GUI
 					TTY.FLOW_CONTROL=IsDlgButtonChecked(hDlg,IDC_FLOW_CONTROL);
   				    if (TTY.COMDEV!=INVALID_HANDLE_VALUE)
 					{
@@ -1083,17 +1129,28 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 					}
 					break;
 
-				case IDC_DEVICECOMBO:
-					if (HIWORD(wParam)==CBN_SELCHANGE)
-					{
-						TTY.devicetype=SendMessage(GetDlgItem(hDlg, IDC_DEVICECOMBO), CB_GETCURSEL , 0, 0);
-					
-						update_devicetype ();
-						update_ports(hDlg, st);
-						update_p21state();
-							
-					}
+				// only for IBVA:
+				case IDC_TESTBAT:
+						if ((TTY.COMDEV!=INVALID_HANDLE_VALUE) && (TTY.devicetype==DEV_IBVA))
+						{
+							write_to_comport(0x42);
+							write_to_comport(0x4c);
+							write_to_comport(0x0d);
+						}
 					break;
+				case IDC_SETCUTOFF:
+						if ((TTY.COMDEV!=INVALID_HANDLE_VALUE) && (TTY.devicetype==DEV_IBVA))
+						{
+							char str[20];
+							float fl;
+							GetDlgItemText(hDlg,IDC_CUTOFF,(LPSTR) str,20);
+							sscanf(str,"%f",&fl);
+							sprintf(str,"FR %.2f\r",fl);
+							write_string_to_comport(str);
+						}
+						break;
+				// 
+
 				case IDC_FILEMODECOMBO:
 					if (HIWORD(wParam)==CBN_SELCHANGE) CAPTFILE.filetype=SendMessage(GetDlgItem(hDlg, IDC_FILEMODECOMBO), CB_GETCURSEL , 0, 0);
 					break;
@@ -1115,11 +1172,13 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 							TTY.read_pause=1;
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 							SetDlgItemText(hDlg,IDC_ARCHIVE_FILENAME,CAPTFILE.filename);
-							SetDlgItemText(hDlg,IDC_DEVICECOMBO,devicetypes[TTY.devicetype]);
+							if (strcmp(devicetypes[TTY.devicetype],CAPTFILE.devicetype))
+								report("Warning: Archive File does not match device type");
 							SetDlgItemText(hDlg,IDC_FILEMODECOMBO,captfiletypes[CAPTFILE.filetype]);
 //							reset_oscilloscopes();
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_RESETBUTTON,0);
-							enable_buttons(hDlg);
+							update_captfile_guibuttons(hDlg);
+						    InvalidateRect(ghWndDesign,NULL,TRUE);
 						}
 					}
 					break;
@@ -1130,25 +1189,15 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 	 					close_captfile();
 						SetDlgItemText(hDlg,IDC_ARCHIVE_FILENAME,"none");
 					 }
-					 enable_buttons(hDlg);
+					 update_captfile_guibuttons(hDlg);
 					break;
 				case IDC_PLAY_ARCHIVE:
 					if(CAPTFILE.filehandle==INVALID_HANDLE_VALUE) break;
 					QueryPerformanceCounter((_LARGE_INTEGER *)&TIMING.readtimestamp);
 					CAPTFILE.do_read=1;
-					enable_buttons(hDlg);
+					update_captfile_guibuttons(hDlg);
 					start_timer();
 					break;
-				case IDC_CH1:
-				case IDC_CH2:
-				case IDC_CH3:
-				case IDC_CH4:
-				case IDC_CH5:
-				case IDC_CH6:
-				case IDC_EXTEND: update_ports(hDlg,st);
-					   sendcommand(CMD_SET_VINFO,VINFO_CHANNELS_MATRIX,(unsigned char) (st->chnmatrix&63));
-					   InvalidateRect(ghWndDesign,NULL,TRUE);
-					   break;
 				case IDC_REC_ARCHIVE:
 					close_captfile();
 					strcpy(CAPTFILE.filename,GLOBAL.resourcepath);
@@ -1156,10 +1205,10 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 					if (open_file_dlg(ghWndMain,CAPTFILE.filename, FT_ARCHIVE, OPEN_SAVE))
 					{
 						CAPTFILE.filehandle=create_captfile(CAPTFILE.filename);
-						if(CAPTFILE.filehandle) 
+						if(CAPTFILE.filehandle!=INVALID_HANDLE_VALUE) 
 						{    SetDlgItemText(hDlg,IDC_ARCHIVE_FILENAME,CAPTFILE.filename);
 							 CAPTFILE.do_write=1;
-							 enable_buttons(hDlg);
+							 update_captfile_guibuttons(hDlg);
 						}
 						else
 						{  
@@ -1174,7 +1223,7 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 					close_captfile();
 					SetDlgItemText(hDlg,IDC_ARCHIVE_FILENAME,"none");
 					SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
-					enable_buttons(hDlg);
+					update_captfile_guibuttons(hDlg);
 					break;
 				case IDC_APPLYOFFSET:
 						GetDlgItemText(hDlg, IDC_OFFSET, strfloat, 20);
@@ -1183,13 +1232,11 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 						st->session_pos(TIMING.packetcounter);
 					break;
 				case IDC_RESOLUTION:
-					{ long l = GetDlgItemInt(hDlg, IDC_RESOLUTION, NULL,0);
-					if ((l>2)&&(l<80000000))
-							st->resolution=(float) l;
+					{   int temp = GetDlgItemInt(hDlg, IDC_RESOLUTION, NULL,0);
+						if ((temp>4)&&(temp<30))
+							st->resolution=temp;
 					}
 					break;
-
-				
 			}	
 			break;
 			//return(TRUE);
@@ -1201,26 +1248,20 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		case WM_MOVE:  
 				update_toolbox_position(hDlg);
 				return(TRUE);
-
-
 	}
     return FALSE;
 }
 
 
 
-
 EEGOBJ::EEGOBJ(int num) : BASE_CL()	
 	{
-
 		inports = 0;
  		outports = 7;
 		scrolling=0;
-
-		chnmatrix=63;
-		resolution=1024.0f;
-		update_ports(NULL,this);
-
+		width=60;
+		update_devicetype();
+		setEEGDeviceDefaults(this);
 	}
 
   	  void EEGOBJ::session_start(void) 
@@ -1236,24 +1277,26 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 		  { 
 			  if ((CAPTFILE.filehandle==INVALID_HANDLE_VALUE)||(CAPTFILE.file_action==FILE_WRITING))
 			     TTY.read_pause=0;
-	  		  sendcommand(CMD_SET_VINFO, VINFO_RUNEEG ,1);
-
+	  		  if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,1);
+			  if (TTY.devicetype==DEV_SBT2) { write_to_comport(0x20); write_to_comport(0x00); }
+			  if (TTY.devicetype==DEV_OPENBCI8) { write_to_comport('b'); }
 		  }
-		  if (ghWndToolbox==hDlg)  enable_buttons(hDlg);
+		  if (ghWndToolbox==hDlg)  update_captfile_guibuttons(hDlg);
 
 		
 	  }
   	  void EEGOBJ::session_stop(void) 
 	  {	
-		    sendcommand(CMD_SET_VINFO, VINFO_RUNEEG ,0);
+		    if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,0);
+			if (TTY.devicetype==DEV_SBT2) { write_to_comport(0x40); write_to_comport(0x00); }
 			CAPTFILE.do_read=0;TTY.read_pause=1; //CAPTFILE.do_write=0;
-			if (hDlg==ghWndToolbox) enable_buttons(hDlg);
+			if (hDlg==ghWndToolbox) update_captfile_guibuttons(hDlg);
 	  }
   	  void EEGOBJ::session_reset(void) 
 	  {	
-		    sendcommand(CMD_SET_VINFO, VINFO_RUNEEG ,0);
+		    if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,0);
 			CAPTFILE.do_read=0;CAPTFILE.do_write=0;TTY.read_pause=1;
-			if (hDlg==ghWndToolbox) enable_buttons(hDlg);
+			if (hDlg==ghWndToolbox) update_captfile_guibuttons(hDlg);
 			if(CAPTFILE.filehandle!=INVALID_HANDLE_VALUE) SetFilePointer(CAPTFILE.filehandle,CAPTFILE.data_begin,NULL,FILE_BEGIN);
 
 	  }
@@ -1274,28 +1317,67 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 
 	  void EEGOBJ::make_dialog(void) 
 	  {  
-		  	  	display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_EEGBOX, ghWndStatusbox, (DLGPROC)EEGDlgHandler));
+		  switch(TTY.devicetype) {
+			  case DEV_IBVA:
+		  	  	display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_EEGBOX_IBVA, ghWndStatusbox, (DLGPROC)EEGDlgHandler));
+				break;
+			  case DEV_NIA:
+		  	  	display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_EEGBOX_NIA, ghWndStatusbox, (DLGPROC)EEGDlgHandler));
+				break;
+			  case DEV_SBT2:
+		  	  	display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_EEGBOX_SBT2, ghWndStatusbox, (DLGPROC)EEGDlgHandler));
+				break;
+			  default:
+		  	  	display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_EEGBOX_GENERIC, ghWndStatusbox, (DLGPROC)EEGDlgHandler));
+		  }
 	  }
 
   	  void EEGOBJ::load(HANDLE hFile) 
 	  {	
-		  
+		  float dummy;   // compatibility to older configurations
+		  resolution=0;
 			load_object_basics(this);
-			load_property("chnmatrix", P_INT, &chnmatrix);
-			load_property("resolution", P_FLOAT, &resolution);
-			
-			update_ports(NULL,this);
-			sendcommand(CMD_SET_VINFO,VINFO_CHANNELS_MATRIX,(unsigned char) (chnmatrix&63));
-						
+			load_property("resolution", P_FLOAT, &dummy);
+			while (dummy>1) {resolution++; dummy/=2;}
+			if (resolution<8) resolution=10;
+			write_logfile("EEG LOAD: TTY.devicetype = %d, outports=%d",TTY.devicetype,outports);
+
+			int desired_outports=6;
+
+			switch (TTY.devicetype) {
+				case DEV_MODEEG_P2: 
+				case DEV_MODEEG_P3: 
+				case DEV_MONOLITHEEG_P21:
+					desired_outports=7;
+				break;
+				case DEV_RAW: 
+				case DEV_RAW8BIT: 
+					desired_outports=1;
+				break;
+				case DEV_NIA: 
+					desired_outports=2;
+				break;
+				case DEV_PENDANT3: 
+				case DEV_SBT4: 
+					desired_outports=4;
+				break;
+				case DEV_QDS: 
+					desired_outports=8;
+				break;
+			}
+			if (outports!=desired_outports) 
+			{
+					//report ("Compatibility Issue with loaded design found: port selection for EEG element was deprecated - please check EEG element output port connections! ");
+					outports=desired_outports;
+			}
 	  }
 
 	  void EEGOBJ::save(HANDLE hFile) 
 	  {	  
+		  long l = (1<<resolution);  // compatibility to older configurations
+		  float dummy= (float)l;
 			save_object_basics(hFile, this);
-			save_property(hFile, "chnmatrix", P_INT, &chnmatrix);
-			save_property(hFile,"resolution", P_FLOAT, &resolution);
-			
-
+			save_property(hFile, "resolution", P_FLOAT, &dummy);
 	  }
 
 	  void EEGOBJ::work(void) 
@@ -1305,61 +1387,56 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
         switch (TTY.devicetype)
 		{
 			case DEV_PENDANT3:
-				pass_values(0,((float) PACKET.buffer[0])-4096);
-		    	pass_values(1,((float) PACKET.buffer[1])-4096);
+			    for (x=0;x<2;x++)
+				   pass_values(x,(float) PACKET.buffer[x] * (out_ports[x].out_max-out_ports[x].out_min) / (float)(1<<resolution) + out_ports[x].out_min);
 		    	pass_values(2,(float) (PACKET.buffer[2]));  // valid indicator
 		    	pass_values(3,(float) (PACKET.switches));  
+				break;
 
-				break;
-			case DEV_NIA:
-			    for (i=0,x=0;i<6;i++)
-			    {
-				  if (chnmatrix & (1<<i))
-				  {
-					pass_values(x,(float) PACKET.buffer[i] * (out_ports[x].out_max-out_ports[x].out_min) / resolution - 16840000.0f / resolution);
-									//NIA Normierung: Shiften auf Nulllinie 
-				  }
-			    }
-				break;
+			case DEV_MODEEG_P2:
+			case DEV_MODEEG_P3:
+			case DEV_MONOLITHEEG_P21: 
+				  for (x=0;x<6;x++)
+						pass_values(x,(float) PACKET.buffer[x] * (out_ports[x].out_max-out_ports[x].out_min) / (float)(1<<resolution) + out_ports[x].out_min);
+				  pass_values(x,(float)PACKET.switches);
+				  break;
+
 			default:  // all other devices
-			  for (i=0,x=0;i<6;i++)
-			  {
-				if (chnmatrix & (1<<i))
-				{
-					pass_values(x,(float) PACKET.buffer[i] * (out_ports[x].out_max-out_ports[x].out_min) / resolution + out_ports[x].out_min);
-					x++;
-				}
-			  }
-
-			  pass_values(x,(float)PACKET.switches);
-
-			  if (chnmatrix&128)
-			  {
-				x++;
-				pass_values(x, (float)(!(PACKET.switches&1)));
-				x++;
-				pass_values(x, (float)(!(PACKET.switches&2)));
-				x++;
-				pass_values(x, (float)(!(PACKET.switches&4)));
-				x++;
-				pass_values(x, (float)(!(PACKET.switches&8)));
-			  }
+			  for (x=0;x<outports;x++)
+					pass_values(x,(float) PACKET.buffer[x] * (out_ports[x].out_max-out_ports[x].out_min) / (float)(1<<resolution) + out_ports[x].out_min);
 			  break;
-
 		}
 
 
-		if ((!TIMING.dialog_update) && (hDlg==ghWndToolbox) && (!scrolling) && (CAPTFILE.do_read)) 
+		if ((!TIMING.dialog_update) && (hDlg==ghWndToolbox))
 		{
-			DWORD x= SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_CURRENT);
-			x=x*1000/CAPTFILE.length/TTY.bytes_per_packet;
-			SetScrollPos(GetDlgItem(hDlg, IDC_ARCHIVE_POSBAR), SB_CTL, x, 1);
+			if (TTY.COMDEV!=INVALID_HANDLE_VALUE)
+			{
+				char str[15];
+				if (TTY.devicetype==DEV_IBVA)
+				{
+					sprintf(str,"%.2f V",(float)PACKET.buffer[5]*16/1024);
+					SetDlgItemText(hDlg, IDC_BATTERY, str);
+				}
+				if (TTY.devicetype==DEV_SBT2)
+				{
+					sprintf(str,"%d",PACKET.buffer[6]);
+					SetDlgItemText(hDlg, IDC_SBT2STATUS, str);
+				}
+			}
+
+			if((!scrolling) && (CAPTFILE.do_read)) 
+			{
+				DWORD x= SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_CURRENT);
+				x=x*1000/CAPTFILE.length/TTY.bytes_per_packet;
+				SetScrollPos(GetDlgItem(hDlg, IDC_ARCHIVE_POSBAR), SB_CTL, x, 1);
+			}
 		}
 	  }
 
 EEGOBJ::~EEGOBJ()
 	  {
-	//	BreakDownCommPort();
+		if (TTY.devicetype==DEV_NIA) DisconnectNIA();
 	    close_captfile();
 	  }  
 

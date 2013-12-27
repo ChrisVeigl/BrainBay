@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Neurobit Driver - Device window</title>
+</head>
+
+<body style="font-family: Arial; margin-left: 7%; margin-right: 9%; 
+  margin-top: 5%; margin-bottom: 5%; font-size: 11pt; ">
+<h1 align="center">Neurobit Driver 3.1</h1>
+<p align="center" style="font-size: 160%; font-weight: bold;">Device window</p>
+<div style="line-height: 135%; ">
+<p align="center"><i>&copy; Copyright by Neurobit Systems 2010-2011</i><br>
+<a href="http://www.neurobitsystems.com/">http://www.neurobitsystems.com</a></p>
+
+<p><b>Neurobit Driver</b> enables applications to communicate with biofeedback and 
+physiological data acquisition equipment by Neurobit Systems. In the device 
+window created by the driver you can set configuration of a given device.
+For some devices, such as Neurobit Optima, it is also possible to test 
+electrode-skin impedances & input circuit continuity.<br>
+The driver is running under Microsoft Windows 7/Vista/XP/2000 systems.
+
+<p>Contents:</p>
+<ol style="top-padding: 0;">
+  <li><a href="#prereq">Prerequisites</a>
+  <li><a href="#window">Window tabs</a>
+    <ol>
+      <li><a href="#general">General tab</a>
+      <li><a href="#chans">Channel tabs</a>
+      <li><a href="#test">Test tab</a>
+      <li><a href="#status">Status tab</a>
+      <li><a href="#about">About tab</a>
+    </ol>
+  <li><a href="#remarks">Remarks</a>
+</ol>
+<div style="line-height: 5%;">&nbsp</div>
+
+<h2><a name="prereq">1. Prerequisites</a></h2>
+<ul>
+  <li><p><u>Neurobit Optima</u> devices:<br>
+    Bluetooth communication port (built-in into a computer or as a USB adapter)
+    compatible with the protocol version 1.1 or newer is required. To install Bluetooth 
+    adapter follow an instruction delivered in its package.<br>
+    Neurobit Optima device should be set in wireless communication range (usually 
+    less than 10m). Before use a Bluetooth device should be paired with your computer. 
+    Pairing code for Neurobit Optima is 0000. You can learn more about Bluetooth pairing 
+    in Windows help.</p>
+  <li><p><u>Neurobit Lite</u> devices:<br>
+    Infrared (IR) communication port (built-in into a computer or in form of a USB adapter) 
+    compatible with IrDA standard v. 1.0 or newer is required. To install IrDA adapter
+    follow an instruction delivered in its package.<br>
+    The Neurobit Lite device should be set with IR port oriented towards IR port 
+    of your computer, no more than 0.5m from it, without physical obstructions 
+    between both entities, preferably on the same axis. There should be no other 
+    active IrDA devices (like cell phones) nearby.</p> 
+    <p>HINT: If you used older BioEra software requiring IrComm2k driver 
+      (i.e. not using Neurobit Driver 3.0 or later version), set that driver in 
+      "Standard" mode or uninstall it completely.
+    </p>
+</ul>
+ 
+<h2><a name="window">2. Window tabs</a></h2>
+<p>The device window is divided into several tabs, which can be selected
+in the upper bar or with Next button in lower right corner of the window.
+The tabs contain options depending on a selected device. These are a General tab 
+with general device options and several tabs with settings for individual measurement 
+channels. There may also appear additional tabs for some devices, e.g. Test tab.</p>
+
+<p><u>As an example, settings for Neurobit Optima 2 device are described below.</u>
+Please consult instruction manual of your device model and version to learn about 
+available settings.</p>
+
+<h3><a name="general">General tab</a></h3>
+<ul>
+  <li><p><b>Link type</b> - type of link used for communication with the device.</p>
+  <li><p><b>Device address</b> - Bluetooth address of Neurobit device (or name of 
+    its communication module).<br> 
+    If you have only one turned on Neurobit Optima device 
+    in the wireless communication range, you can usually leave the default value in 
+    this field. (Otherwise it is recommended to set here a specific address of a given device.
+    Addresses of Bluetooth devices seen by your computer can be listed in system 
+    "Control Panel"/"Bluetooth Devices".)</p>
+  <li><p><b>Power mains frequency</b> [Hz] - sets mains frequency used in your 
+    country, required for power interference filtering in the device.<br> 
+    For example, most European countries uses 50 Hz mains, while 60 Hz is used in North America. 
+    You can check <a href="http://en.wikipedia.org/wiki/Mains_power_around_the_world#Table_of_mains_voltages_and_frequencies" target="_blank">local power frequency</a> in the web.</p>
+  <li><p><b>Silent mode</b> - turns off sound signalization of events (artifacts etc.) in the 
+    device during measurements.<br>
+    Visual signalization is not influenced. 
+    (The option is insignificant in devices without sound transducer.)</p>
+  <li><p><b>Device services</b> button - opens the application of device service functions, 
+    for example firmware upgrade.</p>
+</ul>
+
+<h3><a name="chans">Chan A tab</a></h3>
+<p>Neurobit Optima devices have versatile measurement channels, which functions can be
+  defined by a user. It should be taken into consideration, that appearance and available 
+  settings of some parameters (e.g. "Measurement range") may depend on other parameters
+  (e.g. "Channel function"). When you change such superior parameter, all dependent 
+  parameters are set to defaults.</p>
+<ul>
+  <li><p><b>Channel enable</b> - enables or disables the measurement channel.</p>
+  <li><p><b>Channel label</b><br>
+    You can enter here your short label for the 
+    channel (e.g. "EEG FpzCz"), which may be used by an application. 
+    (The label is optional. It is limited to 16 characters.)</p>
+  <li><p><b>Sensor info</b><br>
+    You can enter here your short description of 
+    used transducer (e.g. "AgAgCl electrode"), which may be used by an application. 
+    (This description is optional. It is limited to 80 characters.)</p>
+  <li><p><b>Channel profile</b><br>
+    The profile enables to set in one step the default parameters 
+    for some basic types of physiological signals (fields of those 
+    parameters are locked then). 
+    <p>In order to freely set all parameters by yourself 
+    select "User defined" option. It unlocks rest of the parameters without their 
+    change. (Thus if you would like to use default settings of most parameters for 
+    a specific profile (e.g. EEG) and set only one or two parameters on your own,
+    you can first select that specific profile, next select "User defined" profile
+    and do required minor changes.)</p>
+  <li><p><b>Channel function</b><br>
+    It enables to select measurement of voltage (default) or other physical quantity.</p>
+  <li><p><b>Frequency characteristic</b><br>
+    For voltage signals this option enables 
+    to minimize signal delay or maximize frequency bandwidth. E.g. for 
+    "Linear phase sharp" option the frequency bandwidth (in Hz) is 40% of sample rate, 
+    and signal delay of analog-to-digital conversion is 19 samples. 
+    For "Linear phase mild" characteristic the bandwidth is 30% of sample rate, 
+    with 11 samples delay.</p>
+    <p>This parameter is replaced with <b>Thermistor characteristic</b> for channel 
+    function set to Temperature.</p>
+  <li><p><b>Measurement range</b> - selects upper limit of signal values, which 
+    can be measured.<br>
+    Higher range protects against clipping of high amplitude signals,
+    while lower range makes measurement more sensitive, thus reduces quantization noise
+    of analog-to-digital conversion.
+    <p>(Note for "Channel function" set to conductance measurement: the unit 1uS (micro Siemens) 
+    equals 1micromhO used in electrophysiology.)</p>
+  <li><p><b>Range minimum</b> - lower limit of measured signals (read only value 
+    depending on "Measurement range" setting).</p>
+  <li><p><b>Sample rate</b> - selects number of output signal samples per second.<br>
+    Higher sample rate enables to measure faster signals, whereas lower sample rate
+    reduces high frequency noise, as well as computational load of a processor and size 
+    of recorded signal files.</p>
+  <li><p><b>Power interference filter</b> - turns on or off device's filter of power 
+    mains interferences.<br>
+    (Filter notch frequency is set by "Power mains frequency"
+    option on General tab.)</p>
+  <li><p><b>Sum disconnected</b><br>
+    The option disconnecting sum voltage in channel 
+    from common voltage feedback amplifier (generating virtual ground potential). 
+    This option have to be cleared for channels galvanically connected to the body 
+    (measuring EEG, EMG, GSR etc. signals on the skin surface). It is recommended 
+    to set the option for channels connected to transducers with asymmetric 
+    (two-wire) voltage output.</p>
+  <li><p><b>Common reference</b><br>
+    This option informs of external connection of "-" input of a given channel to 
+    a common reference electrode. Its suitable selection is required for correct results 
+    of electrode-skin impedance tests for such inputs. Up to two independent common 
+    references are supported.</p>
+    <p>(This setting does not cause any internal connections of inputs in the device. 
+    It also has no influence on regular measurements - apart from tests of electrode-skin 
+    impedances. It does not apply to channel functions different than "Voltage".)</p>
+</ul>
+
+<h3>Chan B tab</h3>
+<p>Parameters for channel B are set similarly as for channel B.</p>
+
+<h3><a name="test">Test tab</a></h3>
+<p>This tab enables to test input circuit connections and electrode-skin impedances 
+for active channels before actual biofeedback or measurement session. Although optional, 
+execution of the test is recommended.
+<p>Note: Test tab is not shown when the device window has been opened during regular 
+measurement session.
+<p>State indicators shown on this tab can have up to four states:</p>
+<ul>
+  <li> disabled - if the indicator does not apply to current configuration and state
+    or corresponding measurement channel is disabled;
+  <li> green - correct state;
+  <li> yellow - warning (e.g. weak battery or no signal in channel);
+  <li> red - fault condition (e.g. battery flat or too high common voltage interferences).
+</ul>
+<p>Window contents:
+<ul>
+  <li><p><b>Link</b> - state of wireless link between measurement device and computer.<br>
+    It is red, if the link is lost. This condition usually appears when the device goes 
+    out of wireless communication range (typically 10 meters for Neurobit Optima). 
+    If the device will be quickly brought closer 
+    to a computer, link will be restored and session will continue. (If lack of 
+    communication is longer than about 60 seconds, the session will be ended.)</p>
+  <li><p><b>Battery</b> - state of battery(ies) in measurement device.<br>
+    If the indicator
+    gets red (batteries flat), the device will turn off in a while. To avoid this 
+    situation it is recommended to replace batteries, when the indicator gets yellow 
+    (batteries become weak).</p>
+  <li><p><b>Pause</b> - not used for Neurobit Optima.</p>
+  <li><p><b>Common voltage</b> - indicator of common voltage interferences.<br>
+    So called common voltage on inputs, which would 
+    strongly interfere with measurement of small electrophysiological signals, is almost 
+    totally removed by differential amplifiers. However, it is true only as far as the common 
+    voltage is within dynamic range of the amplifier. To avoid uncontrolled conditions of poor 
+    signal quality, Neurobit Optima supervises common voltage and indicates when it is too high
+    (the indicator becomes red). In most cases the cause of that condition is lack of 
+    electrical contact between Virtual Ground (VG) line and examined subject's body.</p>
+  <li><p><b>Channel A</b> - state of signal in channel A.<br>
+    At moments, when the signal goes 
+    beyond measurement range, this indicator gets red. It is usually caused by bad 
+    electrical contact of sensor or high amplitude interferences. This condition could also
+    appear with correct connection and input signal, if too small measurement range was set 
+    for the channel.</p>
+    <p>The yellow indicator means lack of signal. This condition is detected when measured 
+    signal is many times lower than measurement range for long time (consult the equipment 
+    manual for specific limits). Depending on type of signal it may be normal from time to 
+    time. If the condition occurs frequently or all the time, it may be caused by short 
+    circuit of electrodes of both channel inputs (maybe with excessive amount of conductive gel).
+    This condition may also occur with correct connections, as a result of too large 
+    measurement range set for the channel.</p>
+  <li><p><b>Channel B</b> - state of signal in channel B, similarly as for Channel A.</p>
+  <li><p>Impedance indicators<br>
+    For channels with voltage measurement setting there are
+    two sets of indicators of electrode-skin impedances on inputs + and - of the differential channel.
+    For channels with non-voltage measurement setting there is one set of indicators of connection
+    resistance between + and - inputs of the channel. Indicators for disabled channels are inactive. 
+    Each set of indicators includes bar gauge and digital value of impedance (resistance).
+    <p>Bar gauges for channels with voltage measurement setting change their colors depending on
+    impedance level. For recommended low electrode-skin impedance they are green, when impedance 
+    goes higher to acceptable level, they become yellow. For unacceptably high impedances the 
+    gauges are red.</p>
+    <p>HINT: When signal state indicator for a given channel (or "Common voltage" indicator) 
+    is red (signal is invalid), impedance indicators are not updated.</p>
+  <li><p><b>Test</b> button - initiates test.<br>
+    When physical measurement starts, the indicators become active. During the test most of the 
+    configuration options are locked. The test can be ended with <b>Stop</b> button, which 
+    appears instead of Test button.</p>
+</ul>
+<p><b>HINT</b>: For multi-channel measurements of voltage signals (for example EEG), suitable settings of 
+<b>Common reference</b> fields on individual channel tabs are necessary for correct electrode-skin 
+impedance readings. For reference derivations (with common reference electrode) connection of 
+- inputs to that electrode should be selected ("Reference 1" option if single reference electrode 
+is used). For bipolar derivations the <b>Common reference</b> fields should be set to "No connection" 
+(it is the default).</b>
+
+<h3><a name="status">Status tab</a></h3>
+<p>This tab is shown only when the device window has been opened during regular measurement session. 
+It enables to check the session state, if not presented directly in an application window. 
+The tab includes more detailed information than seen on the device, with separate indicators 
+for individual measurement channels: 
+<ul>
+  <li><b>Link</b>
+  <li><b>Battery</b>
+  <li><b>Pause</b>
+  <li><b>Common voltage</b>
+  <li><b>Channel A</b>
+  <li><b>Channel B</b>
+</ul>
+<p>Meaning and states of those indicators are described above in &quot;<a href="#test">Test tab</a>&quot; section.
+
+<h3><a name="about">About tab</a></h3>
+<p>Information about driver's manufacturer, its license and help are available here.
+
+<h2><a name="remarks">3. Remarks</a></h2>
+<ul>
+  <li><p><u>For Neurobit Lite devices:</u> please remember that computer-based session is 
+  initiated from computer side, and not with Start! command from the device's menu. 
+  (For stand-alone trainings initiated with Start! in the device, no data is transmitted 
+  to computer.)</p>
+  <li><p>Episodes of signaled artifacts are not cut out from measured data to avoid loss 
+  of time information.</p>
+  <li><p>Additional information in the equipment instruction manual 
+    may apply to the product use with a computer.</p>
+</ul>
+
+</div>
+</body>
+</html>

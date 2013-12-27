@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   OB_OSCI.H:  contains the OSCI-Object
   the object's propertries are declared and the
@@ -22,6 +22,7 @@ class OSCIOBJ : public BASE_CL
   public:
 
 	float    input[MAX_EEG_CHANNELS];
+	int      inputcount[MAX_EEG_CHANNELS];
 
 	float    pixelbuffer[MAX_EEG_CHANNELS][LEN_PIXELBUFFER];
 	int	     prev_pixel[MAX_EEG_CHANNELS];
@@ -35,10 +36,13 @@ class OSCIOBJ : public BASE_CL
 	int		 showline;
 	int		 within;
 	int		 group;
+	int		 gradual;
 	int		 gain;
 	int		 mempos;
 	int		 redraw;
-
+	int		mysec;
+	int		mysec_total;
+	int		inc_mysec;
 	int		 showseconds;
 	int		 drawstart,drawend,periods;
 	int		 groupselect;

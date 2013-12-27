@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_OSCI.CPP:  contains functions for the Oscilloscope-Object
   Author: Chris Veigl
@@ -24,14 +24,15 @@
 void draw_osci(OSCIOBJ * st)
 {
 	PAINTSTRUCT ps;
+	POINT psav;
 	HDC hdc;
-	RECT rect,txtpos;
+	RECT rect,txtpos,clr;
 	TCHAR szdata[50];
 	float  pbuf[MAX_EEG_CHANNELS][LEN_PIXELBUFFER];
 	float oscitime,sec_total;
 	int t,i,d,x,y,top,np,count,space;
 	int  half_chn_height,channel_mid,upper,lower;
-	int setnew;
+	int setnew,bcount;
     int ypos;
 	char tmp[20];
 	struct INPORTStruct * act;
@@ -149,14 +150,15 @@ void draw_osci(OSCIOBJ * st)
 		 }
 		 if (st->showline)
 		 {
-			SelectObject (hdc, DRAW.pen_ltblue);
+			SelectObject (hdc, st->gridpen);
+//			SelectObject (hdc, DRAW.pen_ltblue);
 			MoveToEx(hdc,st->drawstart-5, channel_mid,NULL);	
 			LineTo(hdc,st->drawend, channel_mid);
 		 }
 		 if (st->group) i=count;
 	   }
 
-	   if (st->showseconds)
+	   if ((st->showseconds)&&(!st->gradual))
 	   {
 		  int actpos=st->drawstart;
 
@@ -176,16 +178,13 @@ void draw_osci(OSCIOBJ * st)
 		    oscitime=st->laststamp;	
 		    for (t=0;t<=st->periods;t++)
 			{
-
-			
 				print_time(tmp,oscitime,1);		
-				ExtTextOut(hdc, actpos-5,ypos-half_chn_height-4, 0, &rect,tmp, strlen(tmp), NULL ) ;		
+				ExtTextOut(hdc, actpos-15,ypos-half_chn_height-12, 0, &rect,tmp, strlen(tmp), NULL ) ;		
 
 				for (i=0;i<count;i++)          // Draw lines
 				{
 					channel_mid=ypos*(i*2+1);  
-					if (i==0) MoveToEx(hdc,actpos, channel_mid-half_chn_height+10,NULL);	
-					else MoveToEx(hdc,actpos, channel_mid-half_chn_height,NULL);	
+					MoveToEx(hdc,actpos, channel_mid-half_chn_height,NULL);	
 					LineTo(hdc,actpos, channel_mid+half_chn_height);
 					if (st->group) i=count;
 				}
@@ -200,7 +199,7 @@ void draw_osci(OSCIOBJ * st)
 
 	   if((st->signal_pos<st->drawstart)||(st->signal_pos>=st->drawend)) 
 		   st->signal_pos=st->drawstart;
-	   else  // repaint memory
+	  // else  // repaint memory
 	   {
 		   for (i=0;i<count;i++)
 		   {
@@ -211,8 +210,9 @@ void draw_osci(OSCIOBJ * st)
 			 SelectObject (hdc, st->drawpen[i]);
 
 			 setnew=TRUE;
-			 for (t=1;t<st->signal_pos-st->drawstart;t++)
-			 {
+			 if (!st->gradual)
+			   for (t=1;t<st->signal_pos-st->drawstart;t++)
+			   {
 
 				/*	if ((st->secpos>-1)&&(st->showseconds))
 				{
@@ -235,7 +235,44 @@ void draw_osci(OSCIOBJ * st)
 					if (setnew) { MoveToEx(hdc,st->signal_pos-t, y,NULL); setnew=FALSE;}
 					LineTo(hdc,st->signal_pos-t, y); 
 				} else setnew=TRUE;
-			}
+			   }
+			 else
+		       for (t=1;t<st->drawend-st->drawstart;t++)
+			   {
+
+				/*	if ((st->secpos>-1)&&(st->showseconds))
+				{
+					SelectObject (hdc, st->captpen);
+					MoveToEx(hdc,x+st->secpos, channel_mid-half_chn_height,NULL);	
+					LineTo(hdc,x+st->secpos, channel_mid+half_chn_height);
+				} 
+				*/
+		
+				d=st->mempos-t;
+				while (d<0) d+=1024;
+
+				if (act)
+				y=channel_mid-(int)size_value (act->in_min,act->in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+				else y=channel_mid;
+
+				if (y<top) y=top;
+				if (st->pixelmem[i][d]!=INVALID_VALUE) 
+				{ 
+					if (st->signal_pos-t+1>st->drawstart)
+					{
+					  if (setnew) { MoveToEx(hdc,st->signal_pos-t, y,NULL); setnew=FALSE;}
+					  LineTo(hdc,st->signal_pos-t, y);
+					}
+					else
+					{
+					   if (st->signal_pos-t+1==st->drawstart) { setnew=true;bcount=1;}
+					   if (setnew) { MoveToEx(hdc,st->drawend-bcount, y,NULL); 
+					   setnew=FALSE;}
+					   LineTo(hdc,st->drawend-bcount, y); bcount++;
+					}
+
+				} else setnew=TRUE;
+			  }
 
 		  }
 	   }
@@ -247,6 +284,10 @@ void draw_osci(OSCIOBJ * st)
     np=st->newpixels;
 	if (np>0)
 	{
+		int line_x=st->drawstart+st->mysec*PACKETSPERSECOND/st->timer;
+		if (st->mysec>=st->showseconds*st->periods) st->mysec=0;
+		st->inc_mysec=0;
+
 	  st->newpixels=0;
 	    for (i=0;i<count;i++)
 	      for (t=0;t<np;t++)
@@ -260,9 +301,26 @@ void draw_osci(OSCIOBJ * st)
 		else channel_mid=ypos;  
 	    act=&(st->in_ports[i]);
 
-
 		SelectObject (hdc, st->drawpen[i]);
-		
+		if (st->gradual)
+		{
+			if ((!st->group)||(i==0))
+			{
+				clr.left=x;
+				clr.right=x+np;
+				clr.top=channel_mid-half_chn_height+1;
+				clr.bottom=channel_mid+half_chn_height;
+	  			FillRect(hdc, &clr, st->bkbrush);
+
+				if (st->showline)
+				{
+					SelectObject (hdc, st->gridpen);
+					MoveToEx(hdc,x, channel_mid,NULL);	
+					LineTo(hdc,x+np, channel_mid);
+				}
+			}
+		}
+
 		if (st->prev_pixel[i]>=0) { MoveToEx(hdc,x-1, st->prev_pixel[i],NULL);	setnew=FALSE;}
 		else setnew=TRUE;
 
@@ -272,17 +330,45 @@ void draw_osci(OSCIOBJ * st)
 			else y=channel_mid;
 			st->pixelmem[i][st->mempos+t]=pbuf[i][t];
 
+			if ((st->gradual)&&(st->showseconds))
+			{
+				if (x+t==line_x)
+				{
+				    SelectObject (hdc, st->captpen);
+					MoveToEx(hdc,line_x, channel_mid-half_chn_height,&psav);	
+					LineTo(hdc,line_x, channel_mid+half_chn_height);
+					st->inc_mysec=1;
+					SelectObject (hdc, st->drawpen[i]);
+					MoveToEx(hdc,psav.x, psav.y,NULL);	
+
+					SelectObject (hdc, st->captpen);
+					if (i==0)
+					{
+						SetTextColor(hdc,st->captcol);
+						SetBkColor(hdc,st->bkcol);
+						SetBkMode(hdc,OPAQUE);
+		  
+						print_time(tmp,(float)st->mysec_total,1);		
+						ExtTextOut(hdc, line_x-15,channel_mid-half_chn_height-12, 0, &rect,tmp, strlen(tmp), NULL ) ;
+					}
+				}
+			}
+
 			if (y<top) y=top;
 			if (pbuf[i][t]!=INVALID_VALUE) 
 			{ 
+				SelectObject (hdc, st->drawpen[i]);
 				if (setnew) { MoveToEx(hdc,x+t, y,NULL); setnew=FALSE;}
-				LineTo(hdc,x+t, y); 
+				LineTo(hdc,x+t, y);
 			} else setnew=TRUE;
 		}
 		if (setnew) st->prev_pixel[i]=-1; else st->prev_pixel[i]=y;
 
 	  }
-
+	  if (st->inc_mysec) {
+		  st->mysec+=st->showseconds;
+		  st->mysec_total+=st->showseconds;
+	  }
 	  st->mempos+=np; if (st->mempos>=1024) st->mempos=0;
 	  
 	}
@@ -333,6 +419,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				CheckDlgButton(hDlg,IDC_GRID,st->showgrid);
 				CheckDlgButton(hDlg,IDC_LINE,st->showline);
 				CheckDlgButton(hDlg,IDC_WITHIN,st->within);
+				CheckDlgButton(hDlg,IDC_GRADUAL,st->gradual);
 
 				for (t=0;t<st->inports;t++)
 				{
@@ -376,6 +463,9 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 			case IDC_WITHIN:  st->within=IsDlgButtonChecked(hDlg, IDC_WITHIN);
 							InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
+			case IDC_GRADUAL:  st->gradual=IsDlgButtonChecked(hDlg, IDC_GRADUAL);
+							InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
 			
 			case IDC_SIGCOMBO:  
 				actsig=SendDlgItemMessage(hDlg, IDC_SIGCOMBO, CB_GETCURSEL, 0, 0 ) ;
@@ -383,7 +473,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				InvalidateRect(hDlg,NULL,FALSE);
 				break;
  			case IDC_BKCOLOR:
-				st->bkcol=select_color(hDlg);
+				st->bkcol=select_color(hDlg,st->bkcol);
 				DeleteObject(st->bkbrush);
 				st->bkbrush=CreateSolidBrush(st->bkcol);
 				st->redraw=TRUE;
@@ -391,7 +481,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
  			case IDC_SIGCOLOR:
-				st->sigcol[actsig]=select_color(hDlg);
+				st->sigcol[actsig]=select_color(hDlg,st->sigcol[actsig]);
 				DeleteObject(st->drawpen[actsig]);
 				st->drawpen[actsig]=CreatePen(PS_SOLID,1,st->sigcol[actsig]);
 				st->redraw=TRUE;
@@ -399,7 +489,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 			case IDC_GRIDCOLOR:
-				st->gridcol=select_color(hDlg);
+				st->gridcol=select_color(hDlg,st->gridcol);
 				DeleteObject(st->gridpen);
 				st->gridpen=CreatePen(PS_SOLID,1,st->gridcol);
 				st->redraw=TRUE;
@@ -407,7 +497,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 			case IDC_CAPTCOLOR:
-				st->captcol=select_color(hDlg);
+				st->captcol=select_color(hDlg,st->captcol);
 				DeleteObject(st->captpen);
 				st->captpen=CreatePen(PS_SOLID,1,st->captcol);
 				st->redraw=TRUE;
@@ -607,10 +697,14 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		
 		newpixels=0;signal_pos=0;drawstart=25;drawend=20000;
 		groupselect=0;
+		mysec=0; mysec_total=0;
+		inc_mysec=0;
+
 
 		for (t=0;t<MAX_EEG_CHANNELS;t++) input[t]=0.0f; //512.0;
 		for (t=0;t<MAX_PORTS;t++) sprintf(in_ports[t].in_name,"Chn%d",t+1);
-		timer=1;timercount=0;gain=100; group=0; mempos=0;
+		timer=1;gain=100; group=0; mempos=0; gradual=0;
+		timercount=0;
 		laststamp=(float)TIMING.packetcounter/(float)PACKETSPERSECOND;
 		showgrid=TRUE;showline=TRUE;showseconds=TRUE;within=TRUE;
 		bkcol=RGB(255,255,255);
@@ -646,6 +740,11 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		  for(x=inports;x<MAX_EEG_CHANNELS;x++)
 			  in_ports[x].get_range=1;
 
+		  for(x=0;x<inports;x++)
+		  {
+			 input[x]=0;inputcount[x]=0;
+		  }
+
 		  height=CON_START+inports*CON_HEIGHT+5;
 		  // signal_pos=0;
 	      if (displayWnd) InvalidateRect(displayWnd,NULL,FALSE);
@@ -662,7 +761,8 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		char pname[20];
 
 		newpixels=0;inports=6;signal_pos=0;drawend=20000;
-		for (t=0;t<MAX_EEG_CHANNELS;t++) input[t]=0.0f; 512.0;
+		for (t=0;t<MAX_EEG_CHANNELS;t++)
+		{input[t]=0.0f; inputcount[t]=0;}
 		timercount=0; laststamp=0;
 
 		load_object_basics(this);
@@ -677,6 +777,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
   	    load_property("drawinterval",P_INT,&timer);
 		load_property("within",P_INT,&within);
   	    load_property("group",P_INT,&group);
+  	    load_property("gradual",P_INT,&gradual);
   	    
 
 		temp=RGB(255,255,255);
@@ -729,6 +830,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		  save_property(hFile,"drawinterval",P_INT,&timer);
 		  save_property(hFile,"within",P_INT,&within);
 		  save_property(hFile,"group",P_INT,&group);
+		  save_property(hFile,"gradual",P_INT,&gradual);
 		  
 		  temp=(float)bkcol;
 		  save_property(hFile,"background",P_FLOAT,&temp);
@@ -750,9 +852,11 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 	  }
 
 	  void OSCIOBJ::incoming_data(int port, float value) 
-	  {	float * fp = &input[0];
-		fp+=port;
-		*fp = value;
+	  {
+		  if (inputcount[port]==0)
+			input[port] = value;
+		  else 	input[port] += value;
+	      inputcount[port]++;
 	  }
 
 	  void OSCIOBJ::session_reset(void) 
@@ -761,6 +865,10 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 			timercount=0;
 			newpixels=0;
 			laststamp=0;
+			mysec=0; mysec_total=0;
+			inc_mysec=0;
+			for (t=0;t<MAX_EEG_CHANNELS;t++)
+			{input[t]=0.0f; inputcount[t]=0;}
 			InvalidateRect(displayWnd,NULL,TRUE);
 	  }
 
@@ -770,15 +878,16 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 			timercount=0;
 			newpixels=0;
 			laststamp=(float)pos/(float)PACKETSPERSECOND;
+			mysec_total=(int) laststamp;
+			mysec=0;
 			InvalidateRect(displayWnd,NULL,TRUE);
 	  }
 
 	  void OSCIOBJ::work(void) 
 	  {
-		float * fp,v;
+		float v;
 		int t,z;
 
-		fp=&input[0];
 		timercount++;
 		if(timercount>=timer)
 		{
@@ -786,11 +895,13 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 			z=inports-1; if(z<0) z=0;
 			for (t=0;t<z;t++)
 			{
-				if (*fp!=INVALID_VALUE)
+				if (input[t]!=INVALID_VALUE)
 				{
-					
-					//v=(*fp)*gain/100.0f;
-					v=*fp;
+					if (inputcount[t]>0)
+					{
+						v=input[t]/inputcount[t];
+						inputcount[t]=0;
+					} else v=input[t];
 					if (within)
 					{
 						if (v>in_ports[t].in_max) v=in_ports[t].in_max;
@@ -799,7 +910,6 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 					pixelbuffer[t][newpixels]=v;
 				}
 			    else pixelbuffer[t][newpixels]=INVALID_VALUE;
-				fp++;
 			}
 			if (newpixels<499) newpixels++;
 			InvalidateRect(displayWnd,NULL,FALSE);

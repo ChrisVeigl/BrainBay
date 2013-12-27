@@ -1,8 +1,8 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
 
-  MODULE:  OB_AND.CPP
+  MODULE:  OB_WAV.CPP
   Authors: Jeremy Wilkerson, Chris Veigl
 
 
@@ -81,6 +81,7 @@ WAVOBJ::WAVOBJ(int num) : BASE_CL()
 	reverse = 0;
 	mute = true;	
 	wav_loaded = false;
+	sample=NULL;
 	init();
 }
 
@@ -113,7 +114,7 @@ void WAVOBJ::change_bufsize(unsigned int newbuf)
 	{
 		Sound_FreeSample(sample);
 		wav_loaded = false;
-		strcpy(wavfilename, "");
+		//strcpy(wavfilename, "");
         wav_length_ms = 0;
 //		SDL_CloseAudio();
 		report_error("Could not open SDL_Audio");
@@ -145,9 +146,8 @@ void WAVOBJ::load(HANDLE hFile)
 	load_property("volumeto", P_INT, &volume_to);
 	load_property("speedcenter", P_FLOAT, &speed_center);
 	load_property("speedfactor", P_FLOAT, &speed_factor);
-	load_property("range", P_INT, &range);
+	load_property("pitchrange", P_INT, &range);
 	load_property("reverse", P_INT, &reverse);    
-
 	if (strlen(wavfilename) > 0)
 	{
 		wav_length_ms = loadWavFile(wavfilename);
@@ -179,7 +179,7 @@ void WAVOBJ::save(HANDLE hFile)
 	save_property(hFile, "volumeto", P_INT, &volume_to);
 	save_property(hFile, "speedcenter", P_FLOAT, &speed_center);
 	save_property(hFile, "speedfactor", P_FLOAT, &speed_factor);
-	save_property(hFile, "range", P_INT, &range);
+	save_property(hFile, "pitchrange", P_INT, &range);
 	save_property(hFile, "reverse", P_INT, &reverse);
 }
 	
@@ -257,20 +257,34 @@ int WAVOBJ::loadWavFile(char* filename)
 	strcpy(wavfilename, filename);
 	
 
-	if (playing) { 	SDL_PauseAudio(1); SDL_LockAudio(); }
+	//if (playing) { 	
+		SDL_PauseAudio(1); SDL_LockAudio(); 
+	//}
 
-	if (wav_loaded)
-	{
+	//if (wav_loaded)
+	//{
 		SDL_CloseAudio();
-		Sound_FreeSample(sample);
+		if (sample)
+			Sound_FreeSample(sample);
+	//}
+	char tempfilename[255];
+	HANDLE test=0;
+	strcpy(tempfilename,filename);
+	test=CreateFile(tempfilename, GENERIC_READ , 0, NULL, OPEN_EXISTING, 0,NULL);
+	if (test==INVALID_HANDLE_VALUE)
+	{
+		strcpy(tempfilename,GLOBAL.resourcepath);
+		strcat(tempfilename,filename);
 	}
+	else CloseHandle(test);
+	strcpy (filename, tempfilename);
 
 	sample = Sound_NewSampleFromFile(filename, NULL, 32000);
 	if (sample == NULL)
 	{
 		SDL_CloseAudio();
 		wav_loaded = false;
-		strcpy(wavfilename, "");
+		// strcpy(wavfilename, "");
         wav_length_ms = 0;
 		return -1;
 	}
@@ -289,7 +303,7 @@ int WAVOBJ::loadWavFile(char* filename)
 		SDL_CloseAudio();
 		Sound_FreeSample(sample);
 		wav_loaded = false;
-		strcpy(wavfilename, "");
+		// strcpy(wavfilename, "");
         wav_length_ms = 0;
 		return -1;
 	}
@@ -350,6 +364,7 @@ void WAVOBJ::convertSpeed(float ratio, Uint8 *inputPos, Uint8 *outputPos, Uint32
     
    	int numChannels = wav_spec.channels;
     int bytesPerSample;
+	if ((!inputPos) || (!outputPos)) return;
     if ((wav_spec.format == AUDIO_U8) || (wav_spec.format == AUDIO_S8))
       	bytesPerSample = 1;
     else bytesPerSample = 2;
@@ -524,28 +539,32 @@ LRESULT CALLBACK WavDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) 
 			{
+				case IDC_WAVFILENAME:
+					GetDlgItemText(hDlg,IDC_WAVFILENAME,st->wavfilename,255);
+					break;
 				case IDC_OPENWAVFILE:
 					char filename [MAX_PATH];
-					CheckDlgButton(hDlg, IDC_WAVMUTE, true);
+					int saved;
+					saved=st->mute;
 					ZeroMemory(filename, MAX_PATH);
-					open_file_dlg(hDlg, filename, FT_WAV, OPEN_LOAD);
-					int length;
-					if ((length = st->loadWavFile(filename)) < 0)
+					if (open_file_dlg(hDlg, filename, FT_WAV, OPEN_LOAD))
 					{
-						SetDlgItemText(hDlg, IDC_WAVFILENAME, "");
-						SetDlgItemInt(hDlg, IDC_WAVLENGTH, 0, FALSE);
-						report_error("Unable to load audio file");
-						report_error(SDL_GetError());
-                       // cout << SDL_GetError() << endl;
-                       // cout << Sound_GetError() << endl;
-						st->mute = true;
-
+						int length;
+						if ((length = st->loadWavFile(filename)) < 0)
+						{
+							SetDlgItemInt(hDlg, IDC_WAVLENGTH, 0, FALSE);
+							report_error("Unable to load audio file");
+							report_error(SDL_GetError());
+						   // cout << SDL_GetError() << endl;
+						   // cout << Sound_GetError() << endl;
+						}
+						else
+						{
+							SetDlgItemText(hDlg, IDC_WAVFILENAME, filename);
+							SetDlgItemInt(hDlg, IDC_WAVLENGTH, length, FALSE);
+						}
 					}
-					else
-					{
-						SetDlgItemText(hDlg, IDC_WAVFILENAME, filename);
-						SetDlgItemInt(hDlg, IDC_WAVLENGTH, length, FALSE);
-					}
+					st->mute = saved;
 					break;
 				case IDC_WAVREPINTERVAL:
 					if (HIWORD(wParam) == EN_KILLFOCUS)

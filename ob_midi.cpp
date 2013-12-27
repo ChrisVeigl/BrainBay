@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_MIDI.CPP:  contains assisting functions for the Midi-Object
 
@@ -42,6 +42,7 @@ void update_mididialog(HWND hDlg, MIDIOBJ * st)
 	SetDlgItemInt(hDlg, IDC_PITCHINTERVAL, st->pitchinterval,0);
 	
 	CheckDlgButton(hDlg, IDC_MIDICHANGESCHECK, st->only_changes);
+	CheckDlgButton(hDlg, IDC_MIDIMUTEONFALSE, st->mute_on_falsetones);
 	CheckDlgButton(hDlg, IDC_MIDIMUTE, st->mute);
 
 	SetDlgItemInt(hDlg, IDC_MIDITIMER,st->timer ,0);
@@ -161,9 +162,12 @@ LRESULT CALLBACK MidiStreamDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 				{
 					midi_ControlChange(&(MIDIPORTS[st->port].midiout), st->midichn,123, 0);
 					for (t=0;t<MAX_MIDITONES;t++) st->tonebuffer[t]=0;
-				}
-	
+				}	
 				break;
+			case IDC_MIDIMUTEONFALSE: 
+				st->mute_on_falsetones=IsDlgButtonChecked(hDlg, IDC_MIDIMUTEONFALSE);
+				break;
+
 			case IDC_PITCHRANGE:
 				{  int d= GetDlgItemInt(hDlg, IDC_PITCHRANGE,NULL,1);
 				   if ((d>0)&&(d<50)&&(d!=st->pitchrange))
@@ -208,7 +212,7 @@ LRESULT CALLBACK MidiStreamDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 						reduce_filepath(szFileName,szFileName);
 						strcpy(st->tonefile,szFileName);
 					}
-				  } else report_error("Could not load Harmonic Scale");
+				  } // else report_error("Could not load Harmonic Scale");
 				}
 				break;
 
@@ -266,7 +270,7 @@ MIDIOBJ::MIDIOBJ(int num) : BASE_CL()
 			  }
 
 		midichn=newchn;
-		only_changes=0; mute=TRUE; muted=TRUE; port=DEF_MIDIPORT;
+		only_changes=0; mute=TRUE; muted=TRUE; mute_on_falsetones=FALSE; port=DEF_MIDIPORT;
 //		inputnote=512.0f; inputvolume=1024.0f;
 		inputnote=0.0f; inputvolume=512.0f;
 		sum_note=0.0f; sum_volume=0.0f;
@@ -297,6 +301,7 @@ MIDIOBJ::MIDIOBJ(int num) : BASE_CL()
 		  load_property("from_volume",P_INT,&from_volume);
 		  load_property("to_volume",P_INT,&to_volume);
 		  load_property("mute",P_INT,&mute);
+		  load_property("mute_on_falsetones",P_INT,&mute_on_falsetones);
 		  load_property("scalename",P_STRING,tonescale.name);
 		  load_property("length",P_INT,&(tonescale.len));
 
@@ -360,6 +365,7 @@ MIDIOBJ::MIDIOBJ(int num) : BASE_CL()
 		  save_property(hFile,"from_volume",P_INT,&from_volume);
 		  save_property(hFile,"to_volume",P_INT,&to_volume);
 		  save_property(hFile,"mute",P_INT,&mute);
+		  save_property(hFile,"mute_on_falsetones",P_INT,&mute_on_falsetones);
 		  save_property(hFile,"scalename",P_STRING,tonescale.name);
 		  save_property(hFile,"length",P_INT,&(tonescale.len));
 		  save_property(hFile,"tonefile",P_STRING,tonefile);
@@ -385,7 +391,7 @@ MIDIOBJ::MIDIOBJ(int num) : BASE_CL()
 			if (inputvolume==INVALID_VALUE) inputvolume=0;
 			if(inputnote==INVALID_VALUE)
 			{
-				if (!muted)
+				if ((!muted)&&(mute_on_falsetones))
 				{
 				  midi_ControlChange(&(MIDIPORTS[port].midiout), midichn,123, 0);
 				  muted=true;
@@ -403,13 +409,13 @@ MIDIOBJ::MIDIOBJ(int num) : BASE_CL()
 				{  pitchtime=0;
 				   if (inputpitch!=pitch) 
 				   {
-					pitch=inputpitch;
-					midi_Pitch(&(MIDIPORTS[port].midiout),midichn,pitch); 
-				   } 
-				   if (inputvolume!=volume) 
-				   {
-					volume=(int)inputvolume;
-					midi_Vol(&(MIDIPORTS[port].midiout),midichn,(int)((inputvolume-in_ports[1].in_min)/(in_ports[1].in_max-in_ports[1].in_min) * 128.0f));
+					 pitch=inputpitch;
+					 midi_Pitch(&(MIDIPORTS[port].midiout),midichn,pitch); 
+				     if (inputvolume!=volume) 
+				     {
+					   volume=(int)inputvolume;
+					   midi_Vol(&(MIDIPORTS[port].midiout),midichn,(int)((inputvolume-in_ports[1].in_min)/(in_ports[1].in_max-in_ports[1].in_min) * 127.0f));
+				     } 
 				   } 
 				}
 
@@ -434,7 +440,7 @@ MIDIOBJ::MIDIOBJ(int num) : BASE_CL()
 					note=tonescale.tones[index];
 
 					vol=(int)(sum_volume*(to_volume-from_volume)) + from_volume;
-					if (vol>to_volume) vol=to_volume; if (vol<0) vol=0;
+					if (vol>to_volume) vol=to_volume; if (vol<from_volume) vol=from_volume;
 	
 					if ((MIDIPORTS[port].midiout) && ((!only_changes)||(note!=tonebuffer[acttone])))
 					{

@@ -1,5 +1,5 @@
 
-BrainBay  Version 1.7, written by Chris Veigl under GPL, contact: chris@shifz.org
+BrainBay  Version 1.8, written by Chris Veigl under GPL, contact: chris@shifz.org
 
 Objects-development - Information
 

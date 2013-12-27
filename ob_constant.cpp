@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_CONSTANT.CPP:  contains functions for the Constant-Source Object
   Author: Chris Veigl
@@ -89,7 +89,7 @@ LRESULT CALLBACK ConstantDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPAR
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) 
 			{
-				case IDC_VALUE:
+				case IDC_APPLY:
 					GetDlgItemText(hDlg,IDC_VALUE,tmp,30);
 					sscanf(tmp,"%f",&st->value);
 					break;

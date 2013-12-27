@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
 
   MODULE:  OB_PORTIO.H
   Authors: Craig Peacock, Chris Veigl

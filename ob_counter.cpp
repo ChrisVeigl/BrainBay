@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_COUNTER.CPP:  contains functions for the COUTNER-Object
   Author: Chris Veigl
@@ -27,12 +27,9 @@ void draw_counter(COUNTEROBJ * st)
 	char szdata[20];
 	RECT rect;
 //	int  act,width,height,bottom,y1,y2;
-    HBRUSH actbrush;
-	
+    HBRUSH actbrush;	
 	
 	GetClientRect(st->displayWnd, &rect);
-    	
-	
 	hdc = BeginPaint (st->displayWnd, &ps);
 
 	SetBkMode(hdc, TRANSPARENT);
@@ -45,14 +42,19 @@ void draw_counter(COUNTEROBJ * st)
 	FillRect(hdc, &rect, actbrush);
 
     if (st->integer) wsprintf(szdata, "%d",(int)(st->countervalue+0.5f));
-	else sprintf(szdata, "%.2f",st->countervalue);
+	else
+	{
+		switch(st->digits) {
+			case 0: sprintf(szdata, "%.0f",st->countervalue); break;
+			case 1: sprintf(szdata, "%.1f",st->countervalue); break;
+			case 2: sprintf(szdata, "%.2f",st->countervalue); break;
+			case 3: sprintf(szdata, "%.3f",st->countervalue); break;
+			case 4: sprintf(szdata, "%.4f",st->countervalue); break;
+		}		
+	}
 	DrawText(hdc, szdata, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
-
 	DeleteObject(actbrush);
-	
 	EndPaint( st->displayWnd, &ps );
-
-
 }
 
 
@@ -82,8 +84,12 @@ LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				SetScrollInfo(GetDlgItem(hDlg,IDC_FONTSIZEBAR),SB_CTL,&lpsi, TRUE);
 				SetScrollPos(GetDlgItem(hDlg,IDC_FONTSIZEBAR), SB_CTL,st->fontsize, TRUE);
 				SetDlgItemInt(hDlg, IDC_FONTSIZE, st->fontsize, FALSE);
+				lpsi.nMin=0; lpsi.nMax=4;
+				SetScrollInfo(GetDlgItem(hDlg,IDC_DIGITSBAR),SB_CTL,&lpsi, TRUE);
+				SetScrollPos(GetDlgItem(hDlg,IDC_DIGITSBAR), SB_CTL,st->digits, TRUE);
+				SetDlgItemInt(hDlg, IDC_DIGITS, st->digits, FALSE);
+
 				SetDlgItemText(hDlg, IDC_CAPTION, st->wndcaption);
-                
 
 				SetDlgItemInt(hDlg, IDC_RESETVALUE, (int)st->resetvalue,TRUE);
 				switch (st->mode) 
@@ -115,12 +121,12 @@ LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 			case IDC_RESETVALUE:  st->resetvalue=(float)GetDlgItemInt(hDlg, IDC_RESETVALUE,NULL, 1); break;
 			
 			case IDC_FONTCOLOR:
-				st->fontcolor=select_color(hDlg);
+				st->fontcolor=select_color(hDlg,st->fontcolor);
 				InvalidateRect(hDlg,NULL,FALSE);
 				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 			case IDC_BKCOLOR:
-				st->bkcolor=select_color(hDlg);
+				st->bkcolor=select_color(hDlg,st->bkcolor);
 				InvalidateRect(hDlg,NULL,FALSE);
 				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
@@ -140,9 +146,9 @@ LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				   if ((st->showcounter)&&(!i)&&(st->displayWnd))  { DestroyWindow(st->displayWnd); st->displayWnd=NULL; }
 				   if ((!st->showcounter)&&(i)) 
 				   {  
-					   if(!(st->displayWnd=CreateWindow("Counter_Class", "Counter", WS_THICKFRAME| WS_CLIPCHILDREN,st->left, st->top, st->right-st->left, st->bottom-st->top, NULL, NULL, hInst, NULL)))
+					   if(!(st->displayWnd=CreateWindow("Counter_Class", "Counter", WS_CLIPSIBLINGS| WS_CHILD | WS_CAPTION | WS_THICKFRAME,st->left, st->top, st->right-st->left, st->bottom-st->top, ghWndMain, NULL, hInst, NULL)))
 							report_error("can't create Counter Window");
-					   else { ShowWindow( st->displayWnd, TRUE ); UpdateWindow( st->displayWnd ); }
+					   else { SetForegroundWindow(st->displayWnd); ShowWindow( st->displayWnd, TRUE ); UpdateWindow( st->displayWnd ); }
 				   }
 				   st->showcounter=i;
 				}
@@ -161,6 +167,13 @@ LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				if (!(st->font = CreateFont(-MulDiv(st->fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
 					report_error("Font creation failed!");
 
+				InvalidateRect(st->displayWnd, NULL, TRUE);
+			} 
+			if (lParam == (long) GetDlgItem(hDlg,IDC_DIGITSBAR))  
+			{
+				int nNewPos=get_scrollpos(wParam,lParam);
+				SetDlgItemInt(hDlg, IDC_DIGITS, nNewPos, TRUE);
+                st->digits=nNewPos;
 				InvalidateRect(st->displayWnd, NULL, TRUE);
 			} 
 			break;
@@ -249,7 +262,9 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		fontcolor=255; bkcolor=0;
 		strcpy (wndcaption,"Counter");
 		mode=0;
+		digits=2;
 		resetvalue=0;
+		scount=0;
 		showcounter=TRUE;
 
 	//	color=RGB(0,0,100);
@@ -298,6 +313,7 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		  load_property("bottom",P_INT,&bottom);
 		  load_property("integer",P_INT,&integer);
 		  load_property("wndcaption",P_STRING,wndcaption);
+		  load_property("digits",P_INT,&digits);
 
 		if (!showcounter)
 		{
@@ -331,8 +347,7 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"bottom",P_INT,&bottom);
 		  save_property(hFile,"integer",P_INT,&integer);
 		  save_property(hFile,"wndcaption",P_STRING,wndcaption);
-
-		  
+		  save_property(hFile,"digits",P_INT,&digits);	  
 	  }
 
 
@@ -346,13 +361,8 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		if (port==0) { oldinput=input; input=value; }
 		// if (port==1) reset=value;
 		if (port==1) { if (value!=INVALID_VALUE) countervalue=resetvalue; }
-        
-      }
-        
 
-	  void COUNTEROBJ::work(void) 
-	  {
-		
+		  scount++;
 		  switch (mode)
 		  {
 			case 0:  if ((oldinput==INVALID_VALUE) && (input!=INVALID_VALUE))
@@ -365,13 +375,22 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 					break;
 			case 3:  if ((oldinput==INVALID_VALUE) && (input!=INVALID_VALUE))
 					 {
-						 period=TIMING.acttime-prev_time;
-						 prev_time=TIMING.acttime;
-						 countervalue=(float)TIMING.pcfreq/(float)period;
+						 //period=TIMING.acttime-prev_time;
+						 //prev_time=TIMING.acttime;
+						 //countervalue=(float)TIMING.pcfreq/(float)period;
+						 countervalue = (float)PACKETSPERSECOND/(float)scount;
+						 scount=0;
 					 }
-					 if (period*2<TIMING.acttime-prev_time) countervalue=0;
+					 //if (period*2<TIMING.acttime-prev_time) countervalue=0;
 					break;
 		  }
+
+        
+      }
+        
+
+	  void COUNTEROBJ::work(void) 
+	  {
 
 		  pass_values(0,countervalue);
 		

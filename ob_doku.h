@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   OB_DOKU.H:  contains the DOKU-Object
   the object's propertries are declared and the
@@ -21,11 +21,13 @@ class DOKUOBJ : public BASE_CL
 {
   
   public: 
-	char text[8192];
+	char text[20000];
 
 	
 	DOKUOBJ(int num);
 	void make_dialog(void);
+    void remove_nl(void); 
+    void apply_nl(void); 
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);
 	~DOKUOBJ();

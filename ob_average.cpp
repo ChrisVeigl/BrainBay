@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
 
   MODULE:  OB_AVERAGE.CPP
   Author:  Chris Veigl
@@ -26,6 +26,7 @@ AVERAGEOBJ::AVERAGEOBJ(int num) : BASE_CL()
 {
 	outports = 1;
 	inports = 1;
+	width=75;
     strcpy(in_ports[0].in_name,"in");
 	strcpy(out_ports[0].out_name,"out");
     accumulator = 0.0;
@@ -75,20 +76,24 @@ void AVERAGEOBJ::incoming_data(int port, float value)
 {
 	if (value!=INVALID_VALUE)
 	{
-		samples[writepos] = value;
    		accumulator += value;
 		added++;
-		if (added > interval)
+
+		if (interval) 
 		{
-		    int oldest = writepos - interval;
-			if (oldest < 0)
-	    		oldest += AVGSAMPLES;
-		  accumulator -= samples[oldest];
-			added = interval;
+			samples[writepos] = value;
+			if (added > interval)
+			{
+				int oldest = writepos - interval;
+				if (oldest < 0)
+	    			oldest += AVGSAMPLES;
+			    accumulator -= samples[oldest];
+				added = interval;
+			}
+			writepos++;
+			if (writepos >= AVGSAMPLES)
+    			writepos = 0;
 		}
-		writepos++;
-		if (writepos >= AVGSAMPLES)
-    		writepos = 0;
 	}
 }
 	
@@ -126,7 +131,7 @@ LRESULT CALLBACK AverageDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				SCROLLINFO lpsi;
 			    lpsi.cbSize=sizeof(SCROLLINFO);
 				lpsi.fMask=SIF_RANGE|SIF_POS;
-				lpsi.nMin=1; lpsi.nMax=AVGSAMPLES - 1;
+				lpsi.nMin=0; lpsi.nMax=AVGSAMPLES - 1;
 				SetScrollInfo(GetDlgItem(hDlg,IDC_AVERAGEINTERVALBAR),SB_CTL,&lpsi, TRUE);
 				
 				init = true;

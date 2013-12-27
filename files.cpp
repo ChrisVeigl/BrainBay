@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
   
   MODULE: Files.cpp: this Module provides global accessible File - Functions.
 
@@ -91,8 +91,6 @@ HANDLE create_captfile(LPCTSTR lpFName)
 	int t;
 
 	CAPTFILEHEADERStruct  header;
-	if (TTY.devicetype>1) 
-	{ report_error("Can only create ModuarEEG P2 or P3 Archive Files."); return(INVALID_HANDLE_VALUE); }
 
 	for(t=0;t<sizeof(header);t++)  * (((char *)&header)+t) = ' ';
 	append_newline(header.description,sizeof(header.description));
@@ -119,6 +117,43 @@ HANDLE create_captfile(LPCTSTR lpFName)
 	return hTemp;
 }
 
+
+void update_devicetype(void)
+{
+	switch (TTY.devicetype) 
+	{
+		case DEV_MODEEG_P2:
+		case DEV_MODEEG_P3:
+		case DEV_MONOLITHEEG_P21:
+		case DEV_SBT4:
+			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
+				CAPTFILE.length=(SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END) - sizeof(CAPTFILEHEADERStruct))/BYTES_PER_PACKET[TTY.devicetype];
+			else CAPTFILE.length=0;
+			CAPTFILE.data_begin=sizeof(CAPTFILEHEADERStruct);
+			break;
+		case DEV_NIA:
+			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
+				CAPTFILE.length=SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END)/BYTES_PER_PACKET[TTY.devicetype]/2;
+												//NIA 2 Channels: 2*24Bit-Sample/packet!!
+			else CAPTFILE.length=0;
+			CAPTFILE.data_begin=3;
+			break;
+
+		default:
+			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
+				CAPTFILE.length=SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END)/BYTES_PER_PACKET[TTY.devicetype];
+			else CAPTFILE.length=0;
+			CAPTFILE.data_begin=0;
+			break;
+	}
+	TTY.bytes_per_packet=BYTES_PER_PACKET[TTY.devicetype];
+	TTY.amount_to_read=AMOUNT_TO_READ[TTY.devicetype];
+	if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
+		SetFilePointer(CAPTFILE.filehandle,CAPTFILE.data_begin,NULL,FILE_BEGIN);
+	PACKET.readstate=0;
+	get_session_length();
+}
+
 void open_captfile(LPCTSTR lpFName)
 {
 	DWORD dwRead;
@@ -141,16 +176,13 @@ void open_captfile(LPCTSTR lpFName)
 		{
 			if (!strcmp(header.filetype, captfiletypes[FILE_TEXTMODE])) CAPTFILE.filetype=FILE_TEXTMODE; 
 			if (!strcmp(header.filetype, captfiletypes[FILE_INTMODE])) CAPTFILE.filetype=FILE_INTMODE;
-	
-			if (!strcmp(header.devicetype, devicetypes[DEV_MODEEG_P2])) TTY.devicetype=DEV_MODEEG_P2; 		 
-			if (!strcmp(header.devicetype, devicetypes[DEV_MODEEG_P3])) TTY.devicetype=DEV_MODEEG_P3;
-			
 		}
 		else 
 		{
 			// TTY.devicetype=DEV_RAW;
 			CAPTFILE.filetype=FILE_INTMODE;
 		}
+		strcpy(CAPTFILE.devicetype,header.devicetype);
 		update_devicetype();
 		CAPTFILE.file_action=FILE_READING;
 
@@ -186,44 +218,6 @@ void close_captfile(void)
 	get_session_length();
 }
 
-
-
-
-void update_devicetype(void)
-{
-	switch (TTY.devicetype) 
-	{
-		case DEV_MODEEG_P2:
-		case DEV_MODEEG_P3:
-		case DEV_P21:
-		case DEV_SBG:
-			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
-				CAPTFILE.length=(SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END) - sizeof(CAPTFILEHEADERStruct))/BYTES_PER_PACKET[TTY.devicetype];
-			else CAPTFILE.length=0;
-			CAPTFILE.data_begin=sizeof(CAPTFILEHEADERStruct);
-			break;
-		case DEV_NIA:
-			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
-				CAPTFILE.length=SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END)/BYTES_PER_PACKET[TTY.devicetype];
-												//NIA only 1 24Bit-Sample/packet!!
-			else CAPTFILE.length=0;
-			CAPTFILE.data_begin=0;
-			break;
-
-		default:
-			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
-				CAPTFILE.length=SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END)/BYTES_PER_PACKET[TTY.devicetype];
-			else CAPTFILE.length=0;
-			CAPTFILE.data_begin=0;
-			break;
-	}
-	TTY.bytes_per_packet=BYTES_PER_PACKET[TTY.devicetype];
-	TTY.amount_to_read=AMOUNT_TO_READ[TTY.devicetype];
-	if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
-		SetFilePointer(CAPTFILE.filehandle,CAPTFILE.data_begin,NULL,FILE_BEGIN);
-	PACKET.readstate=0;
-	get_session_length();
-}
 
 void read_captfile(int amount)
 {
@@ -358,6 +352,10 @@ int open_file_dlg(HWND hDlg, char * szFileName, int type, int flag_save)
 			ofn.lpstrFilter = "AVI-Files (*.avi)\0*.avi\0All Files (*.*)\0*.*\0";
 		    ofn.lpstrDefExt = "avi";
 			break;
+	   case FT_MCI:
+			ofn.lpstrFilter = "MCI-Files (*.avi,*.wmv,*.mpg,*.mp3,*.wav)\0*.avi;*.wmv;*.mpg;*.mp3;*.wav\0All Files (*.*)\0*.*\0";
+		    ofn.lpstrDefExt = "avi";
+			break;
 	   case FT_ERP:
 			ofn.lpstrFilter = "ERP-signatures (*.erp)\0*.erp\0All Files (*.*)\0*.*\0";
 		    ofn.lpstrDefExt = "erp";
@@ -485,8 +483,14 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		while (GLOBAL.objects>0)
 		    free_object(0);
 
+		deviceobject=NULL;
 		GLOBAL.run_exception=0;
 		GLOBAL.minimized=FALSE;
+		if (GLOBAL.main_maximized)
+		{  SendMessage(ghWndMain,WM_SIZE,SIZE_RESTORED,0);		 
+		   ShowWindow( ghWndMain, TRUE ); UpdateWindow( ghWndMain );
+		}
+
 
 	     load_next_config_buffer(hFile);
 		 load_property("objects",P_INT,&GLOBAL.objects);
@@ -519,7 +523,6 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 load_property("connected",P_INT,&try_connect);	 
 		 load_property("bidirect",P_INT,&TTY.BIDIRECT);
 		 load_property("devicetype",P_INT,&TTY.devicetype);
-		 load_property("samplingtype",P_INT,&TTY.samplingrate);
 		 load_property("baudtype",P_INT,&TTY.BAUDRATE);
 		 load_property("flow_control",P_INT,&TTY.FLOW_CONTROL);
 
@@ -537,6 +540,8 @@ BOOL load_configfile(LPCTSTR pszFileName)
 
 		 MoveWindow(ghWndMain,GLOBAL.left,GLOBAL.top,GLOBAL.right-GLOBAL.left,GLOBAL.bottom-GLOBAL.top,TRUE);
 		 MoveWindow(ghWndDesign,GLOBAL.design_left,GLOBAL.design_top,GLOBAL.design_right-GLOBAL.design_left,GLOBAL.design_bottom-GLOBAL.design_top,TRUE);
+		 		 InvalidateRect(ghWndMain,NULL,TRUE);
+
 		 if (!GLOBAL.showdesign)
 		 {  
 			 ShowWindow(ghWndDesign, FALSE); 
@@ -669,16 +674,15 @@ BOOL save_configfile(LPCTSTR pszFileName)
 		save_property(hFile,"tool-right",P_INT,&GLOBAL.tool_right);
 		save_property(hFile,"tool-bottom",P_INT,&GLOBAL.tool_bottom);
 		save_property(hFile,"showdesign",P_INT,&GLOBAL.showdesign);
+		save_property(hFile,"hidestatus",P_INT,&GLOBAL.hidestatus);
 		save_property(hFile,"showtoolbox",P_INT,&GLOBAL.showtoolbox);
 		save_property(hFile,"autorun",P_INT,&GLOBAL.autorun);
 		save_property(hFile,"minimized",P_INT,&GLOBAL.minimized);
-
 
 		save_property(hFile,"comport",P_INT,&TTY.PORT);
 		save_property(hFile,"bidirect",P_INT,&TTY.BIDIRECT);
 		save_property(hFile,"connected",P_INT,&TTY.CONNECTED);
 		save_property(hFile,"devicetype",P_INT,&TTY.devicetype);
-		save_property(hFile,"samplingtype",P_INT,&TTY.samplingrate);
 		save_property(hFile,"baudtype",P_INT,&TTY.BAUDRATE);
 		save_property(hFile,"flow_control",P_INT,&TTY.FLOW_CONTROL);
 
@@ -722,15 +726,13 @@ BOOL save_settings(void)
 	if(hFile == INVALID_HANDLE_VALUE) return FALSE;
 
 	save_property(hFile,"samplingrate",P_INT,&PACKETSPERSECOND);
-	//save_property(hFile,"com-port",P_INT,&TTY.PORT);
-	//save_property(hFile,"baudrate",P_INT,&TTY.BAUDRATE);
-	//save_property(hFile,"devicetype",P_INT,&TTY.devicetype);
 	save_property(hFile,"dialoginterval",P_INT,&GLOBAL.dialog_interval);
 	save_property(hFile,"drawinterval",P_INT,&GLOBAL.draw_interval);
 	save_property(hFile,"startup",P_INT,&GLOBAL.startup);
 	save_property(hFile,"autorun",P_INT,&GLOBAL.autorun);
 	save_property(hFile,"configfile",P_STRING,GLOBAL.configfile);
 	save_property(hFile,"use_cvcapture",P_INT,&GLOBAL.use_cv_capture);
+	save_property(hFile,"emotivpath",P_STRING,GLOBAL.emotivpath);
 
 	x=0;
 	for (t=0;t<GLOBAL.midiports;t++)
@@ -763,15 +765,13 @@ BOOL load_settings(void)
 
 	load_next_config_buffer(hFile);
 	load_property("samplingrate",P_INT,&PACKETSPERSECOND);
-	//load_property("com-port",P_INT,&TTY.PORT);
-	//load_property("baudrate",P_INT,&TTY.BAUDRATE);
-	//load_property("devicetype",P_INT,&TTY.devicetype);
 	load_property("dialoginterval",P_INT,&GLOBAL.dialog_interval);
 	load_property("drawinterval",P_INT,&GLOBAL.draw_interval);
 	load_property("startup",P_INT,&GLOBAL.startup);
 	load_property("autorun",P_INT,&GLOBAL.autorun);
 	load_property("configfile",P_STRING,GLOBAL.configfile);
 	load_property("use_cvcapture",P_INT,&GLOBAL.use_cv_capture);
+	load_property("emotivpath",P_STRING,GLOBAL.emotivpath);
 
 
 	load_property("midiports",P_INT,&x);
@@ -798,7 +798,7 @@ BOOL load_settings(void)
 	
 }
 
-void load_property(char * desc,int type, void * ad)
+int load_property(char * desc,int type, void * ad)
 {
 	char newdesc[60];
 	char param[20000];
@@ -823,14 +823,13 @@ void load_property(char * desc,int type, void * ad)
 		  param[pos]=0;
 		  switch (type)
 		  {
-			case P_INT: sscanf(param,"%d",(int *)ad); break;
-			case P_FLOAT: sscanf(param,"%f",(float *)ad); break;
-		    case P_STRING: strcpy ((char *)ad,param); break;
+			case P_INT: sscanf(param,"%d",(int *)ad); return(1);
+			case P_FLOAT: sscanf(param,"%f",(float *)ad); return(1);
+		    case P_STRING: strcpy ((char *)ad,param); return(1);
 		  }
 		}
 	}
-	// else report_error("property not found");}
-
+	return(0);
 }
 
 
@@ -849,7 +848,7 @@ void save_property(HANDLE hFile, char * desc,int type, void * ad)
 		switch (type)
 		{
 		  case P_INT: sprintf(str,"%d",*((int *)ad)); break;
-		  case P_FLOAT: sprintf(str,"%.4f",*((float *)ad)); break;
+		  case P_FLOAT: sprintf(str,"%.6f",*((float *)ad)); break;
           case P_STRING: strcpy (str,(char *)ad); break;
 		}
 		strcat(str,nl);

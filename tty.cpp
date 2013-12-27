@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: TTY.cpp:  contains functions for Com-opening, reading, and the reader thread
 
@@ -150,8 +150,11 @@ failed:
 			char sztemp[100];
  	        write_logfile("COMPORT open failed");
 		
-			sprintf(sztemp, "The Port COM%d is not available. Please select another Com-Port.",TTY.PORT);
-			report_error(sztemp);
+			if (!GLOBAL.loading)
+			{
+				sprintf(sztemp, "The Port COM%d is not available. Please select another Com-Port.",TTY.PORT);
+				report_error(sztemp);
+			}
 		
 			TTY.read_pause=sav_pause;
 			TTY.PORT=sav_port;
@@ -239,6 +242,13 @@ int write_to_comport ( unsigned char byte)
 	TTY.writing=0;
 	return(1);
 }
+void write_string_to_comport ( char * s)
+{
+	for (unsigned int i=0; i< strlen(s); i++) 
+		write_to_comport(s[i]);
+}
+
+
 
 /*-----------------------------------------------------------------------------
 

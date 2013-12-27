@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_MCI.H:  declarations for the Multimedia-Player-Object
   Author: Chris Veigl
@@ -28,17 +28,23 @@ protected:
   public: 
   	float    input;
 	int      top,left,right,bottom;
-	int      speed,updatespeed,actspeed;
-	int      volume,updatevolume, actvolume;
+	int      speed,actspeed;
+	int		 play_once;
+	int		 autostart;
+	int		 resetted;
+	int      volume,actvolume;
+	int		 pos_center,pos_change;
 	int	 	 step,updatestep;
 	int	 	 play,playing;
-	int		upd_volume,upd_speed;
+	int		 upd_speed;
 	char     mcifile[256];
 	HWND m_video;
+	LONGLONG prevtime,acttime;
 	
 	
 	MCIOBJ(int num);
 	void session_stop(void);
+	void session_start(void);
 	void make_dialog(void);
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);

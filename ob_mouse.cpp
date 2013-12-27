@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   OB_MOUSE.CPP:  contains the Mouse-Object
   Author: Chris Veigl
@@ -437,11 +437,13 @@ void MOUSEOBJ::incoming_data(int port, float value)
 	{
 		case 0: if (!xinc) xpos = value; 
 			else { if (fabs(value)>0.001) xpos+= value; }//if (fabs(value)>0.8) xpos+= value; }
-			    if (xpos<0) xpos=0; if(xpos*3.76f>(float)xmax) xpos=(float)xmax/3.76f; 
+			  //  if (xpos<0) xpos=0; if(xpos*3.76f>(float)xmax) xpos=(float)xmax/3.76f;
+			  if (xpos<0) xpos=0; if(xpos>(float)xmax) xpos=(float)xmax;
 			  break;
 		case 1: if (!yinc) ypos = value; 
 			else { if (fabs(value)>0.001) ypos+= value;} // if (fabs(value)>0.8) ypos+= value; }
-				if (ypos<0) ypos=0; if(ypos*1.56f>(float)ymax) ypos=(float) ymax/1.56f; 
+				//if (ypos<0) ypos=0; if(ypos*1.56f>(float)ymax) ypos=(float) ymax/1.56f; 
+			   if (ypos<0) ypos=0; if(ypos>(float)ymax) ypos=(float) ymax;
 			  break;
 
 		case 2: lbutton = (int)value; 
@@ -527,7 +529,7 @@ void MOUSEOBJ::work(void)
 			int cpos=(int)((float)dwellcount*6.0f/(float)dwelltime);
 			if (cpos>5) cpos=5;
 			*cursorindex='1'+cpos;
-			SetSystemCursor(LoadCursor(hInst,( LPCTSTR) MAKEINTRESOURCE(IDC_CURSOR1+cpos)), OCR_NORMAL);
+//			SetSystemCursor(LoadCursor(hInst,( LPCTSTR) MAKEINTRESOURCE(IDC_CURSOR1+cpos)), OCR_NORMAL);
 
 		    if (dwellcount>=dwelltime)
 			{
@@ -538,10 +540,10 @@ void MOUSEOBJ::work(void)
 			}
 		}
 
-
-		if (lbutton != INVALID_VALUE)
+		if ((lbutton != INVALID_VALUE) && (!l_clicked))	 
 		{ 
-			lbutton=INVALID_VALUE;
+			if (enable_dwelling) lbutton=INVALID_VALUE;
+			l_clicked=1;
 			updatepos=4;
 
 			if (setdouble)
@@ -562,6 +564,7 @@ void MOUSEOBJ::work(void)
 				}
 			}
 		}
+		else if ((lbutton == INVALID_VALUE) && (l_clicked))	l_clicked=0;
 
 		if ((rbutton != INVALID_VALUE) && (!r_clicked))	{ 
 			if (enable_dwelling) rbutton=INVALID_VALUE; 
@@ -596,8 +599,8 @@ void MOUSEOBJ::work(void)
 	{
 		if (hDlg=ghWndToolbox)
 		{
-			SetDlgItemInt(hDlg,IDC_ACT_X,(int)(xpos*3.76f),FALSE);
-			SetDlgItemInt(hDlg,IDC_ACT_Y,(int)(xpos*1.56f),FALSE);
+			SetDlgItemInt(hDlg,IDC_ACT_X,(int)(xpos),FALSE); //*3.76f
+			SetDlgItemInt(hDlg,IDC_ACT_Y,(int)(ypos),FALSE); // *1.56f
 		}
 
 		if (hWndClick)
@@ -619,7 +622,7 @@ MOUSEOBJ::~MOUSEOBJ()
 {
 	if (hWndClick) SendMessage(hWndClick,WM_CLOSE,0,0);
 //	DestroyCursor(hCurs3);
-    SetSystemCursor(hCurs1,OCR_NORMAL);
+//    SetSystemCursor(hCurs1,OCR_NORMAL);
 }
 
 

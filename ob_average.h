@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
 
   MODULE:  OB_AVERAGE.H  declarations for the Averager-Object
   Author:  Chris Veigl
@@ -23,7 +23,7 @@ class AVERAGEOBJ : public BASE_CL
 	protected:
 		float accumulator;
 		float samples[AVGSAMPLES];
-        int interval, writepos, added;
+        long interval, writepos, added;
 
 	public:
 

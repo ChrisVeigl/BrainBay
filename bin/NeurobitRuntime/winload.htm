@@ -1,0 +1,112 @@
+<html>
+<head>
+<title>Neurobit Firmware Loader 4.0</title>
+</head>
+
+<body style="font-family: Arial; margin-left: 7%; margin-right: 9%; 
+  margin-top: 5%; margin-bottom: 5%; font-size: 11pt; ">
+<h1 align="center">Neurobit Firmware Loader 4.0</h1>
+<div style="line-height: 135%; ">
+<p align="center"><i>&copy; Copyright by Neurobit Systems 2005-2010</i><br>
+<a href="http://www.neurobitsystems.com/">http://www.neurobitsystems.com</a></p>
+
+<p>This software application enables to upload firmware to Neurobit devices.
+It is also possible to read out information about the hardware and firmware from the device.
+Wireless communication (Bluetooth or IrDA) with the equipment is used.
+The application works under Microsoft&reg; Windows&reg; operating systems: 2000/XP/2003 Server/Vista/7. </p>
+<p>(For Microsoft Windows 95/98/Me/NT please use Neurobit Firmware Loader 2.2 instead.)</p>
+
+<h2>Parameters</h2>
+<ul>
+  <li><b>Firmware file</b> - filename of binary file of firmware version 
+    selected to upload.
+  <li><b>Access key</b> - a key string entitling you to a specific upgrade. 
+    If a given firmware is made generally available, this field can remain empty.
+  <li><b>Link type</b> - type of link used for communication with Neurobit device.
+  <li><b>BT address</b> - Bluetooth address of Neurobit device (or name of 
+    its communication module). If you have only one turned on Neurobit device
+    in the wireless communication range, you can usually leave the default value 
+    in this field.
+</ul>
+
+<h2>Buttons</h2>
+<ul>
+  <li><b>Browse</b> - opens a window enabling selection of a specific version 
+     firmware file,
+  <li><b>Doc</b> - displays documentation of changes in selected firmware version,
+  <li><b>Check</b> - reads out hardware and firmware information from the device,
+  <li><b>Upload</b> - uploads a firmware to the device,
+  <li><b>Help</b> - displays this help for the PC loader application,
+  <li><b>Exit</b> - closes the loader application.
+</ul>
+
+<h2>Upgrade procedure</h2>
+
+<h3>Prerequisites</h3>
+<ul>
+  <li><p><u>Neurobit Optima</u> devices:<br>
+    Bluetooth communication port (built-in into a computer or as a USB adapter)
+    compatible with the protocol version 1.1 or newer is required. To install Bluetooth 
+    adapter follow an instruction delivered in its package.<br>
+    Neurobit Optima device should be set in wireless communication range (usually 
+    less than 10m). Before use a Bluetooth device should be paired with your computer. 
+    Pairing code for Neurobit Optima is 0000. You can learn more about Bluetooth pairing 
+    in Windows help.</p>
+  <li><p><u>Neurobit Lite</u> devices:<br>
+    Infrared (IR) communication port (built-in into a computer or in form of a USB adapter) 
+    compatible with IrDA standard v. 1.0 or newer is required. To install IrDA adapter
+    follow an instruction delivered in its package.<br>
+    The Neurobit Lite device should be set with IR port oriented towards IR port 
+    of your computer, no more than 0.5m from it, without physical obstructions 
+    between both entities, preferably on the same axis. There should be no other 
+    active IrDA devices (like cell phones) nearby.</p> 
+</ul>
+
+<h3>Typical firmware upgrade</h3>
+<ol>
+  <li><p>Run firmware installer. Package files will be uncompressed 
+    ("c:\Program Files\Neurobit\Firmware" is the default directory).
+    If there were previous upgrade installations, the existing directory can be used.</p>
+  <li><p>Run Winload.exe application from the package directory.</p>
+  <li><p>To familiarize with news in a given firmware version (set in <b>Firmware file</b> 
+    field) you can click <b>Doc</b> button.</p>
+  <li><p>Turn on Neurobit device (and wait a few seconds).</p>
+  <li><p>Click <b>Upload</b> button of the application. Information about the hardware 
+    and its firmware is displayed. 
+    The bar at the bottom of the window indicates firmware transmission progress. 
+    The upload usually takes less than a minute.</p>
+  <li><p>After successful transmission the new firmware 
+    is automatically launched. (In devices having a screen the new firmware name 
+    and version will be displayed).</p>
+  <li><p>You can now turn off the device and close the loader application.</p>
+</ol>
+
+<h3>Remarks</h3>
+<ul>
+  <li><p>If a firmware transmission failed for any reason (like loss of connection between 
+    the devices), try to upload the firmware again.</p>
+  <li><p>It is also possible to upload older, previously installed firmware versions. 
+    You can choose one of installed versions of firmware files clicking 
+    <b>Browse</b> button.</p>
+  <li><p>If you have more than one turned on <u>Neurobit Optima</u> devices in the communication 
+    range, you should indicate an individual device for upload with its <b>BT address</b>.
+    In order to list Bluetooth devices previously paired with your computer and their 
+    addresses click the Bluetooth icon on the right side of the system task bar and 
+    select the option "View Bluetooth devices". (You can select Properties of a selected device 
+    and copy its address.)</p>
+  <li><p>If <u>Neurobit Lite</u> configuration structure has changed in new firmware version, 
+    default configuration is set. It is indicated with an appropriate message on 
+    device's display.
+    In this case please make again startup settings, as described in the chapter 
+    "<i>The basics of usage/Initial configuration</i>" of your equipment instruction 
+    manual (especially System/Mains option, according to your country).
+    You may also want to set other configuration options then, depending on your 
+    preferences.<br>
+    For most upgrades the device's configuration is preserved.</p>
+  <li><p>You can also consult the chapter "<i>Firmware download</i>" of device 
+    instruction manual.</p>
+</ul>
+
+</div>
+</body>
+</html>

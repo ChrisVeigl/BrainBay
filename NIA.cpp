@@ -1,6 +1,6 @@
  /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
     
   MODULE: NIA.CPP:  contains functions for the NIA-Interface
   Author: Franz Strobl 2010, contact: fraxas@hotmail.de
@@ -41,7 +41,8 @@ int	m_nCountNIA=0;
 
 BOOL       fNIAThreadDone = FALSE;
 
-int oldIndex=0;
+int oldIndex_NIA1=0;
+int oldIndex_NIA2=0;
 int oldTiming=0;
 
 // 
@@ -52,7 +53,7 @@ BOOL DisconnectNIA(void) {
 	UINT ui;
 	UINT ret;
 	UINT i;
-
+	write_logfile("Disconnecting NIA");
 	ret=GetRegisteredRawInputDevices(NULL,&ui,sizeof(RAWINPUTDEVICE));			// get size
 	if (ret<=sizeof(Rid))														// if okay, get structures
 		GetRegisteredRawInputDevices(Rid, &ui, sizeof(RAWINPUTDEVICE));
@@ -69,14 +70,14 @@ BOOL DisconnectNIA(void) {
 	}
 	ret=GetRegisteredRawInputDevices(Rid, &ui, sizeof(RAWINPUTDEVICE));
 	if (ret !=0)
-		report_error("Could not disconnect NIA");
+		write_logfile("Could not disconnect NIA");
 
 	return TRUE;
 }
 
 //
-// ConnectNIA wurde abgeleitet aus NIADlg.cpp, aber ohne MFC implementiert
-// Das NIA Device wird als USB HID Device angekoppelt und mit GetRawInputData ausgelesen
+// ConnectNIA, without MFC 
+// NIA Device is attached as USB HID and read via GetRawInputData 
 //
 
 BOOL ConnectNIA(HWND hDlg) {
@@ -86,6 +87,8 @@ BOOL ConnectNIA(HWND hDlg) {
 	UINT i;
 	int sav_pause;
 
+	write_logfile("Connecting NIA");
+
 	sav_pause=TTY.read_pause;
     TTY.read_pause=1;
 
@@ -93,7 +96,7 @@ BOOL ConnectNIA(HWND hDlg) {
 	if (ret<=sizeof(Rid))														// if okay, get structures
 		GetRegisteredRawInputDevices(Rid, &ui, sizeof(RAWINPUTDEVICE));
 	if (ui>0) {
-		report_error("NIA already connected!");
+		write_logfile("NIA already connected!");
 		TTY.read_pause=sav_pause;
 		return (TRUE);
 	}
@@ -127,9 +130,9 @@ BOOL ConnectNIA(HWND hDlg) {
 				Rid[m_nCountNIA].usUsagePage = 0xFF00; 
 				Rid[m_nCountNIA].usUsage = 0xFF01; 
 				Rid[m_nCountNIA].dwFlags = RIDEV_INPUTSINK;	// this enables the caller to receive the input even when the caller is not in the foreground. Note that hwndTarget must be specified.
-				Rid[m_nCountNIA].hwndTarget = ghWndMain ;		// ist wichtig, damit die Daten an den richtigen Thread kommen!!!
+				Rid[m_nCountNIA].hwndTarget = ghWndMain ;		//  directs Data to main Thread !!
 
-				m_nCountNIA++;					// ToDo: für 2 NIA Devices 2! Kanäle im Amplifier??? (not tested yet!)
+				m_nCountNIA++;					// ToDo: für 2 NIA Devices 2! Channels in Amplifier??? (not tested yet!)
 			}
 		}
 	} else {
@@ -139,15 +142,16 @@ BOOL ConnectNIA(HWND hDlg) {
 	if(m_nCountNIA>0)
 	{
 		if (RegisterRawInputDevices(Rid, m_nCountNIA, sizeof(RAWINPUTDEVICE)) == FALSE) {
+				write_logfile("Could not register NIA");
 				report_error("Could not register NIA");
 				TTY.read_pause=sav_pause;
 				return FALSE; 
 		} else {
-
-			SetDlgItemText( hDlg, IDC_PORTCOMBO, "none") ;
-			SendDlgItemMessage( hDlg, IDC_SAMPLINGCOMBO, CB_SETCURSEL, TTY.samplingrate, 0L ) ;
-			TTY.read_pause=sav_pause;
-			return TRUE ;
+			if (hDlg!=NULL) {
+  			  SetDlgItemText( hDlg, IDC_PORTCOMBO, "none") ;
+			  TTY.read_pause=sav_pause;
+			  return TRUE;
+			}
 		}
 	}
 
@@ -179,6 +183,7 @@ int ReadNIA( UINT wParam, LONG lParam )
 	LPBYTE lpb = new BYTE[dwSize+sizeof(RAWINPUTHEADER)];								
 	if (lpb == NULL)											
 	{
+		write_logfile("Create NIA Buffer failed!");
 		report_error("Create NIA Buffer failed!");
 		return 0;
 	} 
@@ -186,7 +191,7 @@ int ReadNIA( UINT wParam, LONG lParam )
 
 	if (GetRawInputData((HRAWINPUT)(lParam), RID_INPUT, lpb, &dwSize, 
 		 sizeof(RAWINPUTHEADER)) != dwSize )
-		 OutputDebugString (TEXT("GetRawInputData doesn't return correct size !\n")); 
+		 write_logfile ("GetRawInputData doesn't return correct size !\n"); 
 
 	raw = (RAWINPUT*)lpb;						
 
@@ -205,35 +210,53 @@ int ReadNIA( UINT wParam, LONG lParam )
 
 		#define MAX_SAMPLE_COUNT 16
 
-		int nFixed;		// Bytes 49+50, ist an sich immer gleich
+		int nFixed;		// Bytes 49+50
 		int nTiming;	// Timing-Info
-		int nIndex;		// Laufender Index bezogen auf 4kHz Sampling-Rate
-		int nSamples;	// Anzahl der Samples
+		int nIndex;		// sequential Index(corresponding to 4kHz Sampling-Rate)
+		int nSamples;	// number of Samples
+		int nByteTrans; // number of Bytes to be transferred (2 Channels at one time!)
 
 		nFixed=raw->data.hid.bRawData[49]+raw->data.hid.bRawData[50]*0x100;
 		nTiming=raw->data.hid.bRawData[51]+raw->data.hid.bRawData[52]*0x100;
 		nIndex=raw->data.hid.bRawData[53]+raw->data.hid.bRawData[54]*0x100;
 		nSamples=raw->data.hid.bRawData[55];
 		
-		if (oldIndex >0){
-			if (nIndex > (oldIndex+4)){
-				 GLOBAL.syncloss++;
+
+/* copy channel data to TTY.readBuf (for archive functions) */
+
+		nByteTrans = NIABYTECOUNT*2 ;						// take 1 Sample (3Bytes) /Channel 
+
+		if ((!TTY.read_pause) && nNIA ==1) {
+
+			if (oldIndex_NIA1 >0){							// check for lost samples 
+	//			if (nIndex > (oldIndex+4)){
+				if (nIndex != (oldIndex_NIA1+nSamples)%0xffff){
+					 GLOBAL.syncloss++;
+				}
 			}
-		}
+			oldIndex_NIA1 = nIndex;
 
-		oldIndex= nIndex;
-
-/* Umkopieren von lpb auf TTY.readBuf fürs Archivieren! */
-
-		nSamples = NIABYTECOUNT ;						// NIA: nur 1 Sample (3Byte) statt nSamples bzw.
-														// nur das erste Sample aus einem packet auswerten
-		if ((!TTY.read_pause)) {
-			for (i=0; i<nSamples; i++)	
+			for (i=0; i<NIABYTECOUNT; i++)	
 				TTY.readBuf[i] = (unsigned char) raw->data.hid.bRawData[1+i] ; 
-			ParseLocalInput(nSamples);
-		}
 
+			ParseLocalInput(nByteTrans);					// evaluate always all channels(=2 or 6Bytes) with 1st sample; 
+//			ParseLocalInput(NIABYTECOUNT);				
+
+		} else if ((!TTY.read_pause) && nNIA ==2) {
+
+			if (oldIndex_NIA2 >0){							// check for lost samples 
+	//			if (nIndex > (oldIndex+4)){
+				if (nIndex != (oldIndex_NIA2+nSamples)%0xffff){
+					 GLOBAL.syncloss++;
+				}
+			}
+			oldIndex_NIA2 = nIndex;
+
+			for (i=0; i<NIABYTECOUNT; i++)	
+				TTY.readBuf[i+3] = (unsigned char) raw->data.hid.bRawData[1+i] ; 
+		}
 	} else {
+		write_logfile("NIA connection issue!");
 		report_error("NIA connection issue!");
 	}
 

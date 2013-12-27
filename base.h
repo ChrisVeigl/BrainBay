@@ -1,7 +1,7 @@
 /* -----------------------------------------------------------------------------
 
 
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
                OpenSource Application for realtime BodySignalProcessing & HCI
                with the OpenEEG hardware
 			   
@@ -48,6 +48,7 @@
 #define MAX_PORTS 32
 #define MAX_EEG_CHANNELS  32
 #define MAX_OBJECTS 150
+#define MAX_VECTOR_SIZE 2000
 
 // Signal value definitions
 #define TRUE_VALUE         512 
@@ -64,10 +65,14 @@
 void report_error( char * Message );
 extern class BASE_CL * objects[MAX_OBJECTS];
 extern class BASE_CL * actobject;
+extern class BASE_CL * deviceobject;
 extern class BASE_CL * copy_object;
 extern int actport;
 extern struct LINKStruct * actconnect;
 
+typedef enum PORTTYPE{
+	SFLOAT = 0, MFLOAT = 1
+} PORTTYPE;
 
 typedef struct OUTPORTStruct
 {
@@ -77,6 +82,7 @@ typedef struct OUTPORTStruct
 	float  out_max;
 	char   out_dim[10];
 	int    get_range;
+	PORTTYPE out_type;
 } OUTPORTStruct ;
 
 typedef struct INPORTStruct
@@ -88,6 +94,7 @@ typedef struct INPORTStruct
 	char  in_dim[10];
 	int   get_range;
 	float value;
+	PORTTYPE in_type;
 } INPORTStruct ;
 
 typedef struct LINKStruct
@@ -137,6 +144,7 @@ class BASE_CL
 		   in_ports[i].in_max=1.0f; 
 		   strcpy(in_ports[i].in_dim,"none");
 		   in_ports[i].get_range=1;
+		   in_ports[i].in_type = SFLOAT;
 
 		   out_ports[i].out_name[0]=0;
 		   strcpy(out_ports[i].out_desc,"none");
@@ -144,6 +152,7 @@ class BASE_CL
 		   out_ports[i].out_max=1.0f;
 		   strcpy(out_ports[i].out_dim,"none");
 		   out_ports[i].get_range=0;
+		   out_ports[i].out_type = SFLOAT;
 		}
 
 		for (i=0;i<MAX_CONNECTS;i++) 
@@ -165,6 +174,7 @@ class BASE_CL
 	virtual void load (HANDLE hFile) {}
 	virtual void save (HANDLE hFile) {}
 	virtual void incoming_data(int port, float value) {}
+	virtual void incoming_data(int port, float *value, int count) {}
 	
 	void pass_values (int port, float value)
 	{
@@ -172,6 +182,14 @@ class BASE_CL
 		for (act_link=&(out[0]);act_link->to_port!=-1;act_link++)
 			if (act_link->from_port==port)
 			   objects[act_link->to_object]->incoming_data(act_link->to_port, value );
+	}
+	void pass_values (int port, float *value, int count)
+	{
+		LINKStruct * act_link;
+		for (act_link=&(out[0]);act_link->to_port!=-1;act_link++)
+			if (act_link->from_port==port)
+				if (objects[act_link->to_object])
+					objects[act_link->to_object]->incoming_data(act_link->to_port, value, count );
 	}
 };
 

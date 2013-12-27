@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   OB_MIDI.H:  contains the MIDI-Object
   the object's propertries are declared and the
@@ -47,6 +47,7 @@ class MIDIOBJ : public BASE_CL
 	int  to_volume;
 	int  mute;
 	int  muted;
+	int  mute_on_falsetones;
 	int  pitch,pitchrange, pitchtime,pitchinterval;
 	int volume;
 

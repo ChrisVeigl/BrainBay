@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_DEBOUNCE.CPP:  functions for the Debounce-Object
   Author: Chris Veigl
@@ -25,7 +25,7 @@ DEBOUNCEOBJ::DEBOUNCEOBJ(int num) : BASE_CL()
 	width=75;
 	strcpy(out_ports[0].out_name,"out");
 	strcpy(in_ports[0].in_name,"in");
-	dtime=0;active=0;
+	dtime=0;active=0;old_value=0;
 	count_time=0;
 }
 	
@@ -36,6 +36,7 @@ void DEBOUNCEOBJ::make_dialog(void)
 
 void DEBOUNCEOBJ::load(HANDLE hFile) 
 {
+	active=0;old_value=0;
 	load_object_basics(this);
     load_property("dtime",P_INT,&dtime);
 }
@@ -51,24 +52,28 @@ void DEBOUNCEOBJ::save(HANDLE hFile)
   	
 void DEBOUNCEOBJ::incoming_data(int port, float value)
 {
+
+	switch (active) {
+		case 0:
+			if ((old_value==INVALID_VALUE)&&(value!=INVALID_VALUE))
+				active++;
+			break;
+		case 1:
+			if (value==INVALID_VALUE) {count_time=0; active++; }
+			break;
+		case 2:
+			if (count_time++>dtime)  active=0; else	out=INVALID_VALUE;
+			break; 
+	}
+
 	out=value;
-
-	if ((!active) && (old_value==INVALID_VALUE)&&(value!=INVALID_VALUE))
-		active=1;
-
-	if ((active==1)&&(value==INVALID_VALUE)) {count_time=0; active=2; }
-
-	if (active==2)
-	{
-		if (count_time++>dtime)  active=0; else	out=INVALID_VALUE;
-	}  
-
 	old_value=value;
 }
 	
 void DEBOUNCEOBJ::work(void)
 {
- 	pass_values(0, out);
+//	if (out!=INVALID_VALUE)
+		pass_values(0, out);
 }
 
 

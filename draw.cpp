@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
   
   MODULE: DRAW.CPP: this Module provides global accessible Drawing - Functions.
 
@@ -153,19 +153,35 @@ void draw_captions(HDC hdc, WORD t)
 		SelectObject (hdc, DRAW.brush_yellow);
 		for (i=0;i<objects[t]->inports;i++)
 		{
-		  RoundRect(hdc, SX+objects[t]->xPos, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT,
-		        SX+objects[t]->xPos+CON_MAGNETIC, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT+CON_MAGNETIC,
-				10, 10);
-		  if (!objects[t]->in_ports[i].in_name[0]) wsprintf(szdata,"%d",i+1); else strcpy(szdata,objects[t]->in_ports[i].in_name);
-		  ExtTextOut(hdc, SX+objects[t]->xPos+12,SY+objects[t]->yPos-4+CON_START+i*CON_HEIGHT, 0, NULL,szdata, strlen(szdata), NULL ) ;
+			switch(objects[t]->in_ports[i].in_type){
+				case SFLOAT:
+					RoundRect(hdc, SX+objects[t]->xPos, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT,
+					SX+objects[t]->xPos+CON_MAGNETIC, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT+CON_MAGNETIC,
+					10, 10);
+					break;
+				case MFLOAT:
+					Rectangle(hdc, SX+objects[t]->xPos, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT,
+					SX+objects[t]->xPos+CON_MAGNETIC, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT+CON_MAGNETIC);
+					break;
+			}
+		   if (!objects[t]->in_ports[i].in_name[0]) wsprintf(szdata,"%d",i+1); else strcpy(szdata,objects[t]->in_ports[i].in_name);
+		   ExtTextOut(hdc, SX+objects[t]->xPos+12,SY+objects[t]->yPos-4+CON_START+i*CON_HEIGHT, 0, NULL,szdata, strlen(szdata), NULL ) ;
 		  
 		}
 		SelectObject (hdc, DRAW.brush_orange);
 		for (i=0;i<objects[t]->outports;i++)
 		{
-			RoundRect(hdc, SX+objects[t]->xPos+objects[t]->width-CON_MAGNETIC, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT,
-		        SX+objects[t]->xPos+objects[t]->width, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT+CON_MAGNETIC,
-				10, 10); 
+			switch(objects[t]->out_ports[i].out_type){
+				case SFLOAT:
+					RoundRect(hdc, SX+objects[t]->xPos+objects[t]->width-CON_MAGNETIC, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT,
+					SX+objects[t]->xPos+objects[t]->width, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT+CON_MAGNETIC,
+					10, 10); 
+					break;
+				case MFLOAT:
+					Rectangle(hdc, SX+objects[t]->xPos+objects[t]->width-CON_MAGNETIC, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT,
+					SX+objects[t]->xPos+objects[t]->width, SY+objects[t]->yPos+CON_START-4+i*CON_HEIGHT+CON_MAGNETIC);					
+					break;
+			}
 		    if (!objects[t]->out_ports[i].out_name[0]) wsprintf(szdata,"%d",i+1); else strcpy(szdata,objects[t]->out_ports[i].out_name);
 			SetTextAlign(hdc,TA_RIGHT);
 		    ExtTextOut(hdc, SX+objects[t]->xPos+objects[t]->width-CON_MAGNETIC-4, SY+objects[t]->yPos-4+CON_START+i*CON_HEIGHT, 0, NULL,szdata, strlen(szdata), NULL ) ;

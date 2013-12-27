@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, GPL, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, GPL, contact: chris@shifz.org
   
   MODULE: OB_EDF_READER.CPP:  contains functions for EDF - File import
   Author: Chris Veigl

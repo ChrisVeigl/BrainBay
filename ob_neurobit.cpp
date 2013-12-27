@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_NEUROBIT.CPP:  contains the interface to the 
           Neurobit OPTIMA/lite devices. 
@@ -346,7 +346,7 @@ static HMODULE InitNeurobitDrvLib(const char * drvLibName)
 		!(NdDevServices = (TDevServices) GetProcAddress(drv_lib, "NdDevServices")) ||
 		!(NdCreateDevWindow = (TCreateDevWindow) GetProcAddress(drv_lib, "NdCreateDevWindow")) ||
 
-		!(pUserMsg = (TUserMsg*) GetProcAddress(drv_lib, "NdUserMsg")) ||
+		!(pUserMsg =   (TUserMsg*) GetProcAddress(drv_lib, "NdUserMsg")) ||
 		!(pUserInd = (TUserInd*) GetProcAddress(drv_lib, "NdUserInd")) ||
 		!(pProcSamples = (TProcSamples*) GetProcAddress(drv_lib, "NdProcSamples")))
 	{
@@ -420,6 +420,8 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						{
 							SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
 							report_error("Could not open Archive-File");
+							get_session_length();
+
 						}
 						else
 						{
@@ -427,6 +429,7 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 							SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,st->archivefile);
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_RESETBUTTON,0);
 							st->filemode=FILE_READING;
+							get_session_length();
 						}
 					}
 				break;
@@ -436,6 +439,8 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 		 			if (!CloseHandle(st->filehandle))
 						report_error("could not close Archive file");
 					st->filehandle=INVALID_HANDLE_VALUE;
+					SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
+					get_session_length();
 				}
 				break;
 			case IDC_REC_NB_ARCHIVE:
@@ -462,6 +467,8 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 		 			if (!CloseHandle(st->filehandle))
 						report_error("could not close Archive file");
 					st->filehandle=INVALID_HANDLE_VALUE;
+					SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
+
 				}
 				break;
 			}
@@ -583,9 +590,6 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 			if (!NdGetParam(ND_PAR_CH_RANGE_MIN, i, &gv)) {
 				out_ports[i].out_min = gv.val.f;
 			}
-			if (!NdGetParam(ND_PAR_CH_SR, i, &gv)) {
-				if (gv.val.f>max_sr) max_sr=gv.val.f;
-			}
 
 			strcpy(out_ports[i].out_dim,NdParamInfo(ND_PAR_CH_RANGE_MAX, i)->unit);
 /*
@@ -597,13 +601,18 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 
 			}*/
 			if (!NdGetParam(ND_PAR_CH_EN, i, &gv)) {
-				if (gv.val.b) chncol[i+1]= CI_GREEN; else chncol[i+1]=CI_GRAY;
+				if (gv.val.b) {
+					chncol[i+1]= CI_GREEN;
+					if (!NdGetParam(ND_PAR_CH_SR, i, &gv)) {
+						if (gv.val.f>max_sr) max_sr=gv.val.f;
+					}
+				} else chncol[i+1]=CI_GRAY;
 			}
 		  }
-         if (max_sr>0) update_samplingrate((int)max_sr);
+         if (max_sr>0) update_samplingrate((int)(max_sr+0.5f));
 
 		 dev_chans=0;
-		 update_dimensions();
+		 if (!GLOBAL.loading) update_dimensions();
  	 	 reset_oscilloscopes();
 
 		 InvalidateRect(ghWndMain,NULL,TRUE);
@@ -634,7 +643,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		GLOBAL.neurobit_available=1;
 
 		InvalidateRect(hDlg,NULL,FALSE);
-		update_channelinfo();
+		if (!GLOBAL.loading) update_channelinfo();
 		SetDlgItemText(hDlg,IDC_NB_DEVICECOMBO,device);
 	}
 
@@ -717,15 +726,41 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 			//DevCtx=-1;
 	  }
 
+  	  void NEUROBITOBJ::session_pos(long pos) 
+	  {	
+			if(filehandle==INVALID_HANDLE_VALUE) return;
+			if (pos>filelength) pos=filelength;
+			SetFilePointer(filehandle,pos*(sizeof(float))*4,NULL,FILE_BEGIN);
+	  } 
+
+	  long NEUROBITOBJ::session_length(void) 
+	  {
+			if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode==FILE_READING))
+			{
+				DWORD sav= SetFilePointer(filehandle,0,NULL,FILE_CURRENT);
+				filelength= SetFilePointer(filehandle,0,NULL,FILE_END)/(sizeof(float))/4;
+				SetFilePointer(filehandle,sav,NULL,FILE_BEGIN);
+				return(filelength);
+			}
+		    return(0);
+	  }
 
 	  void NEUROBITOBJ::work(void) 
 	  {
 			DWORD dwWritten,dwRead;
 
-			if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_READING)) 
+			if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
+			{
 				ReadFile(filehandle,current_chn,sizeof(float)*4, &dwRead, NULL);
+				if (dwRead != sizeof(float)*4) SendMessage (ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
+				else 
+				{
+					DWORD x= SetFilePointer(filehandle,0,NULL,FILE_CURRENT);
+					x=x*1000/filelength/TTY.bytes_per_packet;
+					SetScrollPos(GetDlgItem(ghWndStatusbox, IDC_SESSIONPOS), SB_CTL, x, 1);
+				}
+			}
 			
-
 			pass_values(0, current_chn[0]);
 			pass_values(1, current_chn[1]);
     		pass_values(2, current_chn[2]); 

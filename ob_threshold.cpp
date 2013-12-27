@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_THRESHOLD.CPP:  contains functions for the Threshold-Generator-Object
 
@@ -258,22 +258,22 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_RISING: st->rising=IsDlgButtonChecked(hDlg,IDC_RISING); break;
 			case IDC_FALLING: st->falling=IsDlgButtonChecked(hDlg,IDC_FALLING); break;
 			case IDC_SELECTCOLOR:
-				st->color=select_color(hDlg);
+				st->color=select_color(hDlg,st->color);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
 				break;
 			case IDC_BKCOLOR:
-				st->bkcolor=select_color(hDlg);
+				st->bkcolor=select_color(hDlg,st->bkcolor);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
 				break;
 			case IDC_FONTCOL:
-				st->fontcolor=select_color(hDlg);
+				st->fontcolor=select_color(hDlg,st->fontcolor);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
 				break;
 			case IDC_FONTBKCOL:
-				st->fontbkcolor=select_color(hDlg);
+				st->fontbkcolor=select_color(hDlg,st->fontbkcolor);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
 				break;

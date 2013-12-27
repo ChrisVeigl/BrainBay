@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_SIGNAL.CPP:  contains functions for the Signal-Generator-Object
   Author: Chris Veigl
@@ -59,7 +59,9 @@ LRESULT CALLBACK SignalDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 				SetDlgItemInt(hDlg, IDC_CENTER, (int)st->center,1);
 
 				SetScrollPos(GetDlgItem(hDlg,IDC_GAINBAR), SB_CTL,(int)st->gain,TRUE);
-				SetDlgItemInt(hDlg, IDC_GAIN, (int)(st->gain/1000.0f*st->out_ports[0].out_max),0);
+				sprintf(sztemp,"%.2f",(st->gain/1000.0f*st->out_ports[0].out_max));
+				SetDlgItemText(hDlg, IDC_GAIN,sztemp);
+				//SetDlgItemInt(hDlg, IDC_GAIN, (int)(st->gain/1000.0f*st->out_ports[0].out_max),0);
 
 				SetScrollPos(GetDlgItem(hDlg,IDC_PHASEBAR), SB_CTL,(int)st->phase,TRUE);
 				SetDlgItemInt(hDlg, IDC_PHASE, (int)st->phase,0);
@@ -67,7 +69,7 @@ LRESULT CALLBACK SignalDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 				SetScrollPos(GetDlgItem(hDlg,IDC_NOISEBAR), SB_CTL,(int)st->noise,TRUE);
 				SetDlgItemInt(hDlg, IDC_NOISE, (int)st->noise,0);
 
-				SendDlgItemMessage( hDlg, IDC_SIGNALCOMBO, CB_ADDSTRING, 0,(LPARAM) "Sinus") ;
+				SendDlgItemMessage( hDlg, IDC_SIGNALCOMBO, CB_ADDSTRING, 0,(LPARAM) "Sine") ;
 				SendDlgItemMessage( hDlg, IDC_SIGNALCOMBO, CB_ADDSTRING, 0,(LPARAM) "Sawtooth") ;
 				SendDlgItemMessage( hDlg, IDC_SIGNALCOMBO, CB_ADDSTRING, 0,(LPARAM) "Rectangle") ;
 				SendDlgItemMessage( hDlg, IDC_SIGNALCOMBO, CB_ADDSTRING, 0,(LPARAM) "Ramp") ;
@@ -117,7 +119,10 @@ LRESULT CALLBACK SignalDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 			  if (lParam == (long) GetDlgItem(hDlg,IDC_GAINBAR)) 
 			  {
 				   st->gain=(float)nNewPos;
-				   SetDlgItemInt(hDlg, IDC_GAIN,(int)(st->gain/1000.0f*st->out_ports[0].out_max),0);
+				   //SetDlgItemInt(hDlg, IDC_GAIN,(int)(st->gain/1000.0f*st->out_ports[0].out_max),0);
+				   sprintf(sztemp,"%.2f",(st->gain/1000.0f*st->out_ports[0].out_max));
+				   SetDlgItemText(hDlg, IDC_GAIN,sztemp);
+
 			  }
 			  if (lParam == (long) GetDlgItem(hDlg,IDC_PHASEBAR)) 
 			  {
@@ -256,9 +261,9 @@ SIGNALOBJ::SIGNALOBJ(int num) : BASE_CL()
 			case SIG_RAMP:
 				x=(float)((angle-DDC_PI)/DDC_PI*g);
 				{
-					char tmp[20];
-					sprintf(tmp,"%.2f",angle);
-					SetDlgItemText(ghWndStatusbox,IDC_STATUS,tmp);
+					//char tmp[20];
+					//sprintf(tmp,"%.2f",angle);
+					//SetDlgItemText(ghWndStatusbox,IDC_STATUS,tmp);
 				}
 				
 				break;

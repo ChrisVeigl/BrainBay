@@ -44,6 +44,8 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BrainBay</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">BrainBay</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -64,21 +66,21 @@
       <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
       <ObjectFileName>.\Debug/</ObjectFileName>
       <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>opencv;neurobit_api</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>ComputerVision\opencv\include;ComputerVision;neurobit_api</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;cv.lib;cvcam.lib;cxcore.lib;highgui.lib;libeng.lib;libmx.lib;skinstyle.lib;videoinput.lib;dxguid.lib;ole32.lib;strmiids.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/brainBay.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>libmsvc;libvideoinput;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libcd.lib; libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalLibraryDirectories>libmsvc;ComputerVision\opencv\lib;ComputerVision\videoInput\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libcd.lib;libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/brainBay.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -88,7 +90,12 @@
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalOptions>/NODEFAULTLIB:"atlthunk"
 /NODEFAULTLIB:"LIBCMT" %(AdditionalOptions)</AdditionalOptions>
+      <PreventDllBinding>
+      </PreventDllBinding>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) bin</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -107,14 +114,15 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>.\Release/brainBay.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
       <ObjectFileName>.\Release/</ObjectFileName>
       <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalIncludeDirectories>ComputerVision;ComputerVision\opencv\include;neurobit_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -129,7 +137,13 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>libmsvc;ComputerVision\videoInput\lib;ComputerVision\opencv\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(TargetPath) bin</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="brainbay.cpp">
@@ -211,6 +225,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_buffer.cpp" />
     <ClCompile Include="ob_cam.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -261,6 +276,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_delay.cpp" />
     <ClCompile Include="ob_deviation.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -268,6 +284,8 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_differentiate.cpp" />
+    <ClCompile Include="ob_displayvector.cpp" />
     <ClCompile Include="ob_doku.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -296,6 +314,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_emotiv.cpp" />
     <ClCompile Include="ob_erpdetect.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -338,6 +357,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_floatvector.cpp" />
     <ClCompile Include="ob_integrate.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -352,6 +372,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_limiter.cpp" />
     <ClCompile Include="ob_magnitude.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -373,6 +394,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_max.cpp" />
     <ClCompile Include="ob_mci.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -387,6 +409,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_min.cpp" />
     <ClCompile Include="ob_mixer4.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -444,6 +467,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_round.cpp" />
     <ClCompile Include="ob_sample_hold.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -500,6 +524,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_vectorfloat.cpp" />
     <ClCompile Include="ob_wav.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -537,6 +562,7 @@
     <ClInclude Include="ob_average.h" />
     <ClInclude Include="ob_avi.h" />
     <ClInclude Include="ob_ballgame.h" />
+    <ClInclude Include="ob_buffer.h" />
     <ClInclude Include="ob_cam.h" />
     <ClInclude Include="ob_com_writer.h" />
     <ClInclude Include="ob_compare.h" />
@@ -545,24 +571,32 @@
     <ClInclude Include="ob_correlation.h" />
     <ClInclude Include="ob_counter.h" />
     <ClInclude Include="ob_debounce.h" />
+    <ClInclude Include="ob_delay.h" />
     <ClInclude Include="ob_deviation.h" />
+    <ClInclude Include="ob_differentiate.h" />
+    <ClInclude Include="ob_displayvector.h" />
     <ClInclude Include="ob_doku.h" />
     <ClInclude Include="ob_edf_reader.h" />
     <ClInclude Include="ob_edf_writer.h" />
     <ClInclude Include="ob_eeg.h" />
+    <ClInclude Include="ob_emotiv.h" />
     <ClInclude Include="ob_erpdetect.h" />
     <ClInclude Include="ob_evaluator.h" />
     <ClInclude Include="ob_fft.h" />
     <ClInclude Include="ob_file_reader.h" />
     <ClInclude Include="ob_file_writer.h" />
     <ClInclude Include="ob_filter.h" />
+    <ClInclude Include="ob_floatvector.h" />
     <ClInclude Include="ob_integrate.h" />
     <ClInclude Include="ob_keystrike.h" />
+    <ClInclude Include="ob_limiter.h" />
     <ClInclude Include="ob_magnitude.h" />
     <ClInclude Include="ob_martini.h" />
     <ClInclude Include="ob_matlab.h" />
+    <ClInclude Include="ob_max.h" />
     <ClInclude Include="ob_mci.h" />
     <ClInclude Include="ob_midi.h" />
+    <ClInclude Include="ob_min.h" />
     <ClInclude Include="ob_mixer4.h" />
     <ClInclude Include="ob_mouse.h" />
     <ClInclude Include="ob_neurobit.h" />
@@ -572,6 +606,7 @@
     <ClInclude Include="ob_particle.h" />
     <ClInclude Include="ob_peakdetect.h" />
     <ClInclude Include="ob_port_io.h" />
+    <ClInclude Include="ob_round.h" />
     <ClInclude Include="ob_sample_hold.h" />
     <ClInclude Include="ob_signal.h" />
     <ClInclude Include="ob_skindialog.h" />
@@ -580,6 +615,7 @@
     <ClInclude Include="ob_tcp_sender.h" />
     <ClInclude Include="ob_threshold.h" />
     <ClInclude Include="ob_translate.h" />
+    <ClInclude Include="ob_vectorfloat.h" />
     <ClInclude Include="ob_wav.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SDL_sound.h" />

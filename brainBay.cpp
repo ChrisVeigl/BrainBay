@@ -9,7 +9,8 @@
 		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORELLATION, EVALUATOR)
 		 Lester John (Module MATLAB-transfer)
 		 Stephan Gerhard (QDS parser)
-		 Franz Stobl ( NIA support )
+		 Raymond Nguyen (Vector ports)
+ 		 Franz Stobl ( NIA support )
 
   Credits: Jim Peters (digital filter works), Jeff Molofee (OpenGL-tutorial), John Roark (SkinDialog)
   		   AllenD (COM-Port control), Aleksandar B. Samardz (Expression Evaluator Library)
@@ -45,9 +46,6 @@
   
 -------------------------------------------------------------------------------------*/
 
-
-
-
 #include "brainBay.h"
 #include "ob_osci.h"
 #include "ob_skindialog.h"
@@ -57,10 +55,7 @@ LRESULT CALLBACK AboutDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam );
 LRESULT CALLBACK COLORDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-
-//extern int lk_work (void);
 extern NEUROBITOBJ * NB_OBJ;
-
 
 int check_keys(void)
 {
@@ -84,62 +79,18 @@ int check_keys(void)
 
 }
 
-/* 
 
-// used to convert capture files 
-
-int conv_file(void)
+//-----------------------------------------------------------------------
+//  FUNCTION AnimProc 
+//  PURPOSE:  Timer Callback for drawing particle animations
+//-----------------------------------------------------------------------
+void CALLBACK AnimProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
 {
-
-    HANDLE hFile,hFile2;
-    BOOL bSuccess = FALSE;
-	DWORD dwRead,dwWritten;
-	unsigned char buffer[3];
-	unsigned char buffer2[3];
-	int num=0;
-
-
-	 hFile = CreateFile( (LPCTSTR) "c:\\capture3.txt", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-     if (hFile == INVALID_HANDLE_VALUE)	 	printf ("file1 open error\n");
-	 hFile2 = CreateFile((LPCTSTR) "c:\\cp.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-     if (hFile2 == INVALID_HANDLE_VALUE)	 	printf ("file1 open error\n");
-
-    if ((hFile != INVALID_HANDLE_VALUE) && (hFile2 != INVALID_HANDLE_VALUE))
-    {
-       do
-	   {
-         ReadFile(hFile, (unsigned char *) buffer , 2, &dwRead, NULL);
-		 if (dwRead==2)
-		 {
-			 if ((buffer[0]>='0') && (buffer[0]<='9'))  buffer2[0]=(buffer[0]-'0') * 16;
-			 else if ((buffer[0]>='A') && (buffer[0]<='F'))  buffer2[0]=(buffer[0]-'A'+10) * 16;
-			 
-			 if ((buffer[1]>='0') && (buffer[1]<='9'))  buffer2[0]+=(buffer[1]-'0');
-			 else if ((buffer[1]>='A') && (buffer[1]<='F'))  buffer2[0]+=(buffer[1]-'A'+10);
-	         
-			 printf ("%d,",buffer2[0]);
-
-	  	      WriteFile(hFile2, (unsigned char * )buffer2, 1, &dwWritten, NULL);
-			  num++;
-		 }
-		 printf ("read %d bytes\n",num);
-
-	   }
-	   while (dwRead==2);
+	if (DRAW.particles) 
+	{
+		InvalidateRect(ghWndAnimation,NULL,FALSE);
 	}
-	else 	printf ("file open error\n");
-
-        			 
-    CloseHandle(hFile);
-    CloseHandle(hFile2);
-
-	printf("done !\n");
-    return(0);
-
 }
-
-*/
-
 
 //-----------------------------------------------------------------------
 //  FUNCTION WinMain
@@ -164,7 +115,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
     else {GLOBAL.left=20;GLOBAL.top=20;GLOBAL.right=900;GLOBAL.bottom=520; }
     ShowWindow( ghWndMain, SW_SHOWNORMAL );
     UpdateWindow( ghWndMain );
-
 
 	create_logfile();
 	write_logfile("BrainBay start.");
@@ -196,31 +146,18 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	}
 
 	update_status_window();
-
-	
-////////////
-	
-
-	
+	UINT timerid= timeSetEvent(30,5,AnimProc,1,TIME_PERIODIC | TIME_CALLBACK_FUNCTION);
 
 	// main message loop
-
 	while (TRUE)
 	{
-
 		check_keys();
-
   		if(!GetMessage(&msg, NULL, 0, 0))	break;
-
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-
-		if(!PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
-		{  
-			if (DRAW.particles) InvalidateRect(ghWndAnimation,NULL,FALSE);
-		}
-		
 	}
+
+    timeKillEvent(timerid);
 	return msg.wParam;
 }
 
@@ -285,6 +222,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					while (GLOBAL.objects>0)
 						free_object(0);
 
+					deviceobject=NULL;
 					GLOBAL.showdesign=TRUE;
 					ShowWindow(ghWndDesign,TRUE);
 				    SetWindowPos(ghWndDesign,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
@@ -367,7 +305,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 						char tmpfile [250];
 						close_toolbox();
 						strcpy(tmpfile,GLOBAL.resourcepath);
-						strcat(tmpfile,"HELPPAGES\\index.html");
+						strcat(tmpfile,"brainbay_user_manual.pdf");
 						ShellExecute(0, "open", tmpfile, NULL, NULL, SW_SHOWNORMAL);
 					}
 					break;
@@ -423,9 +361,18 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                      if (ghWndSettings==NULL) ghWndSettings=CreateDialog(hInst, (LPCTSTR)IDD_SETTINGSBOX, ghWndStatusbox, (DLGPROC)SETTINGSDlgHandler);
 					 else SetForegroundWindow(ghWndSettings);
 					break;
-				case IDM_INSERTMODEEG: 
-					if (!count_objects(OB_EEG)) create_object(OB_EEG); 
+				case IDM_DEVICESETTINGS:
+					if (deviceobject) 
+					{
+						close_toolbox();
+						actobject=deviceobject;
+	//					GLOBAL.showtoolbox=find_object(devicebox);
+						actobject->make_dialog(); 
+						if (actobject->displayWnd) 
+							SetWindowPos(actobject->displayWnd,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
+					} else report ("No Amplifier Device present in the design");
 					break;
+
 				case IDM_INSERTMIDI: create_object(OB_MIDI); 
 					break;
 				case IDM_INSERTSPECTRUM: create_object(OB_FFT);
@@ -452,6 +399,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTWAV:
 					if (!count_objects(OB_WAV)) create_object(OB_WAV);
+					else report_error("Currently only one Sound player is supported.");
 					break;
 				case IDM_INSERTTCPRECEIVER:create_object(OB_TCP_RECEIVER);
 					break;
@@ -523,9 +471,76 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTCOMREADER:create_object(OB_COMREADER);
 					break;
-				case IDM_INSERTOPTIMA:
-					if (!count_objects(OB_NEUROBIT)) create_object(OB_NEUROBIT);
+				case IDM_INSERTMIN:create_object(OB_MIN);
 					break;
+				case IDM_INSERTMAX:create_object(OB_MAX);
+					break;
+				case IDM_INSERTROUND:create_object(OB_ROUND);
+					break;
+				case IDM_INSERTDIFFERENTIATE:create_object(OB_DIFFERENTIATE);
+					break;
+				case IDM_INSERTDELAY:create_object(OB_DELAY);
+					break;
+				case IDM_INSERTLIMITER:create_object(OB_LIMITER);
+					break;
+				case IDM_INSERTFLOATVECTOR:
+					create_object(OB_FLOATVECTOR);
+					break;
+				case IDM_INSERTVECTORFLOAT:
+					create_object(OB_VECTORFLOAT);
+					break;
+				case IDM_INSERTDISPLAYVECTOR:
+					create_object(OB_DISPLAYVECTOR);
+					break;
+				case IDM_INSERTVECTORBUFFER:
+					create_object(OB_BUFFER);
+					break;
+
+				// here are th supported EED devices
+				case IDM_INSERT_EEG_GENERIC8: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_RAW8BIT; create_object(OB_EEG);}
+					break;
+				case IDM_INSERT_EEG_GENERIC16: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_RAW; create_object(OB_EEG);}
+					break;
+				case IDM_INSERT_EEG_IBVA: 
+					if (!count_objects(OB_EEG)) { TTY.devicetype=DEV_IBVA; create_object(OB_EEG);}  
+					break;
+				case IDM_INSERT_EEG_NIA: 
+					if (!count_objects(OB_EEG)) { TTY.devicetype=DEV_NIA; create_object(OB_EEG);}  
+					break;
+				case IDM_INSERT_EEG_P21: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_MONOLITHEEG_P21; create_object(OB_EEG);} 
+					break;
+				case IDM_INSERT_EEG_OPENBCI8: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_OPENBCI8; create_object(OB_EEG);} 
+					break;
+				case IDM_INSERT_EEG_P2: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_MODEEG_P2; create_object(OB_EEG);}
+					break;
+				case IDM_INSERT_EEG_P3: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_MODEEG_P3; create_object(OB_EEG);}
+					break;
+				case IDM_INSERT_EEG_PENDANT: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_PENDANT3; create_object(OB_EEG);} 
+					break;
+				case IDM_INSERT_EEG_QDS: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_QDS; create_object(OB_EEG);}
+					break;
+				case IDM_INSERT_EEG_SBT4: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_SBT4; create_object(OB_EEG);} 
+					break;
+				case IDM_INSERT_EEG_SBT2: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_SBT2; create_object(OB_EEG);} 
+					break;
+				// these devices need special care (seperate element)
+				case IDM_INSERTOPTIMA:
+					if ((!count_objects(OB_NEUROBIT)) && (!count_objects(OB_EEG))) create_object(OB_NEUROBIT);
+					break;
+				case IDM_INSERTEMOTIV:
+					if ((!count_objects(OB_EMOTIV)) && (!count_objects(OB_EEG))) create_object(OB_EMOTIV);
+					break;
+
 				case IDM_COPY:
 					if (actobject)
 					{
@@ -663,3 +678,63 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
    }
    return 0;
 }
+
+
+
+
+/* 
+
+// used to convert capture files 
+
+int conv_file(void)
+{
+
+    HANDLE hFile,hFile2;
+    BOOL bSuccess = FALSE;
+	DWORD dwRead,dwWritten;
+	unsigned char buffer[3];
+	unsigned char buffer2[3];
+	int num=0;
+
+
+	 hFile = CreateFile( (LPCTSTR) "c:\\capture3.txt", GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+     if (hFile == INVALID_HANDLE_VALUE)	 	printf ("file1 open error\n");
+	 hFile2 = CreateFile((LPCTSTR) "c:\\cp.txt", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+     if (hFile2 == INVALID_HANDLE_VALUE)	 	printf ("file1 open error\n");
+
+    if ((hFile != INVALID_HANDLE_VALUE) && (hFile2 != INVALID_HANDLE_VALUE))
+    {
+       do
+	   {
+         ReadFile(hFile, (unsigned char *) buffer , 2, &dwRead, NULL);
+		 if (dwRead==2)
+		 {
+			 if ((buffer[0]>='0') && (buffer[0]<='9'))  buffer2[0]=(buffer[0]-'0') * 16;
+			 else if ((buffer[0]>='A') && (buffer[0]<='F'))  buffer2[0]=(buffer[0]-'A'+10) * 16;
+			 
+			 if ((buffer[1]>='0') && (buffer[1]<='9'))  buffer2[0]+=(buffer[1]-'0');
+			 else if ((buffer[1]>='A') && (buffer[1]<='F'))  buffer2[0]+=(buffer[1]-'A'+10);
+	         
+			 printf ("%d,",buffer2[0]);
+
+	  	      WriteFile(hFile2, (unsigned char * )buffer2, 1, &dwWritten, NULL);
+			  num++;
+		 }
+		 printf ("read %d bytes\n",num);
+
+	   }
+	   while (dwRead==2);
+	}
+	else 	printf ("file open error\n");
+
+        			 
+    CloseHandle(hFile);
+    CloseHandle(hFile2);
+
+	printf("done !\n");
+    return(0);
+
+}
+
+*/
+

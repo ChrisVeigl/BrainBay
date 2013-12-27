@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_DOKU.CPP:  contains functions for the Documentation-Object
   Author: Chris Veigl
@@ -62,30 +62,41 @@ DOKUOBJ::DOKUOBJ(int num) : BASE_CL()
 		  display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_DOKUBOX, ghWndStatusbox, (DLGPROC)DokuDlgHandler)); 
 	  }
 
-	  void DOKUOBJ::load(HANDLE hFile) 
+	  void DOKUOBJ::apply_nl(void) 
 	  {
-  		  unsigned int x;
-	  	  load_object_basics(this);
-		  load_property("text",P_STRING,text);
+		  unsigned int x;
 		  for (x=0;x<strlen(text);x++) 
 		  {
 			  if (text[x]=='#') text[x]=10;
 			  if (text[x]=='/') text[x]=13;
 		  }
-
 	  }
-		
-	  void DOKUOBJ::save(HANDLE hFile) 
-	  {	  
-		  unsigned int x;
+
+	  void DOKUOBJ::remove_nl(void) 
+	  {
+  		  unsigned int x;
 		  for (x=0;x<strlen(text);x++) 
 		  {
 			  if (text[x]==10) text[x]='#';
 			  if (text[x]==13) text[x]='/';
 		  }
+	  }
 
+	  void DOKUOBJ::load(HANDLE hFile) 
+	  {
+	  	  load_object_basics(this);
+		  load_property("text",P_STRING,text);
+		  apply_nl();
+
+	  }
+		
+	  void DOKUOBJ::save(HANDLE hFile) 
+	  {	  
 		  save_object_basics(hFile, this);
+		  remove_nl();
 		  save_property(hFile,"text",P_STRING,text);
+		  apply_nl();
+
 	  }
 	  
 

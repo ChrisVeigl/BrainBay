@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_MAGNITUDE.CPP:  contains assisting functions for the Magnitude-Object
   Authors: Jim Peters,Chris Veigl
@@ -37,7 +37,7 @@ LRESULT CALLBACK MagnitudeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 	int t; // ,z;
 	static int tempfilt=0,acttype=0;
 	static int dinit=FALSE;
-	char sztemp[10];
+	char sztemp[30];
     
 	MAGNITUDEOBJ * st;
 	
@@ -69,11 +69,11 @@ LRESULT CALLBACK MagnitudeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				SetScrollInfo(GetDlgItem(hDlg,IDC_WIDTHBAR),SB_CTL,&lpsi,TRUE);
 
 				SetScrollPos(GetDlgItem(hDlg,IDC_CENTERBAR), SB_CTL,(int)(st->center*10.0f),TRUE);
-				sprintf(sztemp,"%.2f",st->center);
+				sprintf(sztemp,"%.4f",st->center);
 				SetDlgItemText(hDlg,IDC_CENTER, sztemp);
 
 				SetScrollPos(GetDlgItem(hDlg,IDC_WIDTHBAR), SB_CTL,(int)(st->wid*10.0f),TRUE);
-				sprintf(sztemp,"%.2f",st->wid);
+				sprintf(sztemp,"%.4f",st->wid);
 				SetDlgItemText(hDlg,IDC_WIDTH, sztemp);
 			}
 			return TRUE;
@@ -87,6 +87,26 @@ LRESULT CALLBACK MagnitudeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			
 			case IDC_PASSTYPECOMBO:
 				  acttype=SendMessage( GetDlgItem(hDlg, IDC_PASSTYPECOMBO), CB_GETCURSEL, 0, 0 ) ;
+				break;
+			case IDC_CENTER:
+				if (HIWORD(wParam) == EN_KILLFOCUS)
+                    {
+						GetDlgItemText(hDlg, IDC_CENTER, sztemp, 20);
+						st->center = (float)atof(sztemp);
+						if (st->center<0) { st->center=0; SetDlgItemText(hDlg,IDC_CENTER,"0");}
+						if (st->center>PACKETSPERSECOND/2) { st->center=(float)(PACKETSPERSECOND/2); SetDlgItemInt(hDlg,IDC_CENTER,PACKETSPERSECOND/2,0);}
+//						SendMessage (hDlg,WM_COMMAND,IDC_STORE,0);
+					}
+				break;
+			case IDC_WIDTH:
+				if (HIWORD(wParam) == EN_KILLFOCUS)
+                    {
+						GetDlgItemText(hDlg, IDC_WIDTH, sztemp, 20);
+						st->wid = (float)atof(sztemp);
+						if (st->wid<0.0001) { st->wid=1; SetDlgItemText(hDlg,IDC_CENTER,"0.0001");}
+						if (st->wid>PACKETSPERSECOND/2) { st->wid=(float)(PACKETSPERSECOND/2); SetDlgItemInt(hDlg,IDC_WIDTH,PACKETSPERSECOND/2,0);}
+//						SendMessage (hDlg,WM_COMMAND,IDC_STORE,0);
+					}
 				break;
 			case IDC_STORE:
 				{

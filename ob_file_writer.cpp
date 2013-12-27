@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
     
   MODULE: OB_FILE_WRITER.CPP
   Author: Chris Veigl
@@ -72,7 +72,7 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 					EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
 
 				}
-
+				CheckDlgButton(hDlg,IDC_APPEND,st->append);
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -140,7 +140,18 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 					}
 					if (open_file_dlg(ghWndMain,st->filename, FT_TXT, OPEN_SAVE))
 					{
-						 st->file=CreateFile(st->filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
+						 long filesize=0;
+
+						 if (!st->append) 
+						 {
+						   st->file=CreateFile(st->filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
+						 }
+						 else  
+						 {
+						   st->file=CreateFile(st->filename, GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+						   filesize=SetFilePointer(st->file,0,NULL,FILE_END);
+						 }
+
 						 if (st->file==INVALID_HANDLE_VALUE) 
 						 {
 							 SetDlgItemText(hDlg,IDC_FILESTATUS,"Could not create File");
@@ -171,7 +182,8 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 								 if (i!=st->inports-2) strcat (tmp,","); 
 								 else { a=strlen(tmp); tmp[a++]=13;tmp[a++]=10;tmp[a]=0;}
 							 }
-							 WriteFile(st->file,tmp,strlen(tmp),&dwWritten,NULL);
+							 if ((!st->append)||(filesize<10))
+								WriteFile(st->file,tmp,strlen(tmp),&dwWritten,NULL);
 							 EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE); EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
 							 SetDlgItemText(hDlg,IDC_FILESTATUS,"File opened");
 						 }
@@ -180,6 +192,9 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 					InvalidateRect(ghWndDesign,NULL,TRUE);
 				 break; 
 
+			case IDC_APPEND:
+				st->append=IsDlgButtonChecked(hDlg,IDC_APPEND);
+				break;
 			case IDC_START:
 				if ((st->inports>0) &&(st->file!=INVALID_HANDLE_VALUE))
 				{
@@ -245,7 +260,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		width=70;
 		height=50;
 
-		state=0; format=0;
+		state=0; format=0;append=FALSE;
 		file=INVALID_HANDLE_VALUE;
 		strcpy(filename,"none");
 	  }
@@ -274,6 +289,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  load_property("filename",P_STRING,&filename);
 		  load_property("format",P_INT,&format);
 		  load_property("inports",P_INT,&inports);
+		  load_property("append",P_INT,&append);
 		  height=CON_START+inports*CON_HEIGHT+5;
 		  
 	  }
@@ -284,6 +300,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"filename",P_STRING,&filename);
 		  save_property(hFile,"format",P_INT,&format);
 		  save_property(hFile,"inports",P_INT,&inports);
+		  save_property(hFile,"append",P_INT,&append);
 	  }
 
 

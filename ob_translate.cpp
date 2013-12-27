@@ -21,10 +21,10 @@
 #include "brainBay.h"
 #include "ob_translate.h"
 
-#define top 60
-#define left 50
-#define bottom 410
-#define right 470
+int top= 60;
+int left=50;
+int bottom=410;
+int right= 470;
 
 LRESULT CALLBACK TranslateDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -145,6 +145,11 @@ LRESULT CALLBACK TranslateDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 						if (st->setpoint==st->points-1) st->pointx[st->points-1]=1023;
 					}
 					st->calculate_map();
+					sprintf(sztemp,"%.4f",((float)(st->pointx[st->setpoint])/1023*(st->in_ports[0].in_max-st->in_ports[0].in_min)+st->in_ports[0].in_min));
+					SetDlgItemText(hDlg,IDC_ACT_INPUT,sztemp);
+
+					sprintf(sztemp,"%.4f",st->pointy[st->setpoint]*(st->out_ports[0].out_max-st->out_ports[0].out_min)+st->out_ports[0].out_min);
+					SetDlgItemText(hDlg,IDC_ACT_OUTPUT,sztemp);
  					InvalidateRect(hDlg,NULL,TRUE);
 				}
 			}
@@ -155,12 +160,20 @@ LRESULT CALLBACK TranslateDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			{
 				PAINTSTRUCT ps;
 				HDC hdc;
+				RECT rect;
 				HPEN tpen;
 				HBRUSH tbrush;
 				int i;
 				float dx,dy;
 
 				hdc = BeginPaint (hDlg, &ps);
+				GetClientRect(hDlg, &rect);
+				top=(int)rect.top+50;
+				bottom=(int)rect.bottom-50;
+				left=(int)rect.left+85;
+				right=(int)rect.right-20;
+
+
 				tpen    = CreatePen (PS_SOLID,3,50);
 				SelectObject (hdc, tpen);
 				SelectObject (hdc, DRAW.brush_ltorange);
@@ -211,7 +224,7 @@ TRANSLATEOBJ::TRANSLATEOBJ(int num) : BASE_CL()
 
 	outports = 1;
 	inports = 1;
-	width=60;
+	width=70;
 
 	strcpy(in_ports[0].in_name,"in");
 	strcpy(out_ports[0].out_name,"out");

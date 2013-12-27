@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
     
   MODULE: OB_EDF_WRITER.CPP:  contains the EDF-File - Writer-Object
   Author: Chris Veigl
@@ -21,7 +21,79 @@
 #include "brainBay.h"
 #include "ob_edf_writer.h"
 
+#define STATE_IDLE 0
+#define STATE_READY 1
+#define STATE_WRITING 2
 
+
+void set_gui_fileready(HWND hDlg) 
+{
+	EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
+	EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
+
+	EnableWindow(GetDlgItem(hDlg, IDC_PATIENT), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DEVICE), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_SAMPLES), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_SAMPLINGRATE), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_CHANNELCOMBO), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_LABEL), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_ELECTRODE), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSDIM), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSMIN), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSMAX), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DIGMIN), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DIGMAX), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PREFILTERING), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_CHNFROMPORT), FALSE); 
+}
+
+void set_gui_fileidle(HWND hDlg) 
+{
+	EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
+	EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
+
+	EnableWindow(GetDlgItem(hDlg, IDC_PATIENT), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DEVICE), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_SAMPLES), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_SAMPLINGRATE), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_CHANNELCOMBO), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_LABEL), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_ELECTRODE), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSDIM), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSMIN), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSMAX), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DIGMIN), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DIGMAX), TRUE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PREFILTERING), TRUE);
+	EnableWindow(GetDlgItem(hDlg, IDC_CHNFROMPORT), TRUE); 
+}
+
+void set_gui_filewriting(HWND hDlg) 
+{
+	EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
+	EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
+
+	EnableWindow(GetDlgItem(hDlg, IDC_PATIENT), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DEVICE), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_SAMPLES), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_SAMPLINGRATE), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_CHANNELCOMBO), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_LABEL), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_ELECTRODE), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSDIM), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSMIN), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PHYSMAX), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DIGMIN), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_DIGMAX), FALSE); 
+	EnableWindow(GetDlgItem(hDlg, IDC_PREFILTERING), FALSE);
+	EnableWindow(GetDlgItem(hDlg, IDC_CHNFROMPORT), FALSE); 
+}
 
 
 LRESULT CALLBACK EdfWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
@@ -37,29 +109,21 @@ LRESULT CALLBACK EdfWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 	{
 		case WM_INITDIALOG:
 				SetDlgItemText(hDlg, IDC_EDFFILE, st->filename);
-				if (st->state)
+				if (st->state==STATE_WRITING)
 				{
 					add_to_listbox(hDlg,IDC_LIST, "Writing Values to File.");
-					EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
+					set_gui_filewriting(hDlg);
 				}
-				else
+				else if (st->state==STATE_READY)
 				{
-					EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
-					if (st->edffile==INVALID_HANDLE_VALUE)
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-					else EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
+					set_gui_fileready(hDlg);
 				}
+				else set_gui_fileidle(hDlg);
 
 				actchn=0;
 				update_header(hDlg,&st->header);
 				update_channelcombo(hDlg, st->channel, st->header.channels);
 				update_channel(hDlg,st->channel,actchn);
-
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -73,8 +137,17 @@ LRESULT CALLBACK EdfWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_SELECT:
 			 
 				 st->edffile=create_edf_file(&st->header, st->channel, st->filename);
-				 if (st->edffile==INVALID_HANDLE_VALUE) report("Could not create EDF-File");
-				 else { EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE); EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);}
+				 if (st->edffile==INVALID_HANDLE_VALUE) 
+				 { 
+					 report("Could not create EDF-File");
+					 st->state=STATE_IDLE;
+					 set_gui_fileidle(hDlg);
+				 }
+				 else 
+				 { 
+					 st->state=STATE_READY;
+					 set_gui_fileready(hDlg);
+				 }
 
 				 SetDlgItemText(hDlg,IDC_EDFFILE,st->filename);
 			     InvalidateRect(ghWndDesign,NULL,TRUE);
@@ -85,42 +158,44 @@ LRESULT CALLBACK EdfWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				{
 					add_to_listbox(hDlg,IDC_LIST, "starting File-Write");
 					// START FILE WRITING
-					st->state=1;st->samplecount=0;st->recordcount=0;
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-  					EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
+					st->state=STATE_WRITING;st->samplecount=0;st->recordcount=0;
+					set_gui_filewriting(hDlg);
 				} else add_to_listbox(hDlg,IDC_LIST, "No Channels available.");
 				break; 
+			case IDC_CHNFROMPORT:
+				 if (st->inports>0) {
+					 st->get_captions();
+					 update_header(hDlg,&st->header);
+					 update_channelcombo(hDlg, st->channel, st->header.channels);
+					 actchn=0;
+					 update_channel(hDlg,st->channel,actchn);
+			  		 InvalidateRect(ghWndDesign,NULL,TRUE);
+			  		 InvalidateRect(ghWndMain,NULL,TRUE);
+				 }
+				break;
 
 			case IDC_STOP:
 					add_to_listbox(hDlg,IDC_LIST, "stopped");
-					st->state=0;
-					EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
+					st->state=STATE_READY;
+					set_gui_fileready(hDlg);
 					break; 
 
 			case IDC_CLOSE: 
 					add_to_listbox(hDlg,IDC_LIST, "file closed.");
-					st->state=0;
+					st->state=STATE_IDLE;
 					if (st->edffile!=INVALID_HANDLE_VALUE)
 					{
 						char str[8];
 						DWORD dwWritten;
-
 						sprintf(str,"%d",st->recordcount);
 						SetFilePointer(st->edffile,236,NULL,FILE_BEGIN);
 						WriteFile(st->edffile,str,strlen(str),&dwWritten, NULL);
 						SetFilePointer(st->edffile,0,NULL,FILE_END);
-						
-
 						CloseHandle(st->edffile);
 						st->edffile=INVALID_HANDLE_VALUE;
 					}
-  				    EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
+					set_gui_fileidle(hDlg);
+ 
  				    InvalidateRect(ghWndDesign,NULL,TRUE);
 					break;
 
@@ -163,6 +238,7 @@ EDF_WRITEROBJ::EDF_WRITEROBJ(int num) : BASE_CL()
 		reset_header(&header);
 		reset_channel(channel);
 
+		for (x=0;x<8192;x++) edfinfos[x]=' ';
 		header.samplespersegment=PACKETSPERSECOND;
 		header.segments=-1;
 		header.samplingrate=PACKETSPERSECOND;
@@ -184,7 +260,7 @@ EDF_WRITEROBJ::EDF_WRITEROBJ(int num) : BASE_CL()
 			channel[x].digmax=1024;
 		}
 
-		state=0;
+		state=STATE_IDLE;
 		samplecount=0;recordcount=0;
 		edffile=INVALID_HANDLE_VALUE;
 		strcpy(filename,"none");
@@ -193,13 +269,13 @@ EDF_WRITEROBJ::EDF_WRITEROBJ(int num) : BASE_CL()
 
 	  void EDF_WRITEROBJ::get_captions(void)
 	  {
-		int x,i;
+		int x; //,i;
 
 		for (x=0;x<inports;x++) 
 		{
 				strcpy(channel[x].label,in_ports[x].in_desc);
-				for (i=0;(channel[x].label[i])&&i<11;i++) in_ports[x].in_name[i]=channel[x].label[i];
-				in_ports[x].in_name[i]=0;
+				//for (i=0;(channel[x].label[i])&&i<11;i++) in_ports[x].in_name[i]=channel[x].label[i];
+				//in_ports[x].in_name[i]=0;
 				strcpy(channel[x].physdim,in_ports[x].in_dim);
 
 				channel[x].physmin=(int)in_ports[x].in_min;
@@ -215,16 +291,15 @@ EDF_WRITEROBJ::EDF_WRITEROBJ(int num) : BASE_CL()
 			close_toolbox();
 			CloseHandle(edffile);
 			edffile=INVALID_HANDLE_VALUE;
+			close_toolbox();
 			report("EDF-Writer Input Ports changed, File has been closed");
-			state=0;
+			state=STATE_IDLE;
+			if (ghWndToolbox==hDlg) set_gui_fileidle(hDlg);
 		}
-		//if (state!=1)
-		{
-			inports=count_inports(this);
-			get_captions();
-			height=CON_START+inports*CON_HEIGHT+5;
-			InvalidateRect(ghWndMain,NULL,TRUE);
-		}
+		inports=count_inports(this);
+		header.channels=inports-1;
+		height=CON_START+inports*CON_HEIGHT+5;
+		InvalidateRect(ghWndMain,NULL,TRUE);
 	  }
 
 
@@ -238,18 +313,20 @@ EDF_WRITEROBJ::EDF_WRITEROBJ(int num) : BASE_CL()
 
 	 	  load_object_basics(this);
 		  load_property("filename",P_STRING,&filename);
-//		  load_property("header",P_STRING,&edfheader);
-//		  parse_edf_header(&header, channel, edfheader);
+		  if (load_property("edfinfos",P_STRING,&edfinfos))
+			  parse_edf_header(&header, channel, edfinfos);
+	//	  else get_captions();
 		  inports=header.channels;
 		  height=CON_START+inports*CON_HEIGHT+5;
-		  get_captions();
 	  }
 		
 	  void EDF_WRITEROBJ::save(HANDLE hFile) 
 	  {
 		  save_object_basics(hFile, this);
 		  save_property(hFile,"filename",P_STRING,&filename);
-//		  save_property(hFile,"header",P_STRING,&edfheader);	  
+		  edfheader_to_physical(&header, (EDFHEADER_PHYSICALStruct *) edfinfos);
+		  edfchannels_to_physical(channel,edfinfos+256,header.channels);
+		  save_property(hFile,"edfinfos",P_STRING,&edfinfos);	  
 	  }
 
 
@@ -265,7 +342,7 @@ EDF_WRITEROBJ::EDF_WRITEROBJ(int num) : BASE_CL()
 		float fact;
 	
 	
-		if ((inports==0)||(state==0)||(edffile==INVALID_HANDLE_VALUE)) return;
+		if ((inports==0)||(state!=STATE_WRITING)||(edffile==INVALID_HANDLE_VALUE)) return;
 
 	
 		for (x=0;x<inports-1;x++)

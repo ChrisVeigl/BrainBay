@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_FFT.CPP:  contains functions for the Fourier-Transform-Object
 
@@ -691,7 +691,7 @@ LRESULT CALLBACK FFTDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			break;
 
 		case IDC_FFTBKCOLOR:
-			st->bkcol=select_color(hDlg);
+			st->bkcol=select_color(hDlg,st->bkcol);
 			if (st->displayWnd) InvalidateRect(st->displayWnd,NULL,TRUE);
 			InvalidateRect(hDlg,NULL,FALSE);
 			break;

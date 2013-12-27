@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_PARTICLE.CPP:  contains functions for the Particle-Animation-Object
 
@@ -256,6 +256,10 @@ LRESULT CALLBACK ParticleDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				EnableWindow(GetDlgItem(hDlg, IDC_VALUEBAR),TRUE);
 				}
 				break;
+			case IDC_PARTICLEMUTE:
+					st->mute=IsDlgButtonChecked(hDlg, IDC_PARTICLEMUTE);
+				break;
+
 			case IDC_REMOTECOMBO:
 				if (HIWORD(wParam)==CBN_SELCHANGE)
 				{
@@ -590,7 +594,7 @@ PARTICLEOBJ::PARTICLEOBJ(int num) : BASE_CL()
 				}
 
 		counter++;
-		if (counter>get_paramvalue(1)) 
+		if ((counter>get_paramvalue(1))&& (!mute)) 
 		{  
 			int replace,colindex;
 			counter=0; 

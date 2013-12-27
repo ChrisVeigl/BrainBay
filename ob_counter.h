@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_COUNTER.H:  contains the COUNTER-Object
   Author: Chris Veigl
@@ -32,9 +32,11 @@ class COUNTEROBJ : public BASE_CL
     HFONT font;
 	float countervalue;
 	float resetvalue;
+	unsigned long scount;
 	
 	int  showcounter;
 	int  fontsize;
+	int  digits;
 	int  mode, integer;
 	int  top,left,bottom,right;
 	char wndcaption[50];

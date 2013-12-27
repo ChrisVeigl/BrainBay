@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   OB_EEG.H:  contains the EEG-Object
   the object's propertries are declared and the
@@ -38,7 +38,7 @@ class EEGOBJ : public BASE_CL
 	unsigned char     aux;
 	unsigned int      buffer[MAX_EEG_CHANNELS*2];
 	unsigned int      chnmatrix;
-	float			  resolution;
+	int				  resolution;
 
 
 	EEGOBJ(int num);

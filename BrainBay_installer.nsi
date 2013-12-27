@@ -12,13 +12,15 @@
 
   ;Name and file
   Name "BrainBay"
+  RequestExecutionLevel user
   OutFile "Setup_BrainBay.exe"
 
   ;Default installation folder
-  InstallDir $PROGRAMFILES\BrainBay
+;  InstallDir $PROGRAMFILES\BrainBay
+   InstallDir "$LOCALAPPDATA\BrainBay"
   
   ;Get installation folder from registry if available
-  InstallDirRegKey HKLM "Software\BrainBay" "Install_Dir"
+;  InstallDirRegKey HKLM "Software\BrainBay" "Install_Dir"
 
 ;--------------------------------
 ;Interface Settings
@@ -50,48 +52,51 @@ Section "Application" SecApp
 
   SetOutPath "$INSTDIR"
   
-  File "debug\*.exe"
-  File "debug\*.dll"
-  File "debug\*.txt"
-  File "debug\*.sys"
-  File "debug\*.xml"
+  File "bin\*.exe"
+  File "bin\*.cfg"
+  File "bin\*.dll"
+  File "bin\*.txt"
+  File "bin\*.sys"
+  File "bin\*.pdf"
 
   SetOutPath $INSTDIR\ARCHIVES
-  File "debug\ARCHIVES\adxl202.arc"
-  File "debug\ARCHIVES\alpha.arc"
-  File "debug\ARCHIVES\Calib.edf"
-  File "debug\ARCHIVES\Osas2002.edf"
-  File "debug\ARCHIVES\heart.arc"
-  File "debug\ARCHIVES\muskel_training1.arc"
-  File "debug\ARCHIVES\emg.arc"
-  File "debug\ARCHIVES\monolith1.arc"
-  File "debug\ARCHIVES\psytask_test.edf"
-  File "debug\ARCHIVES\ekg_chn1.arc"
-  File "debug\ARCHIVES\2_channel_test.arc"
+  File "bin\ARCHIVES\adxl202.arc"
+  File "bin\ARCHIVES\alpha.arc"
+  File "bin\ARCHIVES\Calib.edf"
+  File "bin\ARCHIVES\Osas2002.edf"
+  File "bin\ARCHIVES\heart.arc"
+  File "bin\ARCHIVES\muskel_training1.arc"
+  File "bin\ARCHIVES\emg.arc"
+  File "bin\ARCHIVES\monolith1.arc"
+  File "bin\ARCHIVES\psytask_test.edf"
+  File "bin\ARCHIVES\ekg_chn1.arc"
+  File "bin\ARCHIVES\2_channel_test.arc"
   SetOutPath $INSTDIR\CONFIGURATIONS
-  File /r "debug\CONFIGURATIONS\*.*"
+  File /r "bin\CONFIGURATIONS\*.*"
   SetOutPath $INSTDIR\GRAPHICS
-  File "debug\GRAPHICS\*.*"
-  SetOutPath $INSTDIR\HELPPAGES
-  File /r "debug\HELPPAGES\*.*"
+  File "bin\GRAPHICS\*.*"
   SetOutPath $INSTDIR\MOVIES
-  File "debug\MOVIES\face.avi"
+  File "bin\MOVIES\face.avi"
+  File "bin\MOVIES\bear.wmv"
+  File "bin\MOVIES\flower.wmv"
   SetOutPath $INSTDIR\NETWORK
-  File "debug\NETWORK\*.*"
+  File "bin\NETWORK\*.*"
   SetOutPath $INSTDIR\PALETTES
-  File "debug\PALETTES\*.*"
+  File "bin\PALETTES\*.*"
   SetOutPath $INSTDIR\PATTERNS
-  File "debug\PATTERNS\*.*"
+  File "bin\PATTERNS\*.*"
   SetOutPath $INSTDIR\SKINDIALOGS
-  File "debug\SKINDIALOGS\*.*"
+  File "bin\SKINDIALOGS\*.*"
   SetOutPath $INSTDIR\SOUNDS
-  File "debug\SOUNDS\*.*"
+  File "bin\SOUNDS\*.*"
   SetOutPath $INSTDIR\TONESCALES
-  File "debug\TONESCALES\*.*"
+  File "bin\TONESCALES\*.*"
   SetOutPath $INSTDIR\NeurobitRuntime
-  File "debug\NeurobitRuntime\*.*"
+  File "bin\NeurobitRuntime\*.*"
   SetOutPath $INSTDIR\dictionary
-  File "debug\dictionary\*.*"
+  File "bin\dictionary\*.*"
+  SetOutPath $INSTDIR\ComputerVision
+  File "bin\ComputerVision\*.*"
   
 ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\BrainBay "Install_Dir" "$INSTDIR"
@@ -102,7 +107,7 @@ Section "Application" SecApp
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BrainBay" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\BrainBay" "NoRepair" 1
   WriteUninstaller "uninstall.exe"
-  
+
 SectionEnd
 
 ; Optional section (can be disabled by the user)
@@ -112,7 +117,8 @@ Section "Start Menu Shortcuts"
   CreateShortCut "$SMPROGRAMS\BrainBay\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\BrainBay\BrainBay.lnk" "$INSTDIR\brainbay.exe" "" "$INSTDIR\brainbay.exe" 0
   CreateShortCut "$SMPROGRAMS\BrainBay\Readme.lnk" "$INSTDIR\ReadMe_BrainBay.txt" "" "$INSTDIR\ReadMe_BrainBay.txt" 0
-  
+  CreateShortCut "$DESKTOP\BrainBay.lnk" "$INSTDIR\BrainBay.exe" ""  
+  CreateShortCut "$DESKTOP\Uninstall_BrainBay.lnk" "$INSTDIR\unistall.exe" ""  
 SectionEnd
 
 ;--------------------------------

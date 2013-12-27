@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
     
   MODULE: OB_EDF_WRITER.H:  contains the EDF-File - Writer-Object
   Author: Chris Veigl
@@ -34,6 +34,7 @@ public:
 	int    samplecount,recordcount;
 	HANDLE edffile;
 	char   filename[255];
+	char   edfinfos[8192];
 	int  state;
 
 

@@ -15,10 +15,10 @@
 #include "brainBay.h"
 
 
-COLORREF select_color(HWND hwnd)
+COLORREF select_color(HWND hwnd, COLORREF initial)
 {
     CHOOSECOLOR cc = {sizeof(CHOOSECOLOR)};
-	static COLORREF g_rgbSelect = RGB(128, 128, 128);
+	COLORREF g_rgbSelect = initial; //RGB(128, 128, 128);
     static COLORREF g_rgbCustom[16] = {0};
 
     cc.Flags = CC_RGBINIT | CC_FULLOPEN  | CC_ANYCOLOR;
@@ -231,9 +231,17 @@ LRESULT CALLBACK COLORDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			strcat(szFileName,"PALETTES\\*.pal");
 			if (open_file_dlg(hDlg, szFileName, FT_PALETTE, OPEN_LOAD)) 
 			{
-			  if (!load_from_file(szFileName, &(cols), sizeof(cols)))
-				report_error("Could not load Palette");
-			  else InvalidateRect(hDlg,NULL,FALSE);
+			  char tmp[256],*p1,*p2,diff=0;
+			  strcpy(tmp,GLOBAL.resourcepath);
+			  strcat(tmp,"PALETTES\\"); 
+			  for (p1=tmp,p2=szFileName;(*p1) && (*p2) && (!diff);p1++,p2++) 
+				  if (tolower(*p1)!=tolower(*p2)) diff=1;
+			  if (diff||(strlen(tmp)>strlen(szFileName)))
+				report("Please use Palletes-subfolder of brainbay application to load/store palette files");
+			  else
+			    if (!load_from_file(szFileName, &(cols), sizeof(cols)))
+				  report_error("Could not load Palette");
+			  InvalidateRect(hDlg,NULL,FALSE);
 			}
 			break;
 		case IDC_SAVEPAL:
@@ -241,13 +249,21 @@ LRESULT CALLBACK COLORDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			strcat(szFileName,"PALETTES\\*.pal");
 			if (open_file_dlg(hDlg, szFileName, FT_PALETTE, OPEN_SAVE)) 
 			{
+			  char tmp[256],*p1,*p2,diff=0;
+			  strcpy(tmp,GLOBAL.resourcepath);
+			  strcat(tmp,"PALETTES\\"); 
+			  for (p1=tmp,p2=szFileName;(*p1) && (*p2) && (!diff);p1++,p2++) 
+				  if (tolower(*p1)!=tolower(*p2)) diff=1;
+			  if (diff||(strlen(tmp)>strlen(szFileName)))
+				report("Please use Palletes-subfolder of brainbay application to load/store palette files");
+			  else
 			  if (!save_to_file(szFileName, &(cols), sizeof(cols)))
 				report_error("Could not save Palette");
-			  else InvalidateRect(hDlg,NULL,FALSE);
+			  InvalidateRect(hDlg,NULL,FALSE);
 			}
 			break;
 		case IDC_FFTCOLOR1:
-			c=select_color(hDlg);
+			c=select_color(hDlg,cols[startband]);
 			cols[startband]=c;
 			update_colors(cols,startband, endband);
 			SetScrollPos(GetDlgItem(hDlg, IDC_FROMREDBAR), SB_CTL, GetRValue(cols[startband]), 1);
@@ -256,7 +272,7 @@ LRESULT CALLBACK COLORDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			InvalidateRect(hDlg,NULL,FALSE);
 			break;
 		case IDC_FFTCOLOR2:
-			c=select_color(hDlg);
+			c=select_color(hDlg,cols[endband]);
 			cols[endband]=c;
 			update_colors(cols,startband, endband);
 			SetScrollPos(GetDlgItem(hDlg, IDC_TOREDBAR), SB_CTL, GetRValue(cols[endband]), 1);
@@ -410,6 +426,7 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 {
     static int t,port=DEF_MIDIPORT,midichn=11,instrument=12;
 	static char szFileName[MAX_PATH];
+	static int oldtone=0;
 
 
 	switch( message )
@@ -447,6 +464,7 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			return TRUE;
 	
 		case WM_CLOSE:
+				midi_NoteOff(&(MIDIPORTS[port].midiout), midichn,oldtone);
 			    EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;
 			break;
@@ -514,6 +532,16 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
  			    strcat(szFileName,"TONESCALES\\default.sc");
 				 if (open_file_dlg(hDlg, szFileName, FT_HARMONIC, OPEN_LOAD)) 
 				 {
+	 			  char tmp[256],*p1,*p2,diff=0;
+				  strcpy(tmp,GLOBAL.resourcepath);
+				  strcat(tmp,"TONESCALES\\"); 
+				  for (p1=tmp,p2=szFileName;(*p1) && (*p2) && (!diff);p1++,p2++) 
+					  if (tolower(*p1)!=tolower(*p2)) diff=1;
+				  if (diff||(strlen(tmp)>strlen(szFileName)))
+					report("Please use Tonescales-subfolder of brainbay application to load/store palette files");
+				  else
+				  {
+
 					if (!load_from_file(szFileName, &LOADSCALE, sizeof(struct SCALEStruct)))
 						report_error("Could not load Harmonic Scale");
 					else
@@ -522,22 +550,36 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 						SetDlgItemText(hDlg, IDC_HARMONICNAME, LOADSCALE.name);
 
 					}
+				  }
 				 } else report_error("Could not load Harmonic Scale");
 
 				}
 				break;
 			case IDC_SAVEHARMONIC:
 				{
-				char temp[100];
-				strcpy(szFileName,GLOBAL.resourcepath);
-				strcat(szFileName,"TONESCALES\\");
-				GetDlgItemText(hDlg, IDC_HARMONICNAME, temp, MAX_PATH);
-				strcat (szFileName,temp);
-				strcat (szFileName,".sc");
+					char temp[100];
+					strcpy(szFileName,GLOBAL.resourcepath);
+					strcat(szFileName,"TONESCALES\\");
+					GetDlgItemText(hDlg, IDC_HARMONICNAME, temp, MAX_PATH);
+					strcat (szFileName,temp);
+					strcat (szFileName,".sc");
 
-				if (open_file_dlg(hDlg, szFileName, FT_HARMONIC, OPEN_SAVE)) 
-					 if (!save_to_file(szFileName, &LOADSCALE, sizeof(struct SCALEStruct)))
-						report_error("Could not save Scale");
+					if (open_file_dlg(hDlg, szFileName, FT_HARMONIC, OPEN_SAVE))
+					{
+	 				  char tmp[256],*p1,*p2,diff=0;
+					  strcpy(tmp,GLOBAL.resourcepath);
+					  strcat(tmp,"TONESCALES\\"); 
+					  for (p1=tmp,p2=szFileName;(*p1) && (*p2) && (!diff);p1++,p2++) 
+						  if (tolower(*p1)!=tolower(*p2)) diff=1;
+					  if (diff||(strlen(tmp)>strlen(szFileName)))
+						report("Please use Tonescales-subfolder of brainbay application to load/store palette files");
+					  else
+					  {
+
+						 if (!save_to_file(szFileName, &LOADSCALE, sizeof(struct SCALEStruct)))
+							report_error("Could not save Scale");
+					  }
+					}
 				}
 				break;
 
@@ -547,6 +589,8 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					int dataint,sel;
 					sel=SendDlgItemMessage( hDlg, IDC_HARMONICLIST, LB_GETCURSEL , 0, 0L ) ;
 					dataint=SendDlgItemMessage(hDlg, IDC_HARMONICLIST, LB_GETITEMDATA, (WPARAM)sel, 0);
+					midi_NoteOff(&(MIDIPORTS[port].midiout), midichn,oldtone);
+					oldtone=dataint;
 					midi_NoteOn(&(MIDIPORTS[port].midiout), midichn, dataint,127);
 					
                 }
@@ -560,6 +604,8 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			if ((nNewPos=get_scrollpos(wParam,lParam))>=0)
 			{   
 			  if (lParam == (long) GetDlgItem(hDlg,IDC_TONEBAR))  { SetDlgItemInt(hDlg, IDC_ACTTONE,nNewPos,0);
+																	midi_NoteOff(&(MIDIPORTS[port].midiout), midichn,oldtone);
+																	oldtone=nNewPos;
 																	midi_NoteOn(&(MIDIPORTS[port].midiout), midichn,nNewPos,127);
 																	apply_harmonic(hDlg);
 																	}
@@ -596,6 +642,7 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				  if (MIDIPORTS[t].midiout) SendDlgItemMessage(hDlg, IDC_MIDIPORTLIST, LB_ADDSTRING, 0, (LPARAM) (LPSTR) MIDIPORTS[t].portname) ;
 				}
 				SetDlgItemText(hDlg, IDC_MIDIPORTCOMBO, MIDIPORTS[port].portname);
+				SetDlgItemText(hDlg, IDC_EMOTIV_PATH, GLOBAL.emotivpath);
 
 				for (wCount = 0; wCount < MAX_COMPORT; wCount++) 
 				{
@@ -701,6 +748,9 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			case IDC_DRAWINTERVAL:
 				GLOBAL.draw_interval=GetDlgItemInt(hDlg,IDC_DRAWINTERVAL, NULL, 0);
+				break;
+			case IDC_EMOTIV_PATH:
+				GetDlgItemText(hDlg,IDC_EMOTIV_PATH, GLOBAL.emotivpath, 255);
 				break;
 			case IDC_SAVESETTINGS:
 				   if (!save_settings())  report_error("Could not save Settings");
@@ -908,6 +958,12 @@ LRESULT CALLBACK OUTPORTDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 					if (HIWORD(wParam)==CBN_SELCHANGE)
 					{
 					   strcpy(actobject->out_ports[actport].out_dim,dimensions[SendDlgItemMessage(hDlg, IDC_DIMCOMBO, CB_GETCURSEL, 0, 0 )]);
+						update_dimensions();
+						update_outportdlg(hDlg);
+					} 
+					else if (HIWORD(wParam)==CBN_KILLFOCUS) {
+						GetDlgItemText(hDlg, IDC_DIMCOMBO, temp,sizeof(temp));
+						strcpy(actobject->out_ports[actport].out_dim,temp);
 						update_dimensions();
 						update_outportdlg(hDlg);
 					}
@@ -1385,7 +1441,7 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 					{
 					  dx = LOWORD(lParam)+PX; 
 					  dy = HIWORD(lParam)+PY; 
-					  for( t=0; (t<GLOBAL.objects)&&(actport==-1);t++)
+					  for( t=0; (t<GLOBAL.objects)&&(actobject==NULL);t++)
 					  {
 						 for (i=0;(i<objects[t]->outports)&&(actport==-1);i++)    // was an outport clicked ?
 						 {
@@ -1395,7 +1451,7 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 								GLOBAL.showtoolbox=t;
 								actport=i;
 								display_toolbox(actobject->hDlg=CreateDialog(hInst, (LPCTSTR)IDD_OUTPORTBOX, ghWndStatusbox, (DLGPROC)OUTPORTDlgHandler));
-								InvalidateRect(hWnd,NULL,TRUE);
+								//InvalidateRect(hWnd,NULL,TRUE);
 								break;
 							}
 						 }
@@ -1408,7 +1464,6 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 								GLOBAL.showtoolbox=t;
 								actport=i;
 								display_toolbox(actobject->hDlg=CreateDialog(hInst, (LPCTSTR)IDD_INPORTBOX, ghWndStatusbox, (DLGPROC)INPORTDlgHandler));
-								InvalidateRect(hWnd,NULL,TRUE);
 								break;
 							}
 						 }
@@ -1420,16 +1475,14 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 							GLOBAL.showtoolbox=t;
 							if (actobject)
 							{
-								
 								actobject->make_dialog(); 
 								if (actobject->displayWnd) 
 									SetWindowPos(actobject->displayWnd,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
-								InvalidateRect(hWnd,NULL,TRUE);
 							}
 							
 						 }
 
-
+						 InvalidateRect(hWnd,NULL,TRUE);
 					  }
 					}
 				}
@@ -1450,6 +1503,7 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 					  {
 					    actobject=oldobject;
 					    for (i=0;i<actobject->outports;i++)    
+							                
 						  if ((!con_found)&&(abs(dx - actobject->xPos - actobject->width)<CON_MAGNETIC)&&(abs(dy - (actobject->yPos+CON_START+i*CON_HEIGHT))<CON_MAGNETIC))
 							{
 							  int k;
@@ -1473,6 +1527,7 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 					  {
 					    for( t=0; t<GLOBAL.objects;t++)   // was an object clicked ?
 						{
+
 						  if ((abs(dx - objects[t]->xPos - objects[t]->width/2)<objects[t]->width/2)&&(abs(dy - objects[t]->yPos - objects[t]->height/2)<objects[t]->height/2)) 
 						  {                            
 							  
@@ -1589,8 +1644,14 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 					if (actobject) //&&(actobject!=objects[0]))        // delete a whole object
 					{
   		 		   	    write_logfile("deleting object: %s",objnames[actobject->type]);
-
+						if (deviceobject==actobject) deviceobject=NULL;
 						for (object_index=0;actobject!=objects[object_index];object_index++);
+
+						//deleting all connections at this object's output ports
+						//for array_data_ports
+						for (i=MAX_CONNECTS-1;i>=0;i--){
+							delete_connection(&objects[object_index]->out[i]);							
+						}
 						for(t=0;t<GLOBAL.objects;t++)						 
 						  for (i=0;i<MAX_CONNECTS;i++)
 						  {
@@ -1844,7 +1905,7 @@ void update_status_window(void)
 	}
 	else	{
 		if (GLOBAL.session_length==0)
-  		    SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(GLOBAL.main_maximized)+15, 
+  		     SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(GLOBAL.main_maximized)+15, 
 		               LOWORD(GLOBAL.main_maximized)-8,HIWORD(GLOBAL.main_maximized), 0);
 		else SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(GLOBAL.main_maximized)-20, 
 		               LOWORD(GLOBAL.main_maximized)-8,HIWORD(GLOBAL.main_maximized), 0);

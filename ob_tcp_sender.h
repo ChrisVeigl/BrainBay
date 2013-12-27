@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_TCP_SENDER.H:  contains functions for the Neuro Server data transmission
   Based on SDL_net-Code by Jeremy Wilkerson
@@ -54,6 +54,7 @@ public:
 
 	struct EDFHEADERStruct header;
 	struct CHANNELStruct channel[MAX_EEG_CHANNELS];
+	char   edfinfos[8192];
 	char   host[101];
 	int    streamnum;
 	int    state;

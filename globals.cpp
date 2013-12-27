@@ -69,7 +69,17 @@
 #include "ob_array3600.h"
 #include "ob_comreader.h"
 #include "ob_neurobit.h"
-
+#include "ob_min.h"
+#include "ob_max.h"
+#include "ob_round.h"
+#include "ob_differentiate.h"
+#include "ob_delay.h"
+#include "ob_limiter.h"
+#include "ob_emotiv.h"
+#include "ob_floatvector.h"
+#include "ob_vectorfloat.h"
+#include "ob_displayvector.h"
+#include "ob_buffer.h"
 
 //
 // GLOBAL VARIABLES
@@ -89,6 +99,7 @@ int PACKETSPERSECOND=DEF_PACKETSPERSECOND;
 
 BASE_CL * objects[MAX_OBJECTS];
 BASE_CL * actobject;
+BASE_CL * deviceobject;
 BASE_CL * copy_object;
 int    actport;
 struct LINKStruct * actconnect;
@@ -102,8 +113,8 @@ struct MIDIPORTStruct       MIDIPORTS[MAX_MIDIPORTS];
 struct SCALEStruct          LOADSCALE;
 struct TIMINGStruct         TIMING;
 
-char objnames[50][20]      = { OBJNAMES };
-char dimensions[10][10]      = {"uV","mV","Hz","%","Deg","uS","kOhm","BPM" };
+char objnames[OBJECT_COUNT][20]      = { OBJNAMES };
+char dimensions[10][10]      = {"uV","mV","V","Hz","%","DegC","DegF","uS","kOhm","BPM" };
 int  fft_bin_values[10]    = { 32,64,128,256,512,0 };
 
 
@@ -123,6 +134,7 @@ void create_object(int type)
 	switch(type) 
 	{ 
 		case OB_EEG:		 actobject=new EEGOBJ(GLOBAL.objects); 
+							 deviceobject=actobject;
 							 actobject->object_size=sizeof(EEGOBJ);break;
 		case OB_MIDI:		 actobject=new MIDIOBJ(GLOBAL.objects);
 							 actobject->object_size=sizeof(MIDIOBJ);break;
@@ -221,8 +233,32 @@ void create_object(int type)
 		case OB_COMREADER:   actobject=new COMREADEROBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(COMREADEROBJ);break;
 		case OB_NEUROBIT:      actobject=new NEUROBITOBJ(GLOBAL.objects); 
+							 deviceobject=actobject;
 							 actobject->object_size=sizeof(NEUROBITOBJ);break;
-		
+		case OB_MIN:		 actobject=new MINOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(MINOBJ);break;
+		case OB_MAX:         actobject=new MAXOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(MAXOBJ);break;
+		case OB_ROUND:      actobject=new ROUNDOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(ROUNDOBJ);break;
+		case OB_DIFFERENTIATE:      actobject=new DIFFERENTIATEOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(DIFFERENTIATEOBJ);break;
+		case OB_DELAY:      actobject=new DELAYOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(DELAYOBJ);break;
+		case OB_LIMITER:      actobject=new LIMITEROBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(LIMITEROBJ);break;
+		case OB_EMOTIV:		 actobject=new EMOTIVOBJ(GLOBAL.objects);
+							 deviceobject=actobject;
+							 actobject->object_size=sizeof(EMOTIVOBJ);break;
+		case OB_FLOATVECTOR: actobject=new FLOATVECTOROBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(FLOATVECTOROBJ);break;
+		case OB_VECTORFLOAT: actobject=new VECTORFLOATOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(VECTORFLOATOBJ);break;
+		case OB_DISPLAYVECTOR: actobject=new DISPLAYVECTOROBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(DISPLAYVECTOROBJ);break;
+		case OB_BUFFER: actobject=new BUFFEROBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(BUFFEROBJ);break;
+
 	}
 	if (actobject)
 	{
@@ -562,7 +598,6 @@ void init_devicetype(void)
 {
 	TTY.BAUDRATE=DEF_BAUDRATE;
 	TTY.devicetype=DEV_MODEEG_P2;        // Default = Modular EEG Firmware Version P2
-	TTY.samplingrate=0;
 	TTY.amount_to_read=AMOUNT_TO_READ[TTY.devicetype];
 	TTY.bytes_per_packet=BYTES_PER_PACKET[TTY.devicetype];
 }
@@ -628,7 +663,9 @@ void GlobalInitialize()
 	GLOBAL.dialog_interval=DIALOG_UPDATETIME;
 	GLOBAL.draw_interval=DRAW_UPDATETIME;
 	GLOBAL.neurobit_available=0;
+	GLOBAL.emotiv_available=0;
 	GLOBAL.use_cv_capture=0;
+	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");
 
 	GLOBAL.loading=false;
 	GLOBAL.read_tcp=0;
@@ -965,8 +1002,46 @@ void update_dimensions(void)
 
 void update_samplingrate(int newrate)
 {
-	int t;
+	int t,error=0;
 	char sztemp[30],szorder[5];
+
+	for (t=0;t<GLOBAL.objects;t++)
+ 	switch (objects[t]->type)
+	{ 
+	   case OB_FILTER:
+		   {
+			   FILTEROBJ * st = (FILTEROBJ *) objects[t];
+
+			   if (st->par1>newrate/2) { error=1; break;}
+ 			   if ((FILTERTYPE[st->filtertype].param==2) && (st->par2>newrate/2)) { error=1; break;}
+		   }
+		   break;
+	   case OB_MAGNITUDE:
+		   {
+   			    MAGNITUDEOBJ * st = (MAGNITUDEOBJ *) objects[t];
+			   if ((st->wid>newrate/2) ||(st->center>newrate/2))  { error=1; break;}
+		   }
+		   break;
+	   case OB_EEG:
+		   {
+			switch (TTY.devicetype) {
+					case DEV_IBVA:
+						if (TTY.COMDEV!=INVALID_HANDLE_VALUE)
+						{
+							char str[15];
+							wsprintf(str,"SR %d\r",TTY.samplingrate);
+							write_string_to_comport(str);
+						}
+						break;
+					case DEV_MONOLITHEEG_P21:
+						update_p21state();
+						break;
+				}
+		   }
+		   break;
+	}
+
+	if (error) {report_error ("Cannot change Sampling Rate, please check corner frequencies of filter- or magnitude elements"); return;}
 
 	PACKETSPERSECOND=newrate;
 	for (t=0;t<GLOBAL.objects;t++)
@@ -1124,3 +1199,60 @@ int check_OS(void)
    write_logfile ("OS version: %s",(char *)temp.data());
    return osid; 
 } 
+
+//for array_data_ports
+void set_inports(BASE_CL *st, int num){
+	if (st->inports<=num){
+		st->inports = num;
+		return;
+	}
+
+	int i,t,object_index;
+	for (object_index=0;actobject!=objects[object_index];object_index++);
+	for(t=0;t<GLOBAL.objects;t++)						 
+		for (i=0;i<MAX_CONNECTS;i++)
+		{
+		while (objects[t]->out[i].to_object==object_index)
+		{
+			memcpy(&objects[t]->out[i],&objects[t]->out[i+1],sizeof(LINKStruct)*(MAX_CONNECTS-i));
+			objects[t]->out[MAX_CONNECTS-1].to_object=-1;
+			objects[t]->out[MAX_CONNECTS-1].from_port=-1;
+			objects[t]->out[MAX_CONNECTS-1].to_port=-1;
+		}
+		if (objects[t]->out[i].to_object>object_index) 
+			objects[t]->out[i].to_object--;
+		if (objects[t]->out[i].from_object>object_index) 
+			objects[t]->out[i].from_object--;
+		}
+	st->inports = num;
+	get_session_length();
+
+}
+
+//for array_data_ports
+void set_outports(BASE_CL *st, int num){
+	if (st->outports<=num){
+		st->outports = num;
+		return;
+	} 
+	
+	for (int i=num;i<st->outports;i++){
+		for (int j=0;j<MAX_CONNECTS;j++){
+			if (st->out[j].from_port==i){
+				delete_connection(&st->out[j]);
+			}
+		}
+	}
+	st->outports = num;
+	get_session_length();
+}
+
+//for array_data_ports
+void delete_connection(LINKStruct *myactconnect){
+	int o,c;
+	o=myactconnect->to_object;c=-1;
+	for(;myactconnect->to_port!=-1;myactconnect++)
+		memcpy(myactconnect,(void *)(myactconnect+1),sizeof(struct LINKStruct));
+
+	close_toolbox();
+}

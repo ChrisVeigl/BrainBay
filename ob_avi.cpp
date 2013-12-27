@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.7, GPL 2003-2010, contact: chris@shifz.org
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
   MODULE: OB_AVI.CPP:  functions for the AVI-Player-Object
   Author: Chris Veigl
@@ -44,6 +44,9 @@ LRESULT CALLBACK AVIDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
+		  case IDC_AVIFILE:
+				GetDlgItemText(hDlg, IDC_AVIFILE, st->avifile, 255); 
+		   break;
 		  case IDC_LOADAVI:
 			strcpy(szFileName,GLOBAL.resourcepath);
 			strcat(szFileName,"MOVIES\\*.avi");

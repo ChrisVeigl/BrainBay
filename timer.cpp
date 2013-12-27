@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.7, GPL 2003-2010
+  BrainBay  -  Version 1.9, GPL 2003-2014
 
   MODULE:  TIMER.CPP
   Author:  Chris Veigl
@@ -22,6 +22,8 @@
 
 #include "brainBay.h"
 #include "neurobit_api\\api.h"
+#include "ob_emotiv.h"
+
 
 extern TProtocolEngine NdProtocolEngine;
 
@@ -91,6 +93,7 @@ void CALLBACK TimerProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
 
     check_keys();
     if (GLOBAL.neurobit_available) NdProtocolEngine();
+	if (GLOBAL.emotiv_available) process_emotiv();
 
 	if ((!TIMING.pause_timer) && (!GLOBAL.loading))
 	{
@@ -119,7 +122,7 @@ void CALLBACK TimerProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
 			}
 
 			// process packets in case of no File-Read and no Com-Read
-			else if ((TTY.read_pause) && (!GLOBAL.neurobit_available))  process_packets();
+			else if ((TTY.read_pause) && (!GLOBAL.neurobit_available) && (!GLOBAL.emotiv_available))  process_packets();
 
 			if (GLOBAL.fly)
 			{
