@@ -1,4 +1,5 @@
-<H2>BrainBay Open Source Bio- and Neurofeedback application</H2>
+BrainBay Bio- and Neurofeedback application
+-------------------------------------------
 
 Welcome to the BrainBay Github repository !
 The current release version is 1.9 (27-12-2013)
@@ -8,14 +9,17 @@ some GUI-cleanup, fixed issues (webcam/facetracking and particle animation)
 and new signal processing elements.
 
 In case you just want to use the software, you find executable BrainBay.exe 
-in the \bin folder, where also a user manual is available.
+in the bin folder, where also a user manual is available.
 
 If you want to modifiy or extend the software, the Visual Studio 2010
-project files and all source files are located in the \src folder.
+project files and all source files are located in the src folder.
 
 All source code is licensed under GPL, for copyright information 
 please have a look at ReadMe_License.txt
 
+
+Credits
+-------
 
 BIG CREDITS go to:
    Jim Peters for his marvellous filter-works (http://uazu.net/fiview/)
@@ -23,19 +27,22 @@ BIG CREDITS go to:
    Jeff Molofee (NeHe) for this great OpenGl-tutorial (http://nehe.gamedev.net)
    Don Cross for a well working fft-routine (http://www.intersrv.com/~dcross/fft.html)
    AllenD for showing how to do a thread-oriented Com-Handler in Win32
-   Craig Peacock for the outstandig site http://www.beyondlogic.org and his PortTalk I/O-driver
+   Craig Peacock for the the PortTalk I/O-driver, see http://www.beyondlogic.org 
    Marcin Kocikowski for the Neurobit Optima-4 Device and support
    Raymond Nguyen for the vector port additions
    Franz Strobl for the OCZ NIA support
    Stephan Gerhard for the QDS parser
 
 
-Find further documentation on the project hompage http://brainbay.lo-res.org
+Further Infos
+-------------
+
+* Find documentation on the project hompage http://brainbay.lo-res.org
 and in the user and developer manuals.
 I also recommend having a look at the OpenEEG site http://openeeg.sf.net
 or the new OpenBCI project: http://www.openbci.org
 
-If you want to share your BrainBay design files for neurofeedback or biofeedback
+* If you want to share your BrainBay design files for neurofeedback or biofeedback
 protocols, I would be happy to include them in the release.
 
 
