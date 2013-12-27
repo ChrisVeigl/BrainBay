@@ -69,7 +69,7 @@
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>ComputerVision\opencv\include;ComputerVision;neurobit_api</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib;..\lib\ComputerVision\opencv\include;..\lib\ComputerVision;..\lib\neurobit_api</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -79,7 +79,7 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/brainBay.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>libmsvc;ComputerVision\opencv\lib;ComputerVision\videoInput\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\opencv\lib;..\lib\ComputerVision\videoInput\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcd.lib;libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/brainBay.pdb</ProgramDatabaseFile>
@@ -94,7 +94,7 @@
       </PreventDllBinding>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) bin</Command>
+      <Command>copy $(TargetPath) ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -122,7 +122,7 @@
       <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalIncludeDirectories>ComputerVision;ComputerVision\opencv\include;neurobit_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib;..\lib\ComputerVision;..\lib\ComputerVision\opencv\include;..\lib\neurobit_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -138,14 +138,15 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>libmsvc;ComputerVision\videoInput\lib;ComputerVision\opencv\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\videoInput\lib;..\lib\ComputerVision\opencv\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) bin</Command>
+      <Command>copy $(TargetPath) ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\lib\fidlib-0.9.10\fidlib.c" />
     <ClCompile Include="brainbay.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -167,7 +168,6 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="fidlib-0.9.10\fidlib.c" />
     <ClCompile Include="files.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>

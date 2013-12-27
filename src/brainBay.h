@@ -54,7 +54,7 @@
 #include <math.h>
 #include <GL/gl.h>					// OpenGL32 Library
 #include <GL/glu.h>					// GLu32 Library
-#include "SDL/SDL.h"				// SDL Library
+#include <SDL/SDL.h>				// SDL Library
 extern "C" { 
 #include "fidlib.h"				    // Filter Library, uses .c-conventions
 } 
