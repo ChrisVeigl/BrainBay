@@ -754,6 +754,7 @@ void parse_byte_OPENBCI8(unsigned char actbyte)
 	static int framenumber=0;
 	static int bytecounter=0;
 	static int channelcounter=0;
+	static int tempval=0;
 
 	switch (PACKET.readstate) {
 		case 0:  if (actbyte == 0xA0) {          // look for start indicator
@@ -768,22 +769,20 @@ void parse_byte_OPENBCI8(unsigned char actbyte)
 				bytecounter++;
 				if (bytecounter==4) {
 					bytecounter=0;channelcounter=0;
-					PACKET.buffer[0]=0;
+					tempval=0;
 					PACKET.readstate++;
 				} 
 				break;
 		case 3: // get channel values 
-				PACKET.buffer[channelcounter]+= (((unsigned int)actbyte) << (bytecounter*8));
+				tempval |= (((unsigned int)actbyte) << (bytecounter*8));
 				bytecounter++;
 				if (bytecounter==4) {
-				    if (PACKET.buffer[channelcounter] & (1<<31)) 
-						PACKET.buffer[channelcounter]-=(1<<31);
-					PACKET.buffer[channelcounter]+=(1<<23);
+					PACKET.buffer[channelcounter]=(1<<23)+tempval;
 					channelcounter++;
 					if (channelcounter==channelsInPacket) {  // all channels arrived !
 						PACKET.readstate++;
 					}
-					else { bytecounter=0; PACKET.buffer[channelcounter]=0; }
+					else { bytecounter=0; tempval=0; }
 				}
 				break;
 
