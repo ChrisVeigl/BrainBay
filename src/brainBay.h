@@ -634,7 +634,7 @@ int		open_file_dlg(HWND hDlg, char * szFileName, int type, BOOL flag_save);
 BOOL	load_from_file(LPCTSTR pszFileName, void * buffer, int size);
 BOOL	save_to_file(LPCTSTR pszFileName, void * buffer, int size);
 HANDLE	create_captfile(LPCTSTR);
-void	open_captfile(LPCTSTR);
+int	open_captfile(LPCTSTR);
 void	close_captfile(void );
 void	write_captfile(unsigned char );
 void	read_captfile(int);

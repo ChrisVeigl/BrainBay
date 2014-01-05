@@ -757,31 +757,39 @@ void parse_byte_OPENBCI8(unsigned char actbyte)
 
 	switch (PACKET.readstate) {
 		case 0:  if (actbyte == 0xA0) {          // look for start indicator
-					bytecounter=framenumber=0; 
 					PACKET.readstate++;
 				 } 
 				 break;
-		case 1:  channelsInPacket = (int)actbyte / 4 - 1;   // get number of channels
+		case 1:  channelsInPacket = ((int)actbyte) / 4 - 1;   // get number of channels
 				 if ((channelsInPacket<1) || (channelsInPacket>8)) PACKET.readstate=0;
-				 else PACKET.readstate++;
+				 else { framenumber=0; bytecounter=0; PACKET.readstate++;}
 				 break;
-		case 2: framenumber+= ((unsigned int)actbyte << (bytecounter*8));  // get framenumber
-				if (++bytecounter==4) {
-					bytecounter=channelcounter=PACKET.buffer[channelcounter]=0;
+		case 2: framenumber+= (((unsigned int)actbyte) << (bytecounter*8));  // get framenumber
+				bytecounter++;
+				if (bytecounter==4) {
+					bytecounter=0;channelcounter=0;
+					PACKET.buffer[0]=0;
 					PACKET.readstate++;
 				} 
 				break;
 		case 3: // get channel values 
-				PACKET.buffer[channelcounter]+= ((unsigned int)actbyte << (bytecounter*8));
-				if (++bytecounter==4) {
-					if (++channelcounter==channelsInPacket) {  // all channels arrived !
+				PACKET.buffer[channelcounter]+= (((unsigned int)actbyte) << (bytecounter*8));
+				bytecounter++;
+				if (bytecounter==4) {
+				    if (PACKET.buffer[channelcounter] & (1<<31)) 
+						PACKET.buffer[channelcounter]-=(1<<31);
+					PACKET.buffer[channelcounter]+=(1<<23);
+					channelcounter++;
+					if (channelcounter==channelsInPacket) {  // all channels arrived !
 						PACKET.readstate++;
 					}
-					else bytecounter=PACKET.buffer[channelcounter]=0;
+					else { bytecounter=0; PACKET.buffer[channelcounter]=0; }
 				}
 				break;
-		case 4: if (actbyte == 0xc0)     // if correct end delimiter found:
-					process_packets();   // call message pump  
+
+		case 4: if (actbyte == 0xC0)     // if correct end delimiter found:
+					process_packets();   // call message pump 
+
 		default: PACKET.readstate=0;  // look for next packet
 	}
 }
@@ -968,6 +976,11 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 		case DEV_OPENBCI8:
 			st->resolution=24;
 			numChannels=8;
+			for (i=0;i<numChannels;i++)
+			{
+     			st->out_ports[i].out_min=-187904.8192f;
+				st->out_ports[i].out_max=187904.8192f;
+			}
 			break;
 
 		case DEV_MONOLITHEEG_P21:
@@ -1342,14 +1355,9 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 			if (resolution<8) resolution=10;
 			write_logfile("EEG LOAD: TTY.devicetype = %d, outports=%d",TTY.devicetype,outports);
 
-			int desired_outports=6;
+			int desired_outports=7;
 
 			switch (TTY.devicetype) {
-				case DEV_MODEEG_P2: 
-				case DEV_MODEEG_P3: 
-				case DEV_MONOLITHEEG_P21:
-					desired_outports=7;
-				break;
 				case DEV_RAW: 
 				case DEV_RAW8BIT: 
 					desired_outports=1;
@@ -1362,7 +1370,11 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 					desired_outports=4;
 				break;
 				case DEV_QDS: 
+				case DEV_OPENBCI8:
 					desired_outports=8;
+				break;
+				default:
+					desired_outports=7;
 				break;
 			}
 			if (outports!=desired_outports) 
@@ -1403,7 +1415,7 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 
 			default:  // all other devices
 			  for (x=0;x<outports;x++)
-					pass_values(x,(float) PACKET.buffer[x] * (out_ports[x].out_max-out_ports[x].out_min) / (float)(1<<resolution) + out_ports[x].out_min);
+					pass_values(x, ((float) PACKET.buffer[x])  * (out_ports[x].out_max-out_ports[x].out_min) / (float)(1<<resolution) + out_ports[x].out_min);
 			  break;
 		}
 
