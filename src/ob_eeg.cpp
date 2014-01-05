@@ -974,6 +974,8 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 
 		case DEV_OPENBCI8:
 			st->resolution=24;
+			TTY.BAUDRATE=115200;
+			update_samplingrate(250);
 			numChannels=8;
 			for (i=0;i<numChannels;i++)
 			{
