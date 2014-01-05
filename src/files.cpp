@@ -154,7 +154,7 @@ void update_devicetype(void)
 	get_session_length();
 }
 
-void open_captfile(LPCTSTR lpFName)
+int open_captfile(LPCTSTR lpFName)
 {
 	DWORD dwRead;
 
@@ -162,7 +162,7 @@ void open_captfile(LPCTSTR lpFName)
 
 	CAPTFILE.offset=0;
 
-	write_logfile("create capture file: %s: ", (char *)lpFName);
+	write_logfile("opening capture file: %s: ", (char *)lpFName);
 	CAPTFILE.filehandle = CreateFile(lpFName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
 	{
@@ -170,7 +170,7 @@ void open_captfile(LPCTSTR lpFName)
 		{ 
 			report_error("Could not read from Archive File");
 			CAPTFILE.filehandle=INVALID_HANDLE_VALUE;
-			return;
+			return (0);
 		}
 		if (strstr(header.description,"BrainBay Archive File")!=NULL)
 		{
@@ -189,11 +189,16 @@ void open_captfile(LPCTSTR lpFName)
 	}
 	else
 	{  
-		strcat(CAPTFILE.filename,": Archive not found.");
-		report(CAPTFILE.filename);
-		strcpy(CAPTFILE.filename,"none");
+		if (GLOBAL.loading)
+		{
+			strcat(CAPTFILE.filename,": Archive not found.");
+			report(CAPTFILE.filename);
+			strcpy(CAPTFILE.filename,"none");
+		}
+		return(0);
 	}
 	get_session_length();
+	return(1);
 }
 
 
@@ -582,12 +587,16 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 CAPTFILE.do_read=0;
 		 if (strcmp(CAPTFILE.filename,"none"))
 		 {
-			 char st[150];
-			 reduce_filepath(st,CAPTFILE.filename);
-			 strcpy(CAPTFILE.filename,GLOBAL.resourcepath);
-			 strcat(CAPTFILE.filename,"ARCHIVES\\");
-			 strcat(CAPTFILE.filename,st);			 
-			 open_captfile(CAPTFILE.filename);
+			 if (open_captfile(CAPTFILE.filename)==0)
+			 {
+				 char st[150];
+				 open_captfile(CAPTFILE.filename);
+				 reduce_filepath(st,CAPTFILE.filename);
+				 strcpy(CAPTFILE.filename,GLOBAL.resourcepath);
+				 strcat(CAPTFILE.filename,"ARCHIVES\\");
+				 strcat(CAPTFILE.filename,st);			 
+				 open_captfile(CAPTFILE.filename);
+			 }
 		 }
 
 		 init_system_time();
