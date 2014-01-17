@@ -19,8 +19,8 @@
 #include "neurobit_api\\param.h"
 
 /* Directory of Neurobit Driver runtime files */
-#define NEUROBIT_DLL "\\NeurobitRuntime\\NeurobitDrv.DLL"
-#define NEUROBIT_DIR "\\NeurobitRuntime\\"
+#define NEUROBIT_DLL "NeurobitRuntime\\NeurobitDrv.DLL"
+#define NEUROBIT_DIR "NeurobitRuntime\\"
 #define NB_DEFCONFIGFILE "NB_OPTIMA_DefConfig.nb4"
 
 #define MAX_SIGNALS 16
