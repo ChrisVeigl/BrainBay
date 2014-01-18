@@ -19,7 +19,7 @@
 #include "neurobit_api\\param.h"
 
 /* Directory of Neurobit Driver runtime files */
-#define NEUROBIT_DLL "NeurobitRuntime\\NeurobitDrv.DLL"
+#define NEUROBIT_DLL "NeurobitRuntime\\NeurobitDrv.dll"
 #define NEUROBIT_DIR "NeurobitRuntime\\"
 #define NB_DEFCONFIGFILE "NB_OPTIMA_DefConfig.nb4"
 
@@ -306,7 +306,7 @@ int WriteCfgFile(word dc, const char *fname)
 
 
 /* Init Neurobit driver library use */
-static HMODULE InitNeurobitDrvLib(const char * drvLibName)
+static HMODULE InitNeurobitDrvLib(char * drvLibName)
 {
 	HMODULE drv_lib;
 
@@ -322,6 +322,7 @@ static HMODULE InitNeurobitDrvLib(const char * drvLibName)
 		report_error(strcat(errmsg, DrvLibName));
 		return NULL;
 	}
+
 	if (!(NdStartMeasurement = (TStartMeasurement) GetProcAddress(drv_lib, "NdStartMeasurement")) ||
 		!(NdStopMeasurement = (TStopMeasurement) GetProcAddress(drv_lib, "NdStopMeasurement")) ||
 		!(NdProtocolEngine = (TProtocolEngine) GetProcAddress(drv_lib, "NdProtocolEngine")) ||
