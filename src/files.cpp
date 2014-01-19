@@ -189,11 +189,11 @@ int open_captfile(LPCTSTR lpFName)
 	}
 	else
 	{  
-		if (GLOBAL.loading)
+		if (GLOBAL.loading==0)
 		{
 			strcat(CAPTFILE.filename,": Archive not found.");
 			report(CAPTFILE.filename);
-			strcpy(CAPTFILE.filename,"none");
+			//strcpy(CAPTFILE.filename,"none");
 		}
 		return(0);
 	}
@@ -522,6 +522,15 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 load_property("minimized",P_INT,&GLOBAL.minimized);
 		 save_toolbox=GLOBAL.showtoolbox;
 
+		 if (GLOBAL.left >= GetSystemMetrics(SM_CXVIRTUALSCREEN))
+			 GLOBAL.left=10;
+		 if (GLOBAL.top >= GetSystemMetrics(SM_CYVIRTUALSCREEN))
+			 GLOBAL.top=10;
+		 if (GLOBAL.tool_left >= GetSystemMetrics(SM_CXVIRTUALSCREEN))
+			 GLOBAL.tool_left=100;
+		 if (GLOBAL.tool_top >= GetSystemMetrics(SM_CYVIRTUALSCREEN))
+			 GLOBAL.tool_top=100;
+
 
 		 TTY.PORT=0;try_connect=0;
 		 load_property("comport",P_INT,&TTY.PORT);		 
@@ -590,7 +599,6 @@ BOOL load_configfile(LPCTSTR pszFileName)
 			 if (open_captfile(CAPTFILE.filename)==0)
 			 {
 				 char st[150];
-				 open_captfile(CAPTFILE.filename);
 				 reduce_filepath(st,CAPTFILE.filename);
 				 strcpy(CAPTFILE.filename,GLOBAL.resourcepath);
 				 strcat(CAPTFILE.filename,"ARCHIVES\\");
