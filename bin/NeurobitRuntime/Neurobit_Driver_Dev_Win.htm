@@ -7,10 +7,10 @@
 
 <body style="font-family: Arial; margin-left: 7%; margin-right: 9%; 
   margin-top: 5%; margin-bottom: 5%; font-size: 11pt; ">
-<h1 align="center">Neurobit Driver 3.1</h1>
+<h1 align="center">Neurobit Driver 3.6</h1>
 <p align="center" style="font-size: 160%; font-weight: bold;">Device window</p>
 <div style="line-height: 135%; ">
-<p align="center"><i>&copy; Copyright by Neurobit Systems 2010-2011</i><br>
+<p align="center"><i>&copy; Copyright by Neurobit Systems 2010-2013</i><br>
 <a href="http://www.neurobitsystems.com/">http://www.neurobitsystems.com</a></p>
 
 <p><b>Neurobit Driver</b> enables applications to communicate with biofeedback and 
@@ -18,7 +18,7 @@ physiological data acquisition equipment by Neurobit Systems. In the device
 window created by the driver you can set configuration of a given device.
 For some devices, such as Neurobit Optima, it is also possible to test 
 electrode-skin impedances & input circuit continuity.<br>
-The driver is running under Microsoft Windows 7/Vista/XP/2000 systems.
+The driver is running under Microsoft Windows 8/7/Vista/XP/2000 systems.
 
 <p>Contents:</p>
 <ol style="top-padding: 0;">
@@ -73,6 +73,7 @@ available settings.</p>
 <h3><a name="general">General tab</a></h3>
 <ul>
   <li><p><b>Link type</b> - type of link used for communication with the device.</p>
+
   <li><p><b>Device address</b> - Bluetooth address of Neurobit device (or name of 
     its communication module).<br> 
     If you have only one turned on Neurobit Optima device 
@@ -80,14 +81,32 @@ available settings.</p>
     this field. (Otherwise it is recommended to set here a specific address of a given device.
     Addresses of Bluetooth devices seen by your computer can be listed in system 
     "Control Panel"/"Bluetooth Devices".)</p>
+
   <li><p><b>Power mains frequency</b> [Hz] - sets mains frequency used in your 
     country, required for power interference filtering in the device.<br> 
     For example, most European countries uses 50 Hz mains, while 60 Hz is used in North America. 
+    In most cases you can leave the default setting.</p>
+
+    <p>NOTES: The power frequency is set automatically, based on user's 
+      geographic location (country) set in the system ("Control Panel"/"Regional and Language Options"/Location),
+      when the Neurobit Driver starts the first time, or when a user has changed geographic location
+      in the system since previous start of the driver. 
+      The setting is then stored in the system registry. It is common for all applications 
+      using Neurobit Driver. 
+      Unlike other device settings, the power frequency is not read from design or configuration files.</p>
+
+    <p>Nevertheless, manual frequency selection may be sometimes necessary, for example: 
+    <ul>
+      <li>when traveling and location info in the system is not up-to-date, or 
+      <li>in Japan, where two power frequencies are in use.
+    </ul>
     You can check <a href="http://en.wikipedia.org/wiki/Mains_power_around_the_world#Table_of_mains_voltages_and_frequencies" target="_blank">local power frequency</a> in the web.</p>
+
   <li><p><b>Silent mode</b> - turns off sound signalization of events (artifacts etc.) in the 
     device during measurements.<br>
     Visual signalization is not influenced. 
     (The option is insignificant in devices without sound transducer.)</p>
+
   <li><p><b>Device services</b> button - opens the application of device service functions, 
     for example firmware upgrade.</p>
 </ul>
@@ -260,12 +279,29 @@ for individual measurement channels:
 
 <h2><a name="remarks">3. Remarks</a></h2>
 <ul>
+  <li><p>For interoperation with <u>BioExplorer</u> application (v. 1.6 or earlier), which 
+    does not store Neurobit device settings along with a design, there are two additional 
+    buttons at the bottom of the window to facilitate device configuration:
+    <ul>
+      <li><b>Load</b> settings from file,
+      <li><b>Save</b> settings in file.
+    </ul>
+    </p><p>NOTES:
+    <ul>
+      <li>Make sure that loaded configuration is suitable for
+        current BioExplorer design (e.g. that channels are configured to
+        measure EEG for a neurofeedback design).
+      <li>Only configuration file for current device model (selected in the Device
+        Manager of the application) can be loaded.
+    </ul>
+    </p>
+
   <li><p><u>For Neurobit Lite devices:</u> please remember that computer-based session is 
-  initiated from computer side, and not with Start! command from the device's menu. 
-  (For stand-alone trainings initiated with Start! in the device, no data is transmitted 
-  to computer.)</p>
+    initiated from computer side, and not with Start! command from the device's menu. 
+    (For stand-alone trainings initiated with Start! in the device, no data is transmitted 
+    to computer.)</p>
   <li><p>Episodes of signaled artifacts are not cut out from measured data to avoid loss 
-  of time information.</p>
+    of time information.</p>
   <li><p>Additional information in the equipment instruction manual 
     may apply to the product use with a computer.</p>
 </ul>

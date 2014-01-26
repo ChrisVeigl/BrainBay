@@ -62,6 +62,7 @@ BEGIN
                 MENUITEM "Emotiv Epoc (14 Channels, raw EEG data)", IDM_INSERTEMOTIV
                 MENUITEM "IBVA (2 Channel EEG)",        IDM_INSERT_EEG_IBVA
                 MENUITEM "MonolithEEG (P21 Packetformat)", IDM_INSERT_EEG_P21
+                MENUITEM "Neurobit Biosignal Amplifier (Lite, Optima-2 or Optima-4)", IDM_INSERTOPTIMA
                 MENUITEM "OCZ NIA (2 Channel EEG)",     IDM_INSERT_EEG_NIA
                 MENUITEM "OpenBCI (8 Channel EEG)",     IDM_INSERT_EEG_OPENBCI8
                 MENUITEM "OpenEEG / Olimex SMT EEG (2-6 Channnels, ModularEEG P2 Packetformat)", IDM_INSERT_EEG_P2
@@ -70,7 +71,6 @@ BEGIN
                 MENUITEM "QDS NFK (2/4 Channels)",      IDM_INSERT_EEG_QDS
                 MENUITEM "SmartBrainTechnologies (4 Channel EEG)", IDM_INSERT_EEG_SBT4
                 MENUITEM "SmartBrainTechnologies (2 Channel Bluetooth EEG)", IDM_INSERT_EEG_SBT2
-                MENUITEM "Neurobit Biosignal Amplifier (Lite, Optima-2 or Optima-4)", IDM_INSERTOPTIMA
             END
             MENUITEM "Camera",                      IDM_INSERTCAM
             MENUITEM "Com-Reader",                  IDM_INSERTCOMREADER
