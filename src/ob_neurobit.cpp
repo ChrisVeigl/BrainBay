@@ -431,6 +431,18 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_RESETBUTTON,0);
 							st->filemode=FILE_READING;
 							get_session_length();
+
+							GLOBAL.addtime=0;
+							FILETIME ftCreate, ftAccess, ftWrite;
+							SYSTEMTIME stUTC, stLocal;
+							DWORD dwRet;
+								
+							if (GetFileTime(st->filehandle, &ftCreate, &ftAccess, &ftWrite))
+							{ 
+								FileTimeToSystemTime(&ftWrite, &stUTC);
+								SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+								GLOBAL.addtime=stLocal.wHour*3600 + stLocal.wMinute*60 + stLocal.wSecond+ (float)stLocal.wMilliseconds/1000;
+							} 
 						}
 					}
 				break;
@@ -442,6 +454,7 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 					st->filehandle=INVALID_HANDLE_VALUE;
 					SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
 					get_session_length();
+					GLOBAL.addtime=0;
 				}
 				break;
 			case IDC_REC_NB_ARCHIVE:

@@ -265,7 +265,6 @@ extern HGLRC		 GLRC_Animation;
 
 extern int PACKETSPERSECOND;
 
-
 extern char   midi_instnames[256][30];
 extern char   captfiletypes[10][40];
 extern char   devicetypes[20][40];
@@ -349,6 +348,9 @@ typedef struct GLOBALStruct
 	long session_end;
 	int	 session_loop;
 	int syncloss;
+
+	int add_archivetime;
+	float addtime;
 } GLOBALStruct;
 
 

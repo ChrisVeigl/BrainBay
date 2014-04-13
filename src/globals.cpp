@@ -328,24 +328,25 @@ void reset_oscilloscopes(void)
 
 void print_time(char * str, float f, int mode)
 {
-	int min,sec;
+	int hour,min,sec;
 
-	
 	if (mode==0)
 	{
-		
-		min = (int)(f/60);
+		if (GLOBAL.add_archivetime) f+=GLOBAL.addtime;
+		hour= ((int)(f/3600))%24;
+		min = ((int)(f/60))%60;
 		sec= ((int)f)%60;
-		sprintf(str," %d:%d ",min,sec);
+		
+		sprintf(str," %02d:%02d:%02d ",hour,min,sec);
 	}
 	else
 	{
-
-
-		min = (int)(f/60);
+		if (GLOBAL.add_archivetime) f+=GLOBAL.addtime;
+		hour= ((int)(f/3600))%24;
+		min = ((int)(f/60))%60;
 		sec= ((int)f)%60;
 		
-		sprintf(str," %d:%.1f ",min,(float)sec+(f-(int)f));
+		sprintf(str," %02d:%02d:%02d.%03d ",hour,min,sec,(int)((f-(int)f)*1000));
 	}
 }
 

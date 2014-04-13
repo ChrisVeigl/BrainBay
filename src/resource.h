@@ -388,6 +388,8 @@
 #define IDC_PRESTIM                     1261
 #define IDC_MINIMIZED                   1261
 #define IDC_STARTCAPTURE                1262
+#define IDC_STARTUP2                    1262
+#define IDC_ADDARCHIVETIME              1262
 #define IDC_LENGTH                      1263
 #define IDC_SESSIONPOS                  1263
 #define IDC_STOPCAPTURE                 1264

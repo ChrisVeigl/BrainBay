@@ -671,6 +671,7 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				CheckDlgButton(hDlg, IDC_MINIMIZED, GLOBAL.minimized);
 				CheckDlgButton(hDlg, IDC_USE_CVCAPTURE, GLOBAL.use_cv_capture);
 				CheckDlgButton(hDlg, IDC_USE_VIDEOINPUT, !GLOBAL.use_cv_capture);
+				CheckDlgButton(hDlg, IDC_ADDARCHIVETIME, GLOBAL.add_archivetime);
 
 			}
 			return TRUE;
@@ -731,6 +732,9 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 		 		 GLOBAL.tool_top=0;
 				 GLOBAL.tool_left=0;
 					 
+				 break;
+			case IDC_ADDARCHIVETIME:
+				 GLOBAL.add_archivetime= IsDlgButtonChecked(hDlg, IDC_ADDARCHIVETIME);
 				 break;
 			case IDC_AUTORUN:
 				 GLOBAL.autorun= IsDlgButtonChecked(hDlg, IDC_AUTORUN);
@@ -1163,10 +1167,10 @@ void update_statusinfo(void)
 
 	if (GLOBAL.session_length>0)
 	{
-		print_time(szdata,(float)GLOBAL.session_end/(float)PACKETSPERSECOND,1);
+		print_time(szdata,(float)GLOBAL.session_end/(float)PACKETSPERSECOND,0);
 		SetDlgItemText(ghWndStatusbox,IDC_SESSLEN,szdata);
 
-		print_time(szdata, (float)GLOBAL.session_start/(float)PACKETSPERSECOND,1);
+		print_time(szdata, (float)GLOBAL.session_start/(float)PACKETSPERSECOND,0);
 		SetDlgItemText(ghWndStatusbox,IDC_SESSTART,szdata);
 
 		if (GLOBAL.session_sliding<4) { GLOBAL.session_sliding=-1; SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETPOS,TRUE,get_sliderpos(TIMING.packetcounter)); }
@@ -1193,10 +1197,10 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 				SendMessage(hTrack_Bar,TBM_SETRANGE,TRUE,MAKELONG(0, 1000));
 				SendMessage(hTrack_Bar,TBM_SETPOS,TRUE,(LONG)0);
 
-				SetDlgItemText(hDlg,IDC_TIME,"0.0 sec");
-				SetDlgItemText(hDlg, IDC_JUMPPOS, "0.0");
-				SetDlgItemText(hDlg, IDC_SESSLEN, "0.0");
-				SetDlgItemText(hDlg, IDC_SESSTART, "0.0");
+				SetDlgItemText(hDlg,IDC_TIME," 00:00:00.000");
+				SetDlgItemText(hDlg, IDC_JUMPPOS, "00:00:00");
+				SetDlgItemText(hDlg, IDC_SESSLEN, "00:00:00");
+				SetDlgItemText(hDlg, IDC_SESSTART, "00:00:00");
 				SetDlgItemText (hDlg, IDC_STATUS, "BrainBay ready.");
 
 				SendMessage(hTrack_Bar,TBM_SETSELSTART,TRUE,0);

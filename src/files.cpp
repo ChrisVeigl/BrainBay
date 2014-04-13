@@ -159,8 +159,8 @@ int open_captfile(LPCTSTR lpFName)
 	DWORD dwRead;
 
 	CAPTFILEHEADERStruct  header;
-
 	CAPTFILE.offset=0;
+	GLOBAL.addtime =0;
 
 	write_logfile("opening capture file: %s: ", (char *)lpFName);
 	CAPTFILE.filehandle = CreateFile(lpFName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -185,6 +185,17 @@ int open_captfile(LPCTSTR lpFName)
 		strcpy(CAPTFILE.devicetype,header.devicetype);
 		update_devicetype();
 		CAPTFILE.file_action=FILE_READING;
+
+		FILETIME ftCreate, ftAccess, ftWrite;
+		SYSTEMTIME stUTC, stLocal;
+		DWORD dwRet;
+								
+		if (GetFileTime(CAPTFILE.filehandle, &ftCreate, &ftAccess, &ftWrite))
+		{ 
+			FileTimeToSystemTime(&ftWrite, &stUTC);
+			SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+			GLOBAL.addtime=stLocal.wHour*3600 + stLocal.wMinute*60 + stLocal.wSecond+ (float)stLocal.wMilliseconds/1000;
+		} 
 
 	}
 	else
@@ -221,6 +232,7 @@ void close_captfile(void)
 
 	}
 	get_session_length();
+	GLOBAL.addtime=0;
 }
 
 
@@ -750,6 +762,7 @@ BOOL save_settings(void)
 	save_property(hFile,"configfile",P_STRING,GLOBAL.configfile);
 	save_property(hFile,"use_cvcapture",P_INT,&GLOBAL.use_cv_capture);
 	save_property(hFile,"emotivpath",P_STRING,GLOBAL.emotivpath);
+	save_property(hFile,"addtime",P_INT,&GLOBAL.add_archivetime);
 
 	x=0;
 	for (t=0;t<GLOBAL.midiports;t++)
@@ -788,6 +801,7 @@ BOOL load_settings(void)
 	load_property("autorun",P_INT,&GLOBAL.autorun);
 	load_property("configfile",P_STRING,GLOBAL.configfile);
 	load_property("use_cvcapture",P_INT,&GLOBAL.use_cv_capture);
+	load_property("addtime",P_INT,&GLOBAL.add_archivetime);
 	load_property("emotivpath",P_STRING,GLOBAL.emotivpath);
 
 
