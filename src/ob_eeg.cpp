@@ -812,6 +812,7 @@ void parse_byte_OPI(unsigned char actbyte)
 	static unsigned char buffer[8192];
 	static int actpos =0;
 	static int checksum, runningsum=0;
+	static short tempval=0;
 
     switch (PACKET.readstate) 
 	{
@@ -824,7 +825,7 @@ void parse_byte_OPI(unsigned char actbyte)
 				  PACKET.readstate++; 
 				  break;
 		  case 3: packetlen+=actbyte;
-				  if (packetlen < 8192) { actpos=0; runningsum=0; PACKET.readstate++; }
+				  if (packetlen == 0x92) { actpos=0; runningsum=0; PACKET.readstate++; }
 				  else PACKET.readstate=0;
 				  break;
 	      case 4: buffer[actpos++]=actbyte;
@@ -842,8 +843,12 @@ void parse_byte_OPI(unsigned char actbyte)
 					    PACKET.buffer[3]=  buffer[14+128+3];
 						for (int i=0; i< 64; i++)
 						{
-					      PACKET.buffer[0]=  buffer[14+i*2]*256 + buffer[15+i*2];
-			  	  	      process_packets();
+							tempval = (((short)buffer[14+i*2]) <<8)
+							          | ((short)buffer[15+i*2]);
+							PACKET.buffer[0]=(1<<15)+tempval;
+
+					        //PACKET.buffer[0]=  buffer[14+i*2]*256 + buffer[15+i*2];
+			  	  	        process_packets();
 						}
 				  }
 				  PACKET.readstate=0;
@@ -878,6 +883,7 @@ void ParseLocalInput(int BufLen)
 			case DEV_NIA:		parse_byte_NIA(actbyte); break;
 			case DEV_IBVA:		parse_byte_IBVA(actbyte); break;
 			case DEV_OPENBCI8:	parse_byte_OPENBCI8(actbyte); break;
+			case DEV_OPI_EXPLORATION: parse_byte_OPI(actbyte); break;
 		}
 	}
 	return;
@@ -990,8 +996,8 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 			break;
 
 		case DEV_OPI_EXPLORATION:
-			numChannels=1;
-			st->resolution=13;
+			numChannels=4;
+			st->resolution=16;
 			break;
 
 		case DEV_PENDANT3:
@@ -1359,6 +1365,7 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 	  		  if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,1);
 			  if (TTY.devicetype==DEV_SBT2) { write_to_comport(0x20); write_to_comport(0x00); }
 			  if (TTY.devicetype==DEV_OPENBCI8) { write_to_comport('b'); }
+			  if (TTY.devicetype==DEV_OPI_EXPLORATION) {  start_opi_pollthread();  }
 		  }
 		  if (ghWndToolbox==hDlg)  update_captfile_guibuttons(hDlg);
 
@@ -1368,6 +1375,8 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 	  {	
 		    if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,0);
 			if (TTY.devicetype==DEV_SBT2) { write_to_comport(0x40); write_to_comport(0x00); }
+			if (TTY.devicetype==DEV_OPI_EXPLORATION) {  stop_opi_pollthread();  }
+
 			CAPTFILE.do_read=0;TTY.read_pause=1; //CAPTFILE.do_write=0;
 			if (hDlg==ghWndToolbox) update_captfile_guibuttons(hDlg);
 	  }
@@ -1427,7 +1436,7 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 				case DEV_RAW: 
 				case DEV_RAW8BIT: 
 				case DEV_OPI_EXPLORATION: 
-					desired_outports=1;
+					desired_outports=4;
 				break;
 				case DEV_NIA: 
 					desired_outports=2;

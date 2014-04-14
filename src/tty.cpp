@@ -28,6 +28,7 @@ DWORD WINAPI ReaderProc(LPVOID);
 int c=0;
 
 BOOL       fThreadDone = FALSE;
+BOOL       fOpiThreadDone = FALSE;
 
 /*-----------------------------------------------------------------------------
 
@@ -221,13 +222,16 @@ DWORD WINAPI WriterProc(LPVOID lpv)
 {
     DWORD dwWritten;
 
-
     while (!fThreadDone) 
 	{
-        if ((TTY.CONNECTED)&&(TTY.amount_to_write>0)&&(!TTY.writing))
+        if ((TTY.CONNECTED)&&(TTY.amount_to_write>0))
 		{
+			if ( WaitForSingleObject( TTY.writeMutex, INFINITE ) == WAIT_OBJECT_0 )
+			{
 			    WriteFile(TTY.COMDEV, TTY.writeBuf, TTY.amount_to_write, &dwWritten, 0); 
 				TTY.amount_to_write=0;
+				ReleaseMutex( TTY.writeMutex );
+			}
 		} else Sleep (10);
 	}
 	write_logfile("COMPORT closed");    
@@ -235,13 +239,70 @@ DWORD WINAPI WriterProc(LPVOID lpv)
 }
 
 
+DWORD WINAPI OpiProc(LPVOID lpv)
+{
+    DWORD dwWritten;
+
+	unsigned char buf[8];
+	buf[0]=0x33; buf[1]=0x33; buf[2]=0x00;
+	buf[3]=0x02; buf[4]=0x10; buf[5]=0x00;
+	buf[6]=0x00; buf[7]=0x10;
+
+    while (!fThreadDone) 
+	{
+		if (TTY.CONNECTED)
+		{
+			write_to_comport (buf,8); 
+			Sleep (50);  // send a request packet every 50 milliseconds
+		}
+	}
+	return(0);
+}
+
+
+int start_opi_pollthread (void)
+{
+	DWORD dwOpiThreadStatId;
+
+	fOpiThreadDone=FALSE;
+	TTY.OPITHREAD =
+		CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) OpiProc, 0, 0, &dwOpiThreadStatId);
+
+	return(0);
+}
+
+int stop_opi_pollthread (void)
+{
+	fOpiThreadDone=TRUE;
+	return(0);
+}
+
+
 int write_to_comport ( unsigned char byte)
 {
-	TTY.writing=1;
-	TTY.writeBuf[TTY.amount_to_write]=byte;TTY.amount_to_write++;
-	TTY.writing=0;
+	if ( WaitForSingleObject( TTY.writeMutex, INFINITE ) == WAIT_OBJECT_0 )
+	{
+		TTY.writeBuf[TTY.amount_to_write]=byte;TTY.amount_to_write++;
+	    ReleaseMutex( TTY.writeMutex );
+    }
 	return(1);
 }
+
+int write_to_comport ( unsigned char * buf, int len)
+{
+	if ( WaitForSingleObject( TTY.writeMutex, INFINITE ) == WAIT_OBJECT_0 )
+	{
+		for (int i=0; i<len;i++)
+		{
+			TTY.writeBuf[TTY.amount_to_write]=buf[i];
+			TTY.amount_to_write++;
+		}
+	    ReleaseMutex( TTY.writeMutex );
+    }
+	return(1);
+}
+
+
 void write_string_to_comport ( char * s)
 {
 	for (unsigned int i=0; i< strlen(s); i++) 

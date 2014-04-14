@@ -645,7 +645,8 @@ void GlobalInitialize()
 	TTY.CONNECTED=FALSE;
 	TTY.read_pause=TRUE;
 	TTY.amount_to_write=0;
-	TTY.writing=0;
+	TTY.writeMutex=	CreateMutex( NULL, FALSE, NULL ); 
+
 	TTY.FLOW_CONTROL=0;
 
 	PACKET.readstate=0;

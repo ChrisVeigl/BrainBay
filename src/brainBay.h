@@ -448,7 +448,9 @@ typedef struct TTYStruct
     COMMTIMEOUTS TIMEOUTSNEW;
 	HANDLE		 READERTHREAD;
 	HANDLE		 WRITERTHREAD;
+	HANDLE		 OPITHREAD;
 	HANDLE		 ThreadExitEvent;
+	HANDLE		 writeMutex;
 	BOOL		 CONNECTED;
 	BOOL		 BIDIRECT;
 	int          FLOW_CONTROL;
@@ -458,7 +460,6 @@ typedef struct TTYStruct
 	int          amount_to_read;
 	int          bytes_per_packet;
 	int			 amount_to_write;
-	int			 writing;
     unsigned char readBuf[4096];
 	unsigned char writeBuf[4096];
 	LONGLONG packettime;
@@ -574,7 +575,10 @@ void   register_classes (HINSTANCE);
 void   GlobalInitialize( void );
 void   GlobalCleanup( void );
 int    write_to_comport ( unsigned char byte);
+int    write_to_comport ( unsigned char * buf, int len);
 void   write_string_to_comport ( char * s);
+int    start_opi_pollthread (void);
+int    stop_opi_pollthread (void);
 void   init_system_time( void );
 void   init_draw(void);
 void   init_channels(void);
