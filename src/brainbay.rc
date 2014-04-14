@@ -67,6 +67,7 @@ BEGIN
                 MENUITEM "OpenBCI (8 Channel EEG)",     IDM_INSERT_EEG_OPENBCI8
                 MENUITEM "OpenEEG / Olimex SMT EEG (2-6 Channnels, ModularEEG P2 Packetformat)", IDM_INSERT_EEG_P2
                 MENUITEM "OpenEEG (2-6 Channels, P3 Packetformat)", IDM_INSERT_EEG_P3
+                MENUITEM "OPI TrueSense Exploration Kit", IDM_INSERT_EEG_OPI_EXPLORATION
                 MENUITEM "Pendant EEG (2 Channels)",    IDM_INSERT_EEG_PENDANT
                 MENUITEM "QDS NFK (2/4 Channels)",      IDM_INSERT_EEG_QDS
                 MENUITEM "SmartBrainTechnologies (4 Channel EEG)", IDM_INSERT_EEG_SBT4

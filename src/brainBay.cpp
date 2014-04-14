@@ -533,6 +533,9 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERT_EEG_SBT2: 
 					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_SBT2; create_object(OB_EEG);} 
 					break;
+				case IDM_INSERT_EEG_OPI_EXPLORATION: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_OPI_EXPLORATION; create_object(OB_EEG);} 
+					break;
 				// these devices need special care (seperate element)
 				case IDM_INSERTOPTIMA:
 					if ((!count_objects(OB_NEUROBIT)) && (!count_objects(OB_EEG))) create_object(OB_NEUROBIT);

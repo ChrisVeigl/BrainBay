@@ -388,7 +388,6 @@
 #define IDC_PRESTIM                     1261
 #define IDC_MINIMIZED                   1261
 #define IDC_STARTCAPTURE                1262
-#define IDC_STARTUP2                    1262
 #define IDC_ADDARCHIVETIME              1262
 #define IDC_LENGTH                      1263
 #define IDC_SESSIONPOS                  1263
@@ -795,6 +794,8 @@
 #define IDM_INSERT_EEG_SBT4             32923
 #define IDM_INSERT_EEG_SBT2             32924
 #define IDM_INSERT_EEG_P3               32925
+#define ID_BIOSIGNAL_OPITRUESENSEEXPLORATIONKIT 32926
+#define IDM_INSERT_EEG_OPI_EXPLORATION  32927
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -802,7 +803,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        248
-#define _APS_NEXT_COMMAND_VALUE         32926
+#define _APS_NEXT_COMMAND_VALUE         32928
 #define _APS_NEXT_CONTROL_VALUE         1498
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

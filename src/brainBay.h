@@ -220,6 +220,7 @@ extern "C" {
 #define DEV_IBVA 9
 #define DEV_SBT2 10
 #define DEV_OPENBCI8 11
+#define DEV_OPI_EXPLORATION 12
 
 #define MAX_TEMPSTRING    512
 #define MAX_LOADSTRING    512

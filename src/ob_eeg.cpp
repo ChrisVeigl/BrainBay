@@ -795,6 +795,66 @@ void parse_byte_OPENBCI8(unsigned char actbyte)
 
 
 
+
+
+
+/********************************************************************
+
+  OPI Exploraton kit parser
+
+ **********************************************************************/
+
+
+
+void parse_byte_OPI(unsigned char actbyte)
+{
+	static int packetlen=0;
+	static unsigned char buffer[8192];
+	static int actpos =0;
+	static int checksum, runningsum=0;
+
+    switch (PACKET.readstate) 
+	{
+		  case 0: if (actbyte==0x33) PACKET.readstate++; 
+				  break;
+		  case 1: if (actbyte==0x33)  PACKET.readstate++; 
+				  else PACKET.readstate=0;
+				  break;
+		  case 2: packetlen=actbyte<<8;
+				  PACKET.readstate++; 
+				  break;
+		  case 3: packetlen+=actbyte;
+				  if (packetlen < 8192) { actpos=0; runningsum=0; PACKET.readstate++; }
+				  else PACKET.readstate=0;
+				  break;
+	      case 4: buffer[actpos++]=actbyte;
+				  runningsum+=actbyte;
+				  if (actpos == packetlen) PACKET.readstate++;
+				  break;
+		  case 5: checksum=actbyte<<8;
+				  PACKET.readstate++;
+				  break;
+		  case 6: checksum+=actbyte;
+				  if (checksum==runningsum)
+				  {
+					    PACKET.buffer[1]=  buffer[14+128+1];
+					    PACKET.buffer[2]=  buffer[14+128+2];
+					    PACKET.buffer[3]=  buffer[14+128+3];
+						for (int i=0; i< 64; i++)
+						{
+					      PACKET.buffer[0]=  buffer[14+i*2]*256 + buffer[15+i*2];
+			  	  	      process_packets();
+						}
+				  }
+				  PACKET.readstate=0;
+				  break;
+		  default: PACKET.readstate=0;
+		}		
+}
+
+
+
+
 void ParseLocalInput(int BufLen)
 {
 	unsigned char actbyte;
@@ -927,6 +987,11 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 		case DEV_RAW8BIT:
 			numChannels=1;
 			st->resolution=8;
+			break;
+
+		case DEV_OPI_EXPLORATION:
+			numChannels=1;
+			st->resolution=13;
 			break;
 
 		case DEV_PENDANT3:
@@ -1361,6 +1426,7 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 			switch (TTY.devicetype) {
 				case DEV_RAW: 
 				case DEV_RAW8BIT: 
+				case DEV_OPI_EXPLORATION: 
 					desired_outports=1;
 				break;
 				case DEV_NIA: 
