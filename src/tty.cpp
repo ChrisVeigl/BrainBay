@@ -264,6 +264,9 @@ int start_opi_pollthread (void)
 {
 	DWORD dwOpiThreadStatId;
 
+	unsigned char buf[8] = {0x33,0x33,0x00,0x02,0x20,0x23,0x00,0x43};   // request start module 
+	write_to_comport (buf,8); 
+
 	fOpiThreadDone=FALSE;
 	TTY.OPITHREAD =
 		CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) OpiProc, 0, 0, &dwOpiThreadStatId);
@@ -273,7 +276,11 @@ int start_opi_pollthread (void)
 
 int stop_opi_pollthread (void)
 {
+	unsigned char buf[8] = {0x33,0x33,0x00,0x02,0x20,0x22,0x00,0x42};   // request stop module 
+
 	fOpiThreadDone=TRUE;
+	Sleep(150);
+	write_to_comport (buf,8); 
 	return(0);
 }
 

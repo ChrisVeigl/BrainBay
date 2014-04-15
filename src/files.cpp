@@ -138,6 +138,11 @@ void update_devicetype(void)
 			else CAPTFILE.length=0;
 			CAPTFILE.data_begin=3;
 			break;
+		case DEV_OPI_EXPLORATION:
+			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)
+				CAPTFILE.length=SetFilePointer(CAPTFILE.filehandle,0,NULL,FILE_END)/BYTES_PER_PACKET[TTY.devicetype];
+			else CAPTFILE.length=0;
+			CAPTFILE.data_begin=0;
 
 		default:
 			if (CAPTFILE.filehandle!=INVALID_HANDLE_VALUE)

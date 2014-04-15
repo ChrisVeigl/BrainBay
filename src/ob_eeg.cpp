@@ -99,9 +99,9 @@
 #define VINFO_PROTOCOL_SUBNUMBER 9 	// view sub version of protocoll 21 (read only)
 
 
-  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "\0"};
-  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         60               };
-  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         30               };
+  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "OPI TrueSense Exploration Kit","\0"};
+  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         60       ,   152        };
+  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         30       ,   1        };
 
 
 
@@ -808,11 +808,13 @@ void parse_byte_OPENBCI8(unsigned char actbyte)
 
 void parse_byte_OPI(unsigned char actbyte)
 {
+	static int test=0;
 	static int packetlen=0;
-	static unsigned char buffer[8192];
+	static unsigned char buffer[512];
 	static int actpos =0;
 	static int checksum, runningsum=0;
 	static short tempval=0;
+	static unsigned char pdn,misc;
 
     switch (PACKET.readstate) 
 	{
@@ -838,17 +840,29 @@ void parse_byte_OPI(unsigned char actbyte)
 		  case 6: checksum+=actbyte;
 				  if (checksum==runningsum)
 				  {
-					    PACKET.buffer[1]=  buffer[14+128+1];
-					    PACKET.buffer[2]=  buffer[14+128+2];
-					    PACKET.buffer[3]=  buffer[14+128+3];
+						unsigned int d;
+					    pdn = (unsigned char) buffer[8];  // paired device number
+						misc =(unsigned char) buffer[9];  // "misc data": Bit 7 (MSB) 1: 62 ADC data bytes 0: 64 ADC data bytes; 
+												          // Bits 6-4: wireless data code (usually 1) 
+														  // Bit 0: battery state (1: V sensor > 3.15V )
+
+						PACKET.buffer[1]=  buffer[10+128]<<8;  //  * 1.13f - 46.8f  // -> deg Celisus 
+
+						d= buffer[10+128+1]<<8;
+						if (d < 32768) PACKET.buffer[2]= 32768+d; else PACKET.buffer[2]=d-32768;
+						d= buffer[10+128+2]<<8;
+						if (d < 32768) PACKET.buffer[3]= 32768+d; else PACKET.buffer[3]=d-32768;
+						d= buffer[10+128+4]<<8;
+						if (d < 32768) PACKET.buffer[4]= 32768+d; else PACKET.buffer[4]=d-32768;
+
 						for (int i=0; i< 64; i++)
 						{
-							tempval = (((short)buffer[14+i*2]) <<8)
-							          | ((short)buffer[15+i*2]);
-							PACKET.buffer[0]=(1<<15)+tempval;
 
-					        //PACKET.buffer[0]=  buffer[14+i*2]*256 + buffer[15+i*2];
-			  	  	        process_packets();
+							d= (buffer[10+i*2] << 8) | (buffer[11+i*2]);
+							if (d < 32768) PACKET.buffer[0]= 32768+d;
+							else PACKET.buffer[0]=d-32768;
+							PACKET.buffer[0] &= 0xfffc;
+							process_packets();
 						}
 				  }
 				  PACKET.readstate=0;
@@ -996,8 +1010,40 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 			break;
 
 		case DEV_OPI_EXPLORATION:
-			numChannels=4;
+			numChannels=5;
 			st->resolution=16;
+
+			st->out_ports[0].get_range=-1;
+			st->out_ports[0].out_min=-800.0f;
+			st->out_ports[0].out_max=800.0f;
+
+		  	sprintf(st->out_ports[1].out_name,"Temp");
+			sprintf(st->out_ports[1].out_desc,"Temperature");
+			strcpy(st->out_ports[1].out_dim,"degC");
+			st->out_ports[1].get_range=-1;
+			st->out_ports[1].out_min=0.0f;
+			st->out_ports[1].out_max=50.0f;
+
+		  	sprintf(st->out_ports[2].out_name,"AccX");
+			sprintf(st->out_ports[2].out_desc,"Acceleration X");
+			strcpy(st->out_ports[2].out_dim,"g");
+			st->out_ports[2].get_range=-1;
+			st->out_ports[2].out_min=-2.0f;
+			st->out_ports[2].out_max=2.0f;
+
+		  	sprintf(st->out_ports[3].out_name,"AccY");
+			sprintf(st->out_ports[3].out_desc,"Acceleration Y");
+			strcpy(st->out_ports[3].out_dim,"g");
+			st->out_ports[3].get_range=-1;
+			st->out_ports[3].out_min=-2.0f;
+			st->out_ports[3].out_max=2.0f;
+
+		  	sprintf(st->out_ports[4].out_name,"AccZ");
+			sprintf(st->out_ports[4].out_desc,"Acceleration Z");
+			strcpy(st->out_ports[4].out_dim,"g");
+			st->out_ports[4].get_range=-1;
+			st->out_ports[4].out_min=-2.0f;
+			st->out_ports[4].out_max=2.0f;
 			break;
 
 		case DEV_PENDANT3:
@@ -1435,8 +1481,10 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 			switch (TTY.devicetype) {
 				case DEV_RAW: 
 				case DEV_RAW8BIT: 
-				case DEV_OPI_EXPLORATION: 
 					desired_outports=4;
+				break;
+				case DEV_OPI_EXPLORATION: 
+					desired_outports=5;
 				break;
 				case DEV_NIA: 
 					desired_outports=2;
