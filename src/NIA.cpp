@@ -173,7 +173,7 @@ int ReadNIA( UINT wParam, LONG lParam )
 	int i;
 	UINT dwSize=0;
 	RAWINPUT* raw;
-														//first get size
+	static int ramp=0;														//first get size
 
 	GetRawInputData((HRAWINPUT)(lParam), RID_INPUT, NULL, &dwSize, 
 					sizeof(RAWINPUTHEADER));
@@ -238,6 +238,13 @@ int ReadNIA( UINT wParam, LONG lParam )
 
 			for (i=0; i<NIABYTECOUNT; i++)	
 				TTY.readBuf[i] = (unsigned char) raw->data.hid.bRawData[1+i] ; 
+
+			ramp+=100;
+			ramp&=0x0fff;
+
+			TTY.readBuf[i+3] = (unsigned char) (ramp&0xff); 
+			TTY.readBuf[i+4] = (unsigned char) ((ramp>>8)&0xff); 
+			TTY.readBuf[i+5] = (unsigned char) ((ramp>>16)&0xff); 
 
 			ParseLocalInput(nByteTrans);					// evaluate always all channels(=2 or 6Bytes) with 1st sample; 
 //			ParseLocalInput(NIABYTECOUNT);				

@@ -704,8 +704,8 @@ void parse_byte_NIA(unsigned char actbyte)
 		case 2:
 			PACKET.buffer[0]+=actbyte * 65536;
 			PACKET.readstate++; 
-//			PACKET.readstate=0;     // 2 channel version
-//			process_packets();
+		//	PACKET.readstate=0;     // 1 channel version
+		//	process_packets();      // 1 channel version
 			break;
 		case 3:
 			PACKET.buffer[1]=actbyte ;
@@ -721,7 +721,6 @@ void parse_byte_NIA(unsigned char actbyte)
 			process_packets();
 			break;
 		default: PACKET.readstate=0;
-
 
 	}
 
@@ -1084,6 +1083,9 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 			break;
 
 		case DEV_NIA:
+			st->resolution=24;
+			numChannels=2;
+			break;
 		case DEV_SBT2:
 			st->resolution=24;
 			numChannels=2;
@@ -1487,6 +1489,9 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 					desired_outports=5;
 				break;
 				case DEV_NIA: 
+					desired_outports=2;
+					break;
+				case DEV_SBT2: 
 					desired_outports=2;
 				break;
 				case DEV_PENDANT3: 
