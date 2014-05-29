@@ -25,15 +25,19 @@ class COMREADEROBJ : public BASE_CL
 
   public:
 	float input1;
+	int mintime;
+	int cnt;
+	unsigned char act_value;
 	HANDLE comdev;
 	unsigned int baudrate,comport,connected;
-	unsigned int inpos,outpos, received,processed;
+	unsigned int inpos,outpos, received,processed, sent;
 	unsigned char buffer[COMREADERBUFLEN];
 
 	DWORD dwRead;
 	
 	BOOL COMREADEROBJ::SetupComPort(int port);
 	BOOL COMREADEROBJ::ReadComPort(HANDLE device, unsigned char * buffer, unsigned int pos, unsigned int maxlen);
+	BOOL COMREADEROBJ::WriteComPort(HANDLE device, unsigned char * data, unsigned int len);
 	BOOL COMREADEROBJ::BreakDownComPort(void);
 
 	COMREADEROBJ(int num);

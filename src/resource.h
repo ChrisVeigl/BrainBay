@@ -607,7 +607,11 @@
 #define IDC_RET_INVALID                 1464
 #define IDC_VOLTAGE                     1465
 #define IDC_RET_VALUE                   1465
+#define IDC_MINTIME                     1465
 #define IDC_ADDRESS                     1466
+#define IDC_SENT                        1466
+#define IDC_SENT2                       1467
+#define IDC_ACTVALUE                    1467
 #define IDC_SAVE_DEVCTX                 1468
 #define IDC_LOAD_DEVCTX                 1469
 #define IDC_DISPLAYSETTINGS             1470
@@ -796,14 +800,16 @@
 #define IDM_INSERT_EEG_P3               32925
 #define ID_BIOSIGNAL_OPITRUESENSEEXPLORATIONKIT 32926
 #define IDM_INSERT_EEG_OPI_EXPLORATION  32927
+#define ID_TARGET_COM                   32928
+#define IDM_INSERT_COMWRITER2           32929
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        248
-#define _APS_NEXT_COMMAND_VALUE         32928
+#define _APS_NEXT_RESOURCE_VALUE        253
+#define _APS_NEXT_COMMAND_VALUE         32930
 #define _APS_NEXT_CONTROL_VALUE         1498
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

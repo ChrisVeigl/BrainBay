@@ -59,6 +59,10 @@ LRESULT CALLBACK ComReaderDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
 			SetDlgItemInt(hDlg,IDC_RECEIVED,st->received,0);
 			SetDlgItemInt(hDlg,IDC_PROCESSED,st->processed,0);
 
+			SetDlgItemInt(hDlg,IDC_SENT,st->sent,0);
+			SetDlgItemInt(hDlg,IDC_ACTVALUE,0,0);
+			SetDlgItemInt(hDlg,IDC_MINTIME,st->mintime,0);
+
 	        break;
 
 		case WM_CLOSE:
@@ -111,6 +115,9 @@ LRESULT CALLBACK ComReaderDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
 						CheckDlgButton(hDlg,IDC_CONNECTED, st->connected);
 					break;
 
+				case IDC_PERIOD:
+					st->mintime=GetDlgItemInt(hDlg, IDC_MINTIME, 0,0);
+					break;
             }
 			return TRUE;
 			break;
@@ -219,6 +226,15 @@ int COMREADEROBJ::ReadComPort(HANDLE device, unsigned char * buffer, unsigned in
 	return((int)dwBytesTransferred);
 }
 
+BOOL COMREADEROBJ::WriteComPort(HANDLE device, unsigned char * data, unsigned int len)
+{
+	DWORD dwWritten;
+	if (device==INVALID_HANDLE_VALUE) return(FALSE);
+	if (!WriteFile(device, data, len, &dwWritten, 0) || ((int)dwWritten!=len)) return(FALSE);
+	return(TRUE);
+}
+
+
 BOOL COMREADEROBJ::BreakDownComPort()
 {	
 	connected=FALSE;
@@ -233,16 +249,21 @@ BOOL COMREADEROBJ::BreakDownComPort()
 
 COMREADEROBJ::COMREADEROBJ(int num) : BASE_CL()
 {
-	inports = 0;
+	inports = 1;
 	outports = 1;
 	width=75;
-	strcpy(out_ports[0].out_name,"data");
+	strcpy(out_ports[0].out_name,"rcv");
+	strcpy(in_ports[0].in_name,"send");
 
 	comport=0;
 	inpos=0;
 	outpos=0;
     received=0;
 	processed=0;
+	sent=0;
+	act_value=0;
+	cnt=0;
+	mintime=100;
 	baudrate=57600;
 	comdev=INVALID_HANDLE_VALUE;
 	
@@ -257,6 +278,7 @@ void COMREADEROBJ::load(HANDLE hFile)
 	load_property("comport",P_INT,&comport);
 	load_property("baudrate",P_INT,&baudrate);
 	load_property("connected",P_INT,&connected);
+	load_property("mintime",P_INT,&mintime);
 	if (connected) 
 	{ 
 		connected=SetupComPort(comport);
@@ -270,11 +292,12 @@ void COMREADEROBJ::save(HANDLE hFile)
     save_property(hFile,"comport",P_INT,&comport);
 	save_property(hFile,"baudrate",P_INT,&baudrate);
 	save_property(hFile,"connected",P_INT,&connected);
+	save_property(hFile,"mintime",P_INT,&mintime);
 }
 	
 void COMREADEROBJ::incoming_data(int port, float value)
 {
-	// if (port==0) input1=value;
+	 if (port==0) input1=value;
 }
 	
 void COMREADEROBJ::work(void)
@@ -283,28 +306,37 @@ void COMREADEROBJ::work(void)
 
 	if (connected) 
 	{
+		cnt+= 1000.0f/(float) PACKETSPERSECOND;
+		if (cnt >= (float)mintime)
+		{
+			cnt-= (float) mintime;
+
+			act_value=(unsigned char)((input1-(float)in_ports[0].in_min)/((float)in_ports[0].in_max-(float)in_ports[0].in_min)*256);
+	        WriteComPort(comdev, &act_value, 1);			
+			sent++;
+		}
+
 		// attention: data lost in case of buffer overrun ..
 		i=ReadComPort(comdev,buffer, inpos,COMREADERBUFLEN);
 		received+=i;
 		inpos=(inpos+i) % COMREADERBUFLEN;
 		if (inpos!=outpos)
 		{
-			pass_values(0,(float)buffer[outpos]);
+			float act_outvalue = (float)buffer[outpos] / 256 * ((float)out_ports[0].out_max -(float)out_ports[0].out_min) + (float)out_ports[0].out_min;
+			pass_values(0,act_outvalue);
 			outpos= (++outpos) % COMREADERBUFLEN;
 			processed++;
 		}
-		else pass_values(0,0);
+		//else pass_values(0,0);
 
+		if ((hDlg==ghWndToolbox) && (!TIMING.dialog_update))
+		{ 
+			SetDlgItemInt(hDlg,IDC_RECEIVED,inpos,0);
+			SetDlgItemInt(hDlg,IDC_PROCESSED,outpos,0);
+			SetDlgItemInt(hDlg,IDC_SENT,sent,0);
+			SetDlgItemInt(hDlg,IDC_ACTVALUE,act_value,0);
+		}
 	}
-
-	if ((hDlg==ghWndToolbox) && (!TIMING.dialog_update))
-	{ 
-		SetDlgItemInt(hDlg,IDC_RECEIVED,inpos,0);
-		SetDlgItemInt(hDlg,IDC_PROCESSED,outpos,0);
-	}
-
-
-
 }
 	
 COMREADEROBJ::~COMREADEROBJ() 
