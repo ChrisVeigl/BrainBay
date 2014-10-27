@@ -742,7 +742,25 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 
 		  for(x=0;x<inports;x++)
 		  {
-			 input[x]=0;inputcount[x]=0;
+			input[x]=0;inputcount[x]=0;
+
+			// This section is a bit of an adaptation for EEG devices with an absolutely
+			// HUGE output range.  E.g. OpenBCI is +-187485 uV.  If we use that default
+			// range for the oscilloscope, novice users will generally get confused.
+			// And flail around not being able to get any reasonable values by adjusting
+			// gain.  It's also time consuming having to manually setup each input pin
+			// range by hand;  assuming they even find that feature by reading the manual.
+			//
+			// What this does is detect this situation, and sets range to a more
+			// sane default value.
+
+			if (in_ports[x].get_range && in_ports[x].in_max > 10000.0f)
+			{
+				in_ports[x].get_range = 0;
+				in_ports[x].in_max = 500.0f;
+				in_ports[x].in_min = -500.0f;
+			}
+			
 		  }
 
 		  height=CON_START+inports*CON_HEIGHT+5;

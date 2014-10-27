@@ -82,6 +82,9 @@ typedef struct OUTPORTStruct
 	float  out_max;
 	char   out_dim[10];
 	int    get_range;
+		// get_range values can be:
+		//  (-1) = output port is defining it's own range as out_min and out_max
+		//  (0 - N) = get the output range from origin of our input port# (0 = 1st port)
 	PORTTYPE out_type;
 } OUTPORTStruct ;
 
@@ -93,6 +96,9 @@ typedef struct INPORTStruct
 	float in_max;
 	char  in_dim[10];
 	int   get_range;
+		// get_range values can be:
+		//  (TRUE, nonzero) = get the output range from source of this input port
+		//  (FALSE, 0) = port is defining it's own range as in_min and in_max
 	float value;
 	PORTTYPE in_type;
 } INPORTStruct ;
