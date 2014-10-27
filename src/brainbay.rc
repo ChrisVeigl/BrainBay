@@ -16,7 +16,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
@@ -65,6 +65,7 @@ BEGIN
                 MENUITEM "Neurobit Biosignal Amplifier (Lite, Optima-2 or Optima-4)", IDM_INSERTOPTIMA
                 MENUITEM "OCZ NIA (2 Channel EEG)",     IDM_INSERT_EEG_NIA
                 MENUITEM "OpenBCI (8 Channel EEG)",     IDM_INSERT_EEG_OPENBCI8
+                MENUITEM "OpenBCI (16 Channel EEG)",    IDM_INSERT_EEG_OPENBCI16
                 MENUITEM "OpenEEG / Olimex SMT EEG (2-6 Channnels, ModularEEG P2 Packetformat)", IDM_INSERT_EEG_P2
                 MENUITEM "OpenEEG (2-6 Channels, P3 Packetformat)", IDM_INSERT_EEG_P3
                 MENUITEM "OPI TrueSense Exploration Kit", IDM_INSERT_EEG_OPI_EXPLORATION
@@ -1690,12 +1691,12 @@ BEGIN
     IDS_STRING1             "rc.bottom-rc.top"
 END
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -1786,12 +1787,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Englisch (USA) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Österreich) resources
+// German (Austria) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
@@ -2565,7 +2566,7 @@ IDC_CURSOR3             CURSOR                  "CURSORS\\dwell_arrow2.cur"
 IDC_CURSOR4             CURSOR                  "CURSORS\\dwell_arrow3.cur"
 IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
-#endif    // Deutsch (Österreich) resources
+#endif    // German (Austria) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
