@@ -221,6 +221,8 @@ extern "C" {
 #define DEV_SBT2 10
 #define DEV_OPENBCI8 11
 #define DEV_OPI_EXPLORATION 12
+#define DEV_OPENBCI16 13
+
 
 #define MAX_TEMPSTRING    512
 #define MAX_LOADSTRING    512

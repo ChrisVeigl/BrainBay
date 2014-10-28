@@ -99,9 +99,9 @@
 #define VINFO_PROTOCOL_SUBNUMBER 9 	// view sub version of protocoll 21 (read only)
 
 
-  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "OPI TrueSense Exploration Kit","\0"};
-  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         60       ,   152        };
-  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         30       ,   1        };
+  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "OPI TrueSense Exploration Kit", "OpenBCI 16 Channels", "\0"};
+  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         66       ,        152                    ,          114   };
+  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         33       ,        1                      ,          57   };
 
 
 
@@ -728,67 +728,114 @@ void parse_byte_NIA(unsigned char actbyte)
 
 /********************************************************************
 
-  Packet Parser for OpenBCI (1-8 channel binary format):
+  Packet Parser for OpenBCI:
 
-  4-byte (long) integers are stored in 'little endian' formant in AVRs
-  so this protocol parser expects the lower bytes first.
+  https://github.com/OpenBCI/OpenBCI/wiki/Data-Format-for-OpenBCI-V3
+
+  3-byte signed integers are stored in 'big endian' format, MSB first.
+  The 3-byte values are converted to 4-byte signed longs during the unpacking.
+
+  Accelerometer data are 2-byte signed ints.  Also converted to signed longs.
 
   Start Indicator: 0xA0
-  Packet_length  : 1 byte  (lenght = 4 bytes per active channel + 4 bytes framenumber)
-  Framenumber    : 4 bytes (currently not used - will be a sequential counter ?)
-  Channel1 data  : 4 bytes 
-  Channel2 data  : 4 bytes
-  Channel3 data  : 4 bytes
-  Channel4 data  : 4 bytes
-  Channel5 data  : 4 bytes
-  Channel6 data  : 4 bytes
-  Channel7 data  : 4 bytes
-  Channel8 data  : 4 bytes
+  Frame number   : 1 byte  (advances on each packet)
+  Channel N data : 3 bytes per channel (repeats for ch 1-8, or ch 1-16)
+  ...
+  A_channel X    : 2 bytes (note these may also be instead, optional user data,
+  A_channel Y    : 2 bytes  replacing accelerometer values.)
+  A_channel Z    : 2 bytes
   End Indcator:    0xC0
  **********************************************************************/
 
-void parse_byte_OPENBCI8(unsigned char actbyte)
+void parse_byte_OPENBCI(unsigned char actbyte, int channelsInPacket)
 {
-	static int channelsInPacket=0;
-	static int framenumber=0;
 	static int bytecounter=0;
 	static int channelcounter=0;
 	static int tempval=0;
+	static unsigned char framenumber=0;
 
 	switch (PACKET.readstate) {
-		case 0:  if (actbyte == 0xA0) {          // look for start indicator
+
+		// To better sync up when lost, look for two byte sequence.  It has happened
+		// previously, that when data contains lots of A0's, sync could not reestablish.
+		//
+		case 0: if (actbyte == 0xC0)			// look for end indicator
 					PACKET.readstate++;
-				 } 
-				 break;
-		case 1:  channelsInPacket = ((int)actbyte) / 4 - 1;   // get number of channels
-				 if ((channelsInPacket<1) || (channelsInPacket>8)) PACKET.readstate=0;
-				 else { framenumber=0; bytecounter=0; PACKET.readstate++;}
-				 break;
-		case 2: framenumber+= (((unsigned int)actbyte) << (bytecounter*8));  // get framenumber
-				bytecounter++;
-				if (bytecounter==4) {
-					bytecounter=0;channelcounter=0;
-					tempval=0;
-					PACKET.readstate++;
-				} 
 				break;
+
+		case 1:	if (actbyte == 0xA0)		    // look for start indicator next
+					PACKET.readstate++;
+				else
+					PACKET.readstate = 0;
+				break;
+
+		case 2:	if (actbyte != framenumber) {
+					GLOBAL.syncloss++;
+					// but go ahead and parse it anyway, 
+				}
+				framenumber = actbyte + 1;		// next expected frame number
+				bytecounter=0;
+				channelcounter=0;
+				tempval=0;
+				PACKET.readstate++;
+				break;
+
 		case 3: // get channel values 
-				tempval |= (((unsigned int)actbyte) << (bytecounter*8));
+				tempval |= (((unsigned int)actbyte) << (16 - (bytecounter*8)));		// big endian
+//				tempval |= (((unsigned int)actbyte) << (bytecounter*8));	// little endian
 				bytecounter++;
-				if (bytecounter==4) {
-					PACKET.buffer[channelcounter]=(1<<23)+tempval;
+				if (bytecounter==3) {
+					if ((tempval & 0x00800000) > 0) {
+						tempval |= 0xFF000000;
+					} else {
+						tempval &= 0x00FFFFFF;
+					}
+					PACKET.buffer[channelcounter] = tempval;
 					channelcounter++;
 					if (channelcounter==channelsInPacket) {  // all channels arrived !
 						PACKET.readstate++;
+						bytecounter=0;
+						tempval=0;
 					}
 					else { bytecounter=0; tempval=0; }
 				}
 				break;
 
-		case 4: if (actbyte == 0xC0)     // if correct end delimiter found:
-					process_packets();   // call message pump 
+		case 4: // get accelerometer XYZ
+				tempval |= (((unsigned int)actbyte) << (8 - (bytecounter*8)));		// big endian
+//				tempval |= (((unsigned int)actbyte) << (bytecounter*8));	// little endian
+				bytecounter++;
+				if (bytecounter==2) {
+					if ((tempval & 0x00008000) > 0) {
+						tempval |= 0xFFFF0000;
+					} else {
+						tempval &= 0x0000FFFF;
+					}  
+					PACKET.buffer[channelcounter]=tempval;
+					channelcounter++;
+					if (channelcounter==(channelsInPacket+3)) {  // all channels arrived !
+						PACKET.readstate++;
+						bytecounter=0;
+						channelcounter=0;
+						tempval=0;
+					}
+					else { bytecounter=0; tempval=0; }
+				}
+				break;
 
-		default: PACKET.readstate=0;  // look for next packet
+		case 5: if (actbyte == 0xC0)     // if correct end delimiter found:
+				{
+					process_packets();   // call message pump
+					PACKET.readstate = 1;
+				}
+				else
+				{
+					GLOBAL.syncloss++;
+					PACKET.readstate = 0;	// resync
+				}
+				break;
+
+		default: PACKET.readstate=0;  // resync
 	}
 }
 
@@ -895,7 +942,8 @@ void ParseLocalInput(int BufLen)
 			case DEV_QDS:       parse_byte_QDS(actbyte); break;
 			case DEV_NIA:		parse_byte_NIA(actbyte); break;
 			case DEV_IBVA:		parse_byte_IBVA(actbyte); break;
-			case DEV_OPENBCI8:	parse_byte_OPENBCI8(actbyte); break;
+			case DEV_OPENBCI8:	parse_byte_OPENBCI(actbyte, 8); break;
+			case DEV_OPENBCI16:	parse_byte_OPENBCI(actbyte, 16); break;
 			case DEV_OPI_EXPLORATION: parse_byte_OPI(actbyte); break;
 		}
 	}
@@ -1092,15 +1140,62 @@ void setEEGDeviceDefaults(EEGOBJ * st)
 			break;
 
 		case DEV_OPENBCI8:
-			st->resolution=24;
-			TTY.BAUDRATE=115200;
-			update_samplingrate(250);
 			numChannels=8;
+			TTY.BAUDRATE=115200;
+			goto openbci;
+
+		case DEV_OPENBCI16:
+			numChannels=16;
+			TTY.BAUDRATE=230400;  // Check with Joel
+
+
+openbci:	// common section for OpenBCI devices
+
+			// OpenBCI ADS1299 samples are 24 bits, so +- (2^23 - 1)  max signed integers
+			//
+			// From TI data sheet: (Volts/count) = 4.5 Volts / gain / (2^23 - 1);
+			//  default gain for the board is 24x,
+			//  that gives 4.5 / 24 / (2^23 - 1) = .0223 uV per count
+			//
+			// So full scale +- range of microvolts in 24 bits is 2^23 * .02235 = +-187485.388 uV.
+
+#define OBCI_GAIN ((float)24)
+
+		{
+			float fullscale = (4.5e6 / OBCI_GAIN);
+
 			for (i=0;i<numChannels;i++)
 			{
-     			st->out_ports[i].out_min=-187904.8192f;
-				st->out_ports[i].out_max=187904.8192f;
+     			st->out_ports[i].out_min= -(fullscale);
+				st->out_ports[i].out_max= (fullscale);
 			}
+
+			st->resolution=24;
+			update_samplingrate(250);
+
+			i = numChannels;
+			numChannels += 3;
+			sprintf(st->out_ports[i].out_name,"AccX");
+			sprintf(st->out_ports[i].out_desc,"Acceleration X");
+			strcpy(st->out_ports[i].out_dim,"g");
+			st->out_ports[i].out_min=-2.0f;
+			st->out_ports[i].out_max=2.0f;
+
+			i++;
+			sprintf(st->out_ports[i].out_name,"AccY");
+			sprintf(st->out_ports[i].out_desc,"Acceleration Y");
+			strcpy(st->out_ports[i].out_dim,"g");
+			st->out_ports[i].out_min=-2.0f;
+			st->out_ports[i].out_max=2.0f;
+
+			i++;
+			sprintf(st->out_ports[i].out_name,"AccZ");
+			sprintf(st->out_ports[i].out_desc,"Acceleration Z");
+			strcpy(st->out_ports[i].out_dim,"g");
+			st->out_ports[i].out_min=-2.0f;
+			st->out_ports[i].out_max=2.0f;
+		}
+
 			break;
 
 		case DEV_MONOLITHEEG_P21:
@@ -1176,6 +1271,8 @@ LRESULT CALLBACK EEGDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			sprintf(strfloat,"%.2f",(float)CAPTFILE.offset/(float)PACKETSPERSECOND);
 			SetDlgItemText(hDlg,IDC_OFFSET,strfloat);
 			SetDlgItemInt(hDlg,IDC_RESOLUTION,st->resolution,0);
+			// Resolution field should really not be adjustable any more.
+			EnableWindow(GetDlgItem(hDlg,IDC_RESOLUTION),FALSE);
 
 			// only for IBVA:
 			SetDlgItemText(hDlg, IDC_CUTOFF,"0.33");
@@ -1412,7 +1509,8 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 			     TTY.read_pause=0;
 	  		  if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,1);
 			  if (TTY.devicetype==DEV_SBT2) { write_to_comport(0x20); write_to_comport(0x00); }
-			  if (TTY.devicetype==DEV_OPENBCI8) { write_to_comport('b'); }
+			  if (TTY.devicetype==DEV_OPENBCI8
+				  || TTY.devicetype==DEV_OPENBCI16) { write_to_comport('b'); }
 			  if (TTY.devicetype==DEV_OPI_EXPLORATION) {  start_opi_pollthread();  }
 		  }
 		  if (ghWndToolbox==hDlg)  update_captfile_guibuttons(hDlg);
@@ -1423,6 +1521,8 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 	  {	
 		    if (TTY.devicetype==DEV_MONOLITHEEG_P21) sendP21Command(CMD_SET_VINFO, VINFO_RUNEEG ,0);
 			if (TTY.devicetype==DEV_SBT2) { write_to_comport(0x40); write_to_comport(0x00); }
+			if (TTY.devicetype==DEV_OPENBCI8
+				  || TTY.devicetype==DEV_OPENBCI16) { write_to_comport('s'); }
 			if (TTY.devicetype==DEV_OPI_EXPLORATION) {  stop_opi_pollthread();  }
 
 			CAPTFILE.do_read=0;TTY.read_pause=1; //CAPTFILE.do_write=0;
@@ -1500,7 +1600,10 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 				break;
 				case DEV_QDS: 
 				case DEV_OPENBCI8:
-					desired_outports=8;
+					desired_outports=8+3;
+				break;
+				case DEV_OPENBCI16:
+					desired_outports=16+3;
 				break;
 				default:
 					desired_outports=7;
@@ -1541,6 +1644,31 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 						pass_values(x,(float) PACKET.buffer[x] * (out_ports[x].out_max-out_ports[x].out_min) / (float)(1<<resolution) + out_ports[x].out_min);
 				  pass_values(x,(float)PACKET.switches);
 				  break;
+
+			case DEV_OPENBCI8:
+				i = 8;
+				goto openbci;
+
+			case DEV_OPENBCI16:
+				i = 16;
+openbci:	{
+				float uvpercount, maxcount, pbufferuv;
+				int pbuffer;
+				maxcount = (float)((1<<23) - 1);
+				for (x=0;x<i;x++)
+				{
+					uvpercount = (float)(out_ports[x].out_max) / maxcount;
+					// PACKET.buffer is unsigned int, but our values are signed.
+					pbuffer = (int)PACKET.buffer[x];
+					pbufferuv = (float)pbuffer * uvpercount;
+					pass_values(x, pbufferuv);
+					// if (x == 1)	write_logfile("uvpc %f, pbuf %d, pbufuv %f\n", uvpercount, pbuffer, pbufferuv);
+				}
+				pass_values(x,(float) ((int)PACKET.buffer[x]));  x++;
+				pass_values(x,(float) ((int)PACKET.buffer[x]));  x++;
+				pass_values(x,(float) ((int)PACKET.buffer[x]));  x++;
+				break;
+			}
 
 			default:  // all other devices
 			  for (x=0;x<outports;x++)

@@ -515,6 +515,9 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERT_EEG_OPENBCI8: 
 					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_OPENBCI8; create_object(OB_EEG);} 
 					break;
+				case IDM_INSERT_EEG_OPENBCI16: 
+					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_OPENBCI16; create_object(OB_EEG);} 
+					break;
 				case IDM_INSERT_EEG_P2: 
 					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_MODEEG_P2; create_object(OB_EEG);}
 					break;

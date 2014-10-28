@@ -285,9 +285,19 @@ void Draw_FFT_GL(FFTOBJ * st)  // Called each time the FFT-window has to be draw
 	every=(st->endband-st->startband)/40.0f;
 	ec=every;
 
+	// Instead of clearing the window on each pass, more visual continuity would be 
+	// served by just rolling back to the start point.
+
+	if (st->h_pos == -1)	// 1st time through h_pos is -1
+	{
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear buffers
+	}
+
 	st->h_pos++; if (st->h_pos>150) 
-	{ st->h_pos=0;
-	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear buffers
+	{
+		st->h_pos=0;
+		// now we just clear window on first pass only
+		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear buffers
 	}
 
     x1=(GLfloat) (t_x+st->h_pos*dx);
@@ -668,7 +678,7 @@ LRESULT CALLBACK FFTDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 							glDeleteTextures(1,textur);
 				}
 			*/
-			st->h_pos=0;
+			st->h_pos = -1;
 			if (st->displayWnd) InvalidateRect(st->displayWnd,NULL,TRUE);
 			InvalidateRect(hDlg,NULL,FALSE);
 			break;
@@ -891,7 +901,7 @@ FFTOBJ::FFTOBJ(int num) : BASE_CL()
 		chnBufPos=0;fft_interval=0;fft_drawinterval=15;
 		binselect=3;
 		kind=0;
-		h_pos=0;
+		h_pos = -1;	// tell spectrogram to clear window and start
 		gain_x=50;gain_y=50;gain_z=50;
 		xrot=0;yrot=0;xtrans=0.0f,ytrans=0.0f;
 		memset(tex_buf,0,sizeof(float)*128*128);
@@ -914,6 +924,7 @@ FFTOBJ::FFTOBJ(int num) : BASE_CL()
 		int i;
 		for (i=0;i<FFT_BUFFERLEN;i++) { buffer[i]=0; fftbands[i>>1]=0; }
 		chnBufPos=0;
+		h_pos = -1;
 
 	}
 	

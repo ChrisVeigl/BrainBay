@@ -802,6 +802,8 @@
 #define IDM_INSERT_EEG_OPI_EXPLORATION  32927
 #define ID_TARGET_COM                   32928
 #define IDM_INSERT_COMWRITER2           32929
+#define ID_BIOSIGNAL_OPENBCI32930       32930
+#define IDM_INSERT_EEG_OPENBCI16        32931
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -809,7 +811,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32930
+#define _APS_NEXT_COMMAND_VALUE         32932
 #define _APS_NEXT_CONTROL_VALUE         1498
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
