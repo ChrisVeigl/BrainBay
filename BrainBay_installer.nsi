@@ -1,11 +1,7 @@
-;NSIS Modern User Interface
-;Basic Example Script
-;Written by Joost Verburg
-
 ;--------------------------------
-;Include Modern UI
+;Include Modern UI 2
 
-  !include "MUI.nsh"
+  !include "MUI2.nsh"
 
 ;--------------------------------
 ;General
@@ -26,6 +22,13 @@
 ;Interface Settings
 
   !define MUI_ABORTWARNING
+  !define MUI_UNCONFIRMPAGE_TEXT_TOP "!! W A R N I N G !!    \
+>> Read this first. <<   \
+*Uninstall* will remove ALL FILES from the folder below, \
+INCLUDING any of your own .con files \
+created in CONFIGUATIONS or other sub-folders. \
+YOU MUST SAVE your own files BEFORE \
+you press the *Uninstall* button."
 
 ;--------------------------------
 ;Pages
