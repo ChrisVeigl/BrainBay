@@ -304,12 +304,14 @@ void MCIOBJ::work(void)
 
 	if ((play!=INVALID_VALUE) && (m_video) && (!playing))
 	{ 
+		//write_logfile("MCI: start playing\n");
 		if ((!play_once)||(resetted)) { MCIWndPlay(m_video); playing = TRUE; }
 		resetted=FALSE;
 	}
 
 	if (play==INVALID_VALUE)
 	{
+		//write_logfile("MCI: INVALID play\n");
 		resetted=TRUE;
 		if ((m_video) && (playing))
 		{	MCIWndStop(m_video); playing=FALSE; }
@@ -323,16 +325,25 @@ void MCIOBJ::work(void)
 		if (actvolume!=volume) { actvolume=volume;	MCIWndSetVolume(m_video, volume); }
 		if (step!=0) {
 			if	(MCIWndStep(m_video,step)!=0)
-			 if (step>0) MCIWndSeek(m_video,MCIWND_START);
-			 else MCIWndSeek(m_video,MCIWND_END);
+			{
+				//write_logfile("MCI: step fails, rewind\n");
+				if (step>0) MCIWndSeek(m_video,MCIWND_START);
+				else MCIWndSeek(m_video,MCIWND_END);
+			}
 		} 
 		else
-		if (pos_change) {MCIWndSeek(m_video,pos_center+pos_change); pos_change=0;}
+		if (pos_change)
+		{
+			//write_logfile("MCI: pos_change\n");
+			MCIWndSeek(m_video,pos_center+pos_change); pos_change=0;
+		}
 		else
 		if (MCIWndGetPosition(m_video)>=MCIWndGetLength(m_video))
 		{
-			MCIWndPlay(m_video);
+			//write_logfile("MCI: position > length, restart\n");
+			MCIWndStop(m_video);
 			MCIWndSeek(m_video,MCIWND_START);
+			MCIWndPlay(m_video);
 		}
 	}
 	
