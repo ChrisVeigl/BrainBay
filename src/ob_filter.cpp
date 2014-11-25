@@ -58,20 +58,28 @@ int test_filterparams(int type,int p0,float p1,float p2)
 {
 	if ((type<0)||(type>=FILTERTYPES)) return FALSE;
 	if (p0<1) return FALSE;
-	if ((p1<0.000001f)||(p1>=1024.0f)) return FALSE;
-	if ((p2<0.000001f)||(p2>=1024.0f)) return FALSE;
+	if ((p1<0)||(p1>=(PACKETSPERSECOND/2))) return FALSE;
+	if ((p2<0)||(p2>=(PACKETSPERSECOND/2))) return FALSE;
+
 	switch (type)
 	{
-		case 0: if (p0>=100) return FALSE; break; 
+		case 0: if (p0>=100) return FALSE; 
+			    break; 
   		case 1:
 		case 2:
-		case 3:
-		case 4: if (p0>=11) return FALSE; break;
+		case 3:  
+		case 4: if (p0>=11) return FALSE; 
+			    break;
 		case 5:
-		case 6: if (p0>=60) return FALSE; break;
-		case 7:
-		case 8: if (p0>=30) return FALSE; break;
+		case 6: 
+		case 7: if (p0>=60) return FALSE; 
+			    break;
+		case 8: if (p0>=30) return FALSE;
 	}
+
+	if ((type==3) || (type==7))
+	{	if (p2<=p1) return FALSE;}
+
 	return (TRUE);
 }
 
@@ -96,6 +104,7 @@ FidFilter * do_filt_design(HWND hDlg, int ftype)
 	    strcpy(sztemp,FILTERTYPE[ftype].init);
 	    GetDlgItemText(hDlg, IDC_FILTERPAR0,  szorder, sizeof(szorder));
 		strcat(sztemp,szorder);
+		write_logfile("filterpars: %s,%i,%f,%f ", sztemp,PACKETSPERSECOND,p1,p2);
         return (fid_design(sztemp, PACKETSPERSECOND, p1,p2,0,0));
 	}
 	return (NULL);
