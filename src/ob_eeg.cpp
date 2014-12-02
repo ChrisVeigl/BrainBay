@@ -1583,7 +1583,11 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 			switch (TTY.devicetype) {
 				case DEV_RAW: 
 				case DEV_RAW8BIT: 
-					desired_outports=4;
+					// Was set to '4' by mistake?  Creating a DEV_RAW* makes only 1 channel(!)
+					// '4' breaks all the supplied con files which reference recorded ARCHIVE files,
+					// and shows 3 extra 'phantom' outports.  So set back to '1' for now.
+					//desired_outports=4;
+					desired_outports=1;
 				break;
 				case DEV_OPI_EXPLORATION: 
 					desired_outports=5;

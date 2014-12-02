@@ -3,7 +3,7 @@ Welcome to BrainBay !
 
 BrainBay is an open source bio- and neurofeedback application. It also offers
 some features for the creation of alternative Human-Computer-Interfaces (HCIs) 
-lsuch as facetracking via webcam, EMG signal pattern recognition or mouse-/keyboard control.
+such as facetracking via webcam, EMG signal pattern recognition or mouse-/keyboard control.
 
 All source code is licensed under GPL, for copyright information 
 please have a look at ReadMe_License.txt
@@ -11,14 +11,15 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 1.9 (27-12-2013). Recent changes include support of biosignal amplifiers (Emotiv Epoc, OpenBCI)
-some GUI-cleanup, fixed issues (webcam/facetracking and particle animation)
-and new signal processing elements.
+* The current release version is 1.9.x.  (1.9 series began on 2013-12-27.)
 
-* In case you just want to use the software, you find the executable file BrainBay.exe 
-in the bin folder, where also the user- and developer manuals are available.
+* For the list of recent changes, see https://github.com/ChrisVeigl/BrainBay/releases and https://github.com/ChrisVeigl/BrainBay/commits/master
 
-* If you want to modifiy or extend the software, the Visual Studio 2010
+* We recommend you download and run the latest installer on the 'releases' Github link above.
+In addition, the Github 'bin' folder contains an up to date executable file BrainBay.exe.
+'bin' also contains the user- and developer manual pdfs.
+
+* If you want to modify or extend the software, the Visual Studio 2010
 project files and all source modules are located in the src folder.
 
 
@@ -35,6 +36,7 @@ Credits
 * Raymond Nguyen for the vector port additions
 * Franz Strobl for the OCZ NIA support
 * Stephan Gerhard for the QDS parser
+* William Croft (OpenBCI) for various 2014 fixes and enhancements
 
 
 Further Information
@@ -43,7 +45,7 @@ Further Information
 * Find documentation on the project hompage http://brainbay.lo-res.org
 and in the user and developer manuals.
 I also recommend having a look at the OpenEEG site http://openeeg.sf.net
-or the new OpenBCI project: http://www.openbci.org
+and the OpenBCI project: http://www.openbci.org
 
 * If you want to share your BrainBay design files for neurofeedback or biofeedback
 protocols, I would be happy to include them in the release.
