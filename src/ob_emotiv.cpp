@@ -172,6 +172,18 @@ static HMODULE InitEmotivEDKLib(const char * drvLibName)
 
 	strcpy(actfile,drvLibName);
 	strcat(actfile,"\\edk_utils.dll");
+
+	write_logfile ("now trying to open %s", actfile);
+    FILE * testfile = fopen (actfile, "r");
+	if (testfile != NULL)
+	{ 
+			write_logfile ("open was successful");
+			fclose (testfile);
+	}
+	else
+			write_logfile ("open did not work !");
+
+
 	drv_lib = LoadLibrary(actfile);
 	if (!drv_lib) return NULL;
 	write_logfile ("LOADING EDK_UTILS.DLL succeeded.");

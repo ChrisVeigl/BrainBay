@@ -41,7 +41,7 @@ void draw_MARTINI(MARTINIOBJ * st)
 	HDC hdc;
 	BITMAP bm;
 
-	char szdata[40];
+	char szdata[256];
 	RECT rect;
 	HPEN actpen;
 	// int ballx,bally;
@@ -158,15 +158,15 @@ void draw_MARTINI(MARTINIOBJ * st)
 
 		SetTextColor(hdc,RGB(0,0,150));
 	
-		sprintf(szdata, "ALPHA: %.2f ",st->alpha);
+		sprintf(szdata, "ALPHA: %.2f     ",st->alpha);
 		ExtTextOut( hdc, rect.right-280,90, 0, &rect,szdata, strlen(szdata), NULL ) ;
 
-		sprintf(szdata, "BETA : %.2f ",st->beta);
+		sprintf(szdata, "BETA : %.2f     ",st->beta);
 		ExtTextOut( hdc, rect.right-280,120, 0, &rect,szdata, strlen(szdata), NULL ) ;
 	
 		SetTextColor(hdc,RGB(190,100,0));
 
-		sprintf(szdata, "Vermouth:Gin = 1:%.2f ",st->ratio);
+		sprintf(szdata, "Vermouth:Gin = 1:%.2f                    ",st->ratio);
 		ExtTextOut( hdc, rect.right-320,160, 0, &rect,szdata, strlen(szdata), NULL ) ;
 
 
@@ -202,8 +202,40 @@ void draw_MARTINI(MARTINIOBJ * st)
 
 }
 
+void start_martinigame (	MARTINIOBJ * st)
+{
+	char tmpfile[256];
+	char tmpname[50];
 
+	strcpy(tmpfile,GLOBAL.resourcepath);
+	actsound++;
+	wsprintf(tmpname,"martini\\Track%d.wav",actsound%3+1);
+	strcat(tmpfile,tmpname);
 
+	if (m_audio) {	MCIWndStop(m_audio); 	MCIWndDestroy(m_audio); }
+	if (m_audio2) {	MCIWndStop(m_audio2); 	MCIWndDestroy(m_audio2); }
+
+	m_audio = MCIWndCreate(ghWndMain, hInst,WS_THICKFRAME|MCIWNDF_NOMENU|MCIWNDF_NOPLAYBAR|MCIWNDF_NOERRORDLG,tmpfile);
+	strcpy(tmpfile,GLOBAL.resourcepath);
+	strcat(tmpfile,"martini\\fin.wav");
+	m_audio2 = MCIWndCreate(ghWndMain, hInst,WS_THICKFRAME|MCIWNDF_NOMENU|MCIWNDF_NOPLAYBAR|MCIWNDF_NOERRORDLG,tmpfile);
+	MCIWndPlay(m_audio);
+						
+	srand( TIMING.packetcounter);
+	st->sampletime=0;
+	st->state=1;
+	st->time=0;
+	st->cnt1=0;
+	st->alpha=0;
+	st->beta=0;
+	st->baseline=st->input1/st->input2;
+
+	st->redraw=1;
+	st->redrawcnt=0;
+	InvalidateRect(st->displayWnd,NULL,FALSE);	
+	InvalidateRect(st->displayWnd,NULL,FALSE);	
+	InvalidateRect(st->displayWnd,NULL,FALSE);
+}
 	
 LRESULT CALLBACK MartiniDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -263,37 +295,9 @@ LRESULT CALLBACK MartiniDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 					if ((!st->pump1cnt) && (!st->pump2cnt)) st->pump2cnt=PUMP2TIME;
 					break;
 				case IDC_START: 
-						
-						strcpy(tmpfile,GLOBAL.resourcepath);
-//						wsprintf(tmpname,"martini\\Track%d.wav",rand()%7+1);
-						actsound++;
-						wsprintf(tmpname,"martini\\Track%d.wav",actsound%3+1);
-						strcat(tmpfile,tmpname);
-
-						if (m_audio) {	MCIWndStop(m_audio); 	MCIWndDestroy(m_audio); }
-						if (m_audio2) {	MCIWndStop(m_audio2); 	MCIWndDestroy(m_audio2); }
-
-						m_audio = MCIWndCreate(ghWndMain, hInst,WS_THICKFRAME|MCIWNDF_NOMENU|MCIWNDF_NOPLAYBAR|MCIWNDF_NOERRORDLG,tmpfile);
-						strcpy(tmpfile,GLOBAL.resourcepath);
-						strcat(tmpfile,"martini\\fin.wav");
-						m_audio2 = MCIWndCreate(ghWndMain, hInst,WS_THICKFRAME|MCIWNDF_NOMENU|MCIWNDF_NOPLAYBAR|MCIWNDF_NOERRORDLG,tmpfile);
-						MCIWndPlay(m_audio);
-						
-			  		srand( TIMING.packetcounter);
-						st->sampletime=0;
-						st->state=1;
-						st->time=0;
-						st->cnt1=0;
-						st->alpha=0;
-						st->beta=0;
-						st->baseline=st->input1/st->input2;
-
-						st->redraw=1;
-						st->redrawcnt=0;
-						InvalidateRect(st->displayWnd,NULL,FALSE);	
-						InvalidateRect(st->displayWnd,NULL,FALSE);	
-						InvalidateRect(st->displayWnd,NULL,FALSE);	
+					start_martinigame(st);
 					break;
+
 			}
 			return TRUE;
 
@@ -316,6 +320,8 @@ LRESULT CALLBACK MartiniDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
     return FALSE;
 }
 
+int mmouse_x=0;
+int mmouse_y=0;
 
 LRESULT CALLBACK MartiniWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {   
@@ -344,6 +350,31 @@ LRESULT CALLBACK MartiniWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARA
 		  SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
 		  st->redraw=1;
 		  InvalidateRect(st->displayWnd,NULL,FALSE);
+			break;
+		case WM_MOUSEMOVE:
+			mmouse_x=LOWORD(lParam);
+			mmouse_y=HIWORD(lParam);
+			break;
+		case WM_LBUTTONDOWN:
+			// char test[100];
+			// sprintf(test,"x=%d  y=%d",mmouse_x,mmouse_y);
+			// SetDlgItemText(ghWndStatusbox,IDC_STATUS,test);
+
+			if ((mmouse_x>80) && (mmouse_x<300) && (mmouse_y>120) && (mmouse_y<270))
+			{	// start  
+				// report ("start");
+				start_martinigame(st);
+			}
+			if ((mmouse_x>300) && (mmouse_x<390) && (mmouse_y>380) && (mmouse_y<430))
+			{	// test gin  
+				// report ("test gin");
+				if ((!st->pump1cnt) && (!st->pump2cnt)) st->pump1cnt=PUMP1TIME;
+			}
+			if ((mmouse_x>440) && (mmouse_x<640) && (mmouse_y>380) && (mmouse_y<430))
+			{	// test vermouth
+				// report ("test vermouth");
+				if ((!st->pump1cnt) && (!st->pump2cnt)) st->pump2cnt=PUMP2TIME;
+			}
 			break;
 		case WM_SIZE: 
 		case WM_MOVE:
