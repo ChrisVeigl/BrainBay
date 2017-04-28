@@ -80,7 +80,7 @@
 #include "ob_vectorfloat.h"
 #include "ob_displayvector.h"
 #include "ob_buffer.h"
-
+#include "ob_ganglion.h"
 //
 // GLOBAL VARIABLES
 //
@@ -258,6 +258,10 @@ void create_object(int type)
 							 actobject->object_size=sizeof(DISPLAYVECTOROBJ);break;
 		case OB_BUFFER: actobject=new BUFFEROBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(BUFFEROBJ);break;
+		case OB_GANGLION:    actobject=new GANGLIONOBJ(GLOBAL.objects); 
+							 deviceobject=actobject;
+							 actobject->object_size=sizeof(GANGLIONOBJ);break;
+
 
 	}
 	if (actobject)

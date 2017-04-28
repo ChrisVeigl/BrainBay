@@ -106,6 +106,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// conv_file();
 
+	AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
+
 	init_path();
 	register_classes(hInstance);
 
@@ -496,7 +498,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					create_object(OB_BUFFER);
 					break;
 
-				// here are th supported EED devices
+				// here are the supported EED devices
 				case IDM_INSERT_EEG_GENERIC8: 
 					if (!count_objects(OB_EEG))  { TTY.devicetype=DEV_RAW8BIT; create_object(OB_EEG);}
 					break;
@@ -545,6 +547,9 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTEMOTIV:
 					if ((!count_objects(OB_EMOTIV)) && (!count_objects(OB_EEG))) create_object(OB_EMOTIV);
+					break;
+				case IDM_INSERTGANGLION:
+					if ((!count_objects(OB_GANGLION)) && (!count_objects(OB_EEG))) create_object(OB_GANGLION);
 					break;
 
 				case IDM_COPY:

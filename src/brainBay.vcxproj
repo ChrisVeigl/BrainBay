@@ -358,6 +358,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ob_floatvector.cpp" />
+    <ClCompile Include="ob_ganglion.cpp" />
     <ClCompile Include="ob_integrate.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -587,6 +588,7 @@
     <ClInclude Include="ob_file_writer.h" />
     <ClInclude Include="ob_filter.h" />
     <ClInclude Include="ob_floatvector.h" />
+    <ClInclude Include="ob_ganglion.h" />
     <ClInclude Include="ob_integrate.h" />
     <ClInclude Include="ob_keystrike.h" />
     <ClInclude Include="ob_limiter.h" />

@@ -133,9 +133,10 @@ extern "C" {
 #define OB_VECTORFLOAT	57
 #define OB_DISPLAYVECTOR 58
 #define OB_BUFFER       59
+#define OB_GANGLION     60
 
 
-#define OBJECT_COUNT 	60
+#define OBJECT_COUNT 	61
 
 
 
@@ -151,7 +152,7 @@ extern "C" {
 				 "PEAKDETECT", "SPELLER", "MARTINI", "FILEREAD", "PORT_IO", \
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
-				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER"
+				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)

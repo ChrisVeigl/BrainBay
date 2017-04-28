@@ -88,6 +88,7 @@
 #define IDD_EEGBOX_NIA                  249
 #define IDD_EEGBOX_GENERIC              250
 #define IDD_EEGBOX_SBT2                 251
+#define IDD_GANGLIONBOX                 254
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -648,15 +649,27 @@
 #define IDC_EMOTIV_ARCHIVE_NAME         1497
 #define IDC_SBT2STATUS                  1497
 #define IDC_OPEN_EMOTIV_ARCHIVE         1498
+#define IDC_SCAN_GANGLION               1498
 #define IDC_CLOSE_EMOTIV_ARCHIVE        1499
+#define IDC_GANGLION_DEVICECOMBO        1499
 #define IDC_REC_EMOTIV_ARCHIVE          1500
+#define IDC_OPEN_GANGLION_ARCHIVE       1500
 #define IDC_END_EMOTIV_RECORDING        1501
+#define IDC_CLOSE_GANGLION_ARCHIVE      1501
 #define IDC_CQ_AF3                      1502
+#define IDC_REC_GANGLION_ARCHIVE        1502
 #define IDC_CQ_F7                       1503
+#define IDC_END_GANGLION_RECORDING      1503
 #define IDC_CQ_F3                       1504
+#define IDC_GANGLION_ARCHIVE_NAME       1504
+#define IDC_DISCONNECT_GANGLION         1505
 #define IDC_CQ_FC5                      1506
+#define IDC_START_DATA                  1506
 #define IDC_CQ_T7                       1507
+#define IDC_SELECT_GANGLION2            1507
+#define IDC_SELECT_GANGLION             1507
 #define IDC_CQ_P7                       1508
+#define IDC_STOP_DATA                   1508
 #define IDC_CQ_O1                       1509
 #define IDC_CQ_O2                       1510
 #define IDC_CQ_P8                       1511
@@ -804,15 +817,18 @@
 #define IDM_INSERT_COMWRITER2           32929
 #define ID_BIOSIGNAL_OPENBCI32930       32930
 #define IDM_INSERT_EEG_OPENBCI16        32931
+#define ID_BIOSIGNAL_OPENBCIGANGLION    32932
+#define IDM_INSERT_GANGLION             32933
+#define IDM_INSERTGANGLION              32934
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        253
-#define _APS_NEXT_COMMAND_VALUE         32932
-#define _APS_NEXT_CONTROL_VALUE         1498
+#define _APS_NEXT_RESOURCE_VALUE        255
+#define _APS_NEXT_COMMAND_VALUE         32935
+#define _APS_NEXT_CONTROL_VALUE         1505
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
