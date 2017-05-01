@@ -18,6 +18,10 @@
 -------------------------------------------------------------------------------------*/
 
 #include "brainBay.h"
+#include <tchar.h>
+#include <process.h>
+#include <tlhelp32.h>
+
 #include "ob_evaluator.h"
 #include "ob_fft.h"
 #include "ob_midi.h"
@@ -340,8 +344,8 @@ void print_time(char * str, float f, int mode)
 		hour= ((int)(f/3600))%24;
 		min = ((int)(f/60))%60;
 		sec= ((int)f)%60;
-		
-		sprintf(str," %02d:%02d:%02d ",hour,min,sec);
+		if (hour==0) sprintf(str," %02d:%02d ",min,sec);
+		else sprintf(str," %02d:%02d:%02d ",hour,min,sec);
 	}
 	else
 	{
@@ -598,6 +602,51 @@ void register_classes (HINSTANCE hInstance)
 	
 }    
 
+BOOL killProcess(char * name )
+{
+  HANDLE hProcessSnap;
+  HANDLE hProcess;
+  PROCESSENTRY32 pe32;
+  DWORD dwPriorityClass;
+
+  // Take a snapshot of all processes in the system.
+  hProcessSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
+  if( hProcessSnap == INVALID_HANDLE_VALUE )
+  {   
+    return( FALSE );
+  }
+
+  // Set the size of the structure before using it.
+  pe32.dwSize = sizeof( PROCESSENTRY32 );
+
+  // Retrieve information about the first process,
+  // and exit if unsuccessful
+  if( !Process32First( hProcessSnap, &pe32 ) )
+  {   
+    CloseHandle( hProcessSnap );  // clean the snapshot object
+    return( FALSE );
+  }
+
+  // Now walk the snapshot of processes 
+  do
+  {  
+    if (!(strcmp(pe32.szExeFile,name)))
+	{
+		DWORD dwDesiredAccess = PROCESS_TERMINATE;
+		BOOL  bInheritHandle  = FALSE;
+		HANDLE hProcess = OpenProcess(dwDesiredAccess, bInheritHandle, pe32.th32ProcessID);
+		if (hProcess != NULL) {
+ 		   BOOL result = TerminateProcess(hProcess, 1);
+		   CloseHandle(hProcess);
+		}
+    } 
+  } while( Process32Next( hProcessSnap, &pe32 ) );
+
+  CloseHandle( hProcessSnap );
+  return( TRUE );
+}
+
+
 
 void init_devicetype(void)
 {
@@ -670,8 +719,10 @@ void GlobalInitialize()
 	GLOBAL.draw_interval=DRAW_UPDATETIME;
 	GLOBAL.neurobit_available=0;
 	GLOBAL.emotiv_available=0;
+	GLOBAL.ganglion_available=0;
 	GLOBAL.use_cv_capture=0;
 	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");
+	strcpy(GLOBAL.ganglionhubpath,"C:\\data\\works\\openbci\\data\\GanglionHub.exe");
 
 	GLOBAL.loading=false;
 	GLOBAL.read_tcp=0;

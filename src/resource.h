@@ -255,6 +255,8 @@
 #define IDC_CLOSE                       1170
 #define IDC_SESSTART                    1170
 #define IDC_TESTBAT                     1170
+#define IDC_EMOTIV_PATH2                1170
+#define IDC_GANGLION_PATH               1170
 #define IDC_WAVVOLUMEINPUTFROM          1171
 #define IDC_LIST                        1171
 #define IDC_DBG                         1171
@@ -668,10 +670,13 @@
 #define IDC_CQ_T7                       1507
 #define IDC_SELECT_GANGLION2            1507
 #define IDC_SELECT_GANGLION             1507
+#define IDC_CONNECT_GANGLION            1507
 #define IDC_CQ_P7                       1508
 #define IDC_STOP_DATA                   1508
 #define IDC_CQ_O1                       1509
+#define IDC_STOP_IMPEDANCECHECK         1509
 #define IDC_CQ_O2                       1510
+#define IDC_START_IMPEDANCECHECK        1510
 #define IDC_CQ_P8                       1511
 #define IDC_CQ_T8                       1512
 #define IDC_CQ_FC6                      1513

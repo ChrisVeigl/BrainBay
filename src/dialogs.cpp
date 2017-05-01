@@ -643,6 +643,7 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				}
 				SetDlgItemText(hDlg, IDC_MIDIPORTCOMBO, MIDIPORTS[port].portname);
 				SetDlgItemText(hDlg, IDC_EMOTIV_PATH, GLOBAL.emotivpath);
+				SetDlgItemText(hDlg, IDC_GANGLION_PATH, GLOBAL.ganglionhubpath);
 
 				for (wCount = 0; wCount < MAX_COMPORT; wCount++) 
 				{
@@ -756,10 +757,13 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 			case IDC_EMOTIV_PATH:
 				GetDlgItemText(hDlg,IDC_EMOTIV_PATH, GLOBAL.emotivpath, 255);
 				break;
+			case IDC_GANGLION_PATH:
+				GetDlgItemText(hDlg,IDC_GANGLION_PATH, GLOBAL.ganglionhubpath, 255);
+				break;
 			case IDC_SAVESETTINGS:
 				   if (!save_settings())  report_error("Could not save Settings");
 			
-			case IDC_CLOSE:
+//			case IDC_CLOSE:
  			    EndDialog(hDlg, LOWORD(wParam));
 				ghWndSettings=NULL;
 				break;			

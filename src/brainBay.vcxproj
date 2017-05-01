@@ -624,6 +624,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="brainBay.ico" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="CURSORS\dwell_arrow1.cur" />
     <None Include="CURSORS\dwell_arrow2.cur" />
     <None Include="CURSORS\dwell_arrow3.cur" />

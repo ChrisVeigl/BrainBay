@@ -9,7 +9,6 @@
 
 #include "brainBay.h"
 
-
 #include <iostream>
 #include "SDL_net.h"
 
@@ -20,30 +19,13 @@
 
 using namespace std;
 
-#define defaulthost "localhost"
-#define GANGLIONHUB_PORT 10996
-#define s_writebuflength 1024
-#define s_readbuflength 8192
-
-#define sockettimeout 50
-
 
 class GANGLIONOBJ : public BASE_CL
 {
 protected:
 	DWORD dwRead,dwWritten;
-	char szdata[300];
 
   public: 
-	IPaddress ip; 
-	TCPsocket sock;
-	SDLNet_SocketSet set;
-
-	int  state;
-	char readbuf[s_readbuflength];
-	char writebuf[s_writebuflength];
-
-
 	char  archivefile[256];
 	char  device[100];
 	HANDLE filehandle;
@@ -51,11 +33,6 @@ protected:
 	long filelength;
 
     GANGLIONOBJ(int num);
-
-	int  connect();
-	int  read_tcp(char * readbuf, int size);
-	int  sendstring_tcp(char * buf);
-	void close_tcp(void);
 
 	void update_channelinfo(void);
 	void session_reset(void);

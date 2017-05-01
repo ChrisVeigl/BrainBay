@@ -184,6 +184,7 @@ extern "C" {
 #define FT_NB4          11
 #define FT_NB_ARCHIVE   12
 #define FT_MCI          13
+#define FT_GANGLION_ARCHIVE 14
 
 
 #define MAX_COMPORT				80
@@ -333,6 +334,7 @@ typedef struct GLOBALStruct
 
 	int neurobit_available;
 	int emotiv_available;
+	int ganglion_available;
 
 	int P3ALC1;
 	int P3ALC2;
@@ -346,6 +348,7 @@ typedef struct GLOBALStruct
 	char resourcepath[256];
 	char configfile[256];
 	char emotivpath[256];
+	char ganglionhubpath[256];
 
 	long session_length;
 	long session_start;
@@ -595,6 +598,8 @@ void	update_devicetype(void);
 void	update_samplingrate(int);
 void   create_logfile(void);
 void   write_logfile(char *,...);
+
+BOOL killProcess(char * name );
 
 
 

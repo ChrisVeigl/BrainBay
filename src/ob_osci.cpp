@@ -20,6 +20,7 @@
 #include "brainBay.h"
 #include "ob_osci.h"
 
+#define Y_OFFSET 5
 
 void draw_osci(OSCIOBJ * st)
 {
@@ -46,7 +47,8 @@ void draw_osci(OSCIOBJ * st)
 	count=st->inports-1;
 	if (count<=1) count=1;
 
-    if (st->showgrid) st->drawstart=50; else st->drawstart=35;
+//    if (st->showgrid) st->drawstart=50; else st->drawstart=35;
+    if (st->showgrid) st->drawstart=60; else st->drawstart=45;
 	if (st->showseconds)
 	{
 		 space=rect.right-st->drawstart;
@@ -178,8 +180,8 @@ void draw_osci(OSCIOBJ * st)
 		    oscitime=st->laststamp;	
 		    for (t=0;t<=st->periods;t++)
 			{
-				print_time(tmp,oscitime,1);		
-				ExtTextOut(hdc, actpos-15,ypos-half_chn_height-12, 0, &rect,tmp, strlen(tmp), NULL ) ;		
+				print_time(tmp,oscitime,0);		
+				ExtTextOut(hdc, actpos-15,ypos-half_chn_height-12+Y_OFFSET, 0, &rect,tmp, strlen(tmp), NULL ) ;		
 
 				for (i=0;i<count;i++)          // Draw lines
 				{

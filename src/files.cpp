@@ -767,6 +767,7 @@ BOOL save_settings(void)
 	save_property(hFile,"configfile",P_STRING,GLOBAL.configfile);
 	save_property(hFile,"use_cvcapture",P_INT,&GLOBAL.use_cv_capture);
 	save_property(hFile,"emotivpath",P_STRING,GLOBAL.emotivpath);
+	save_property(hFile,"ganglionhubpath",P_STRING,GLOBAL.ganglionhubpath);
 	save_property(hFile,"addtime",P_INT,&GLOBAL.add_archivetime);
 
 	x=0;
@@ -808,6 +809,7 @@ BOOL load_settings(void)
 	load_property("use_cvcapture",P_INT,&GLOBAL.use_cv_capture);
 	load_property("addtime",P_INT,&GLOBAL.add_archivetime);
 	load_property("emotivpath",P_STRING,GLOBAL.emotivpath);
+	load_property("ganglionhubpath",P_STRING,GLOBAL.ganglionhubpath);
 
 
 	load_property("midiports",P_INT,&x);
