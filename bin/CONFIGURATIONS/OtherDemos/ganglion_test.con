@@ -11,10 +11,10 @@ design-top=9
 design-left=20
 design-right=701
 design-bottom=201
-tool-top=198
-tool-left=163
-tool-right=963
-tool-bottom=573
+tool-top=515
+tool-left=1221
+tool-right=2021
+tool-bottom=883
 showdesign=1
 hidestatus=0
 showtoolbox=-1
@@ -59,7 +59,7 @@ outport4dim=uV
 outport4min=-500.000000
 outport4max=500.000000
 outport4range=-1
-device=Ganglion-2c22
+device=Ganglion-63ab
 linkport 0-1,0
 linkport 1-1,1
 linkport 2-1,2
@@ -99,7 +99,7 @@ inport5max=1.000000
 inport5range=1
 grid=1
 line=0
-gain=712
+gain=179
 seconds=1
 top=200
 left=16

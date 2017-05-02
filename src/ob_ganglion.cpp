@@ -153,11 +153,12 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 					   if (strstr(actline,"s,201,")==actline) {
 						   strcpy (tmpstr,actline+6);
 						   if ((c=strstr(tmpstr,","))) *c=0;
-	   					   printf("found device %d:%s",num_ganglions+1,tmpstr);
+	   					   printf("found device %d:%s\n",num_ganglions+1,tmpstr);
 						   if (dlgWindow==ghWndToolbox) {
   	   						   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) tmpstr ) ;
-			  				   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_SETCURSEL, 0, 0 ) ;
-						   	   InvalidateRect(dlgWindow,NULL,FALSE);
+			  				   //SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_SETCURSEL, 0, 0 ) ;
+							   SetDlgItemText(dlgWindow, IDC_GANGLION_DEVICECOMBO, tmpstr);
+						   	   //InvalidateRect(dlgWindow,NULL, FALSE);
 						   }
 						   strcpy(GanglionNames[num_ganglions],tmpstr);
 						   num_ganglions++;
@@ -325,6 +326,9 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 
 			case IDC_SCAN_GANGLION:
+				num_ganglions=0;
+				GanglionNames[0][0]=0;
+				SendDlgItemMessage(hDlg, IDC_GANGLION_DEVICECOMBO, CB_RESETCONTENT,0,0);
 				ganglion_scan();
 				break;
 
@@ -491,12 +495,14 @@ GANGLIONOBJ::GANGLIONOBJ(int num) : BASE_CL()
 
 		if (connect_tcp()) GLOBAL.ganglion_available=1;
 		else { 
-			// report_error("could not connect to GanglionHub");
 			printf("\nCould not connect to GanglionHub ...\n",sock);
-			printf("\nTrying to start %s\n",GLOBAL.ganglionhubpath);
-			ShellExecute(NULL, "open", GLOBAL.ganglionhubpath, NULL, NULL, SW_SHOWNORMAL);
+			strcpy(szdata,GLOBAL.resourcepath); 
+			strcat(szdata,"GanglionHub\\GanglionHub.exe");
+			// printf("\nTrying to start %s\n",GLOBAL.ganglionhubpath);
+			printf("\nTrying to start %s\n",szdata);
+			ShellExecute(NULL, "open", szdata, NULL, NULL, SW_SHOWNORMAL);
+			Sleep(2000);
 			printf("\nTrying to reconnect ...\n");
-			Sleep(250);
 			if (!connect_tcp()) { 
 				printf("\nConnection failed!...\n");
 				GLOBAL.ganglion_available=0;
@@ -624,13 +630,13 @@ GANGLIONOBJ::~GANGLIONOBJ()
 {
 	// free object
 	ganglion_disconnect();
-	Sleep(200);         // omg!  should be improved with synchronisation ...
+	Sleep(800);         // omg!  should be improved with synchronisation ...
 	GLOBAL.ganglion_available=0;
 	tcpReaderThreadDone=1;
 	close_tcp();
 	dlgWindow=0;
 	killProcess("GanglionHub.exe");
-	Sleep(10);
+	Sleep(200);
 }  
 
 
