@@ -723,6 +723,7 @@ void GlobalInitialize()
 	GLOBAL.use_cv_capture=0;
 	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");
 	strcpy(GLOBAL.ganglionhubpath,"C:\\data\\works\\openbci\\data\\GanglionHub.exe");
+	strcpy(GLOBAL.gangliondevicename,"idle");
 
 	GLOBAL.loading=false;
 	GLOBAL.read_tcp=0;

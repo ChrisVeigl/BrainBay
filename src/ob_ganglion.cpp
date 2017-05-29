@@ -29,7 +29,6 @@
 
 GANGLIONOBJ * GANGLION_OBJ=NULL;
 
-float ganglion_chn[MAX_SIGNALS];
 char GanglionNames[MAX_DEVICES][20]={0};
 int num_ganglions=0;
 
@@ -149,16 +148,24 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 				   // printf("received:%s",readbuf);
 				   actline=readbuf;
 				   while ((actline!=NULL) && (strlen(actline)>5)) {
-
-					   if (strstr(actline,"s,201,")==actline) {
+   					   if (strstr(actline,"q,501,")==actline) {
+						   printf("received: %s\n",actline);
+						   printf("ganglion connection error - is the CSR BT-dongle connected ?\n");
+						   // MessageBox(NULL,"Is the CSR BT-dongle connected ?", "ganglion connection error", MB_OK|MB_TOPMOST);
+					   }
+					   else if ((strstr(actline,"k,400,")==actline)||(strstr(actline,"c,413,")==actline)) {
+						   printf("received: %s\n",actline);
+						   printf("ganglion connection error - is the Ganglion board switched on ?\n");
+						   // MessageBox(NULL,"Is the Ganglion board switched on ?", "ganglion connection error", MB_OK|MB_TOPMOST); 
+					   }
+					   else if (strstr(actline,"s,201,")==actline) {
 						   strcpy (tmpstr,actline+6);
 						   if ((c=strstr(tmpstr,","))) *c=0;
-	   					   printf("found device %d:%s\n",num_ganglions+1,tmpstr);
+	   					   printf("found device %d:%s",num_ganglions+1,tmpstr);
 						   if (dlgWindow==ghWndToolbox) {
   	   						   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) tmpstr ) ;
-			  				   //SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_SETCURSEL, 0, 0 ) ;
-							   SetDlgItemText(dlgWindow, IDC_GANGLION_DEVICECOMBO, tmpstr);
-						   	   //InvalidateRect(dlgWindow,NULL, FALSE);
+			  				   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_SETCURSEL, 0, 0 ) ;
+						   	   InvalidateRect(dlgWindow,NULL,FALSE);
 						   }
 						   strcpy(GanglionNames[num_ganglions],tmpstr);
 						   num_ganglions++;
@@ -184,7 +191,7 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 			else Sleep(5);
 		} else Sleep(100);
 	}
-    printf("Ganglion Reader Thread closed");
+    printf("Ganglion Reader Thread closed\n");
 	write_logfile("Ganglion Reader Thread closed");    
     return 1;
 }
@@ -280,6 +287,40 @@ void ganglion_stopAccel() {
 }
 
 
+void establish_ganglionconnection() {
+	if (connect_tcp()) GLOBAL.ganglion_available=1;
+	else { 
+		// report_error("could not connect to GanglionHub");
+		printf("\nCould not connect to GanglionHub ...\n",sock);
+		printf("\nTrying to start %s\n",GLOBAL.ganglionhubpath);
+		if ((int)ShellExecute(NULL, "open", GLOBAL.ganglionhubpath, NULL, NULL, SW_SHOWNORMAL) < 32)
+			report_error ("Could not start GanglionHub.exe - please check path in Application Settings or install GanglionHub !");
+		else {
+			printf("\nTrying to reconnect ...\n");
+			Sleep(2000);
+			if (!connect_tcp()) { 
+				printf("\nConnection failed!...\n");
+				report_error ("Could not connect to GanglionHub !");
+			}
+			else GLOBAL.ganglion_available=1;
+		}
+	}
+
+	if (GLOBAL.ganglion_available) {
+		printf("\nConnected to GanglionHub, socket=%d\n",sock);
+		CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) TcpReaderProc, 0, 0, &tcpReadStatId);
+		//printf("\nSending disconnect command\n");
+		//ganglion_disconnect();
+	
+		printf("\nTrying to connect to Device: %s\n",GLOBAL.gangliondevicename);
+		ganglion_connect(GLOBAL.gangliondevicename);
+
+
+	}
+}
+
+
+
 LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	static int init;
@@ -323,12 +364,11 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 			case IDC_CONNECT_GANGLION:
 				GetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,st->device,100);
 				ganglion_connect(st->device);
+				strcpy (GLOBAL.gangliondevicename,st->device);
+ 			    if (!save_settings())  report_error("Could not save Settings");
 				break;
 
 			case IDC_SCAN_GANGLION:
-				num_ganglions=0;
-				GanglionNames[0][0]=0;
-				SendDlgItemMessage(hDlg, IDC_GANGLION_DEVICECOMBO, CB_RESETCONTENT,0,0);
 				ganglion_scan();
 				break;
 
@@ -350,6 +390,7 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 
 			case IDC_DISCONNECT_GANGLION:
 				ganglion_disconnect();
+				GLOBAL.ganglion_available=0;
 				break;
 			
 			case IDC_OPEN_GANGLION_ARCHIVE:
@@ -373,6 +414,8 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_RESETBUTTON,0);
 							st->filemode=FILE_READING;
 							get_session_length();
+
+							GLOBAL.ganglion_available=0;
 
 							GLOBAL.addtime=0;
 							FILETIME ftCreate, ftAccess, ftWrite;
@@ -484,7 +527,7 @@ GANGLIONOBJ::GANGLIONOBJ(int num) : BASE_CL()
 	    strcpy(out_ports[3].out_dim,"uV");
 	    out_ports[3].get_range=-1;
 	    strcpy(out_ports[3].out_desc,"channel4");
-	    out_ports[3].out_min=-20000.0f;
+	    out_ports[3].out_min=-500.0f;
 	    out_ports[3].out_max=500.0f;
 
 		strcpy(archivefile,"none");
@@ -493,30 +536,10 @@ GANGLIONOBJ::GANGLIONOBJ(int num) : BASE_CL()
 		sock=0;
         tcpReaderThreadDone=0;
 
-		if (connect_tcp()) GLOBAL.ganglion_available=1;
-		else { 
-			printf("\nCould not connect to GanglionHub ...\n",sock);
-			strcpy(szdata,GLOBAL.resourcepath); 
-			strcat(szdata,"GanglionHub\\GanglionHub.exe");
-			// printf("\nTrying to start %s\n",GLOBAL.ganglionhubpath);
-			printf("\nTrying to start %s\n",szdata);
-			ShellExecute(NULL, "open", szdata, NULL, NULL, SW_SHOWNORMAL);
-			Sleep(2000);
-			printf("\nTrying to reconnect ...\n");
-			if (!connect_tcp()) { 
-				printf("\nConnection failed!...\n");
-				GLOBAL.ganglion_available=0;
-			}
-			else GLOBAL.ganglion_available=1;
-		}
-
-		if (GLOBAL.ganglion_available) {
-			printf("\nConnected to GanglionHub, socket=%d\n",sock);
-		    CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) TcpReaderProc, 0, 0, &tcpReadStatId);
-			//printf("\nSending disconnect command\n");
-			//ganglion_disconnect();
-		}
+	    GLOBAL.ganglion_available=0;
+		establish_ganglionconnection();
 }
+
 
 void GANGLIONOBJ::update_channelinfo(void)
 {
@@ -537,11 +560,11 @@ void GANGLIONOBJ::update_channelinfo(void)
 	void GANGLIONOBJ::load(HANDLE hFile) 
 	{
   		load_object_basics(this);
-		load_property("device",P_STRING,device);
-		if ((GLOBAL.ganglion_available) && (strlen(device)>2)) {
-			printf("\nTrying to connect to Device: %s\n",device);
-			ganglion_connect(device);
-		}
+		//load_property("device",P_STRING,device);
+		//if ((GLOBAL.ganglion_available) && (strlen(device)>2)) {
+		//	printf("\nTrying to connect to Device: %s\n",device);
+		//	ganglion_connect(device);
+		//}
 		update_channelinfo();
 	}
 		
@@ -549,7 +572,7 @@ void GANGLIONOBJ::update_channelinfo(void)
 	{	   
 		save_object_basics(hFile, this);
 		// save_property(hFile,"test",P_INT,&test);
-		save_property(hFile,"device",P_STRING,device);
+		// save_property(hFile,"device",P_STRING,device);
 	}
 
 	void GANGLIONOBJ::session_reset(void) 
@@ -558,13 +581,13 @@ void GANGLIONOBJ::update_channelinfo(void)
 
 	void GANGLIONOBJ::session_start(void)
 	{
-		short r;
-
   		if ((filehandle==INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
 		{  
 			update_channelinfo();
+			   ganglion_connect(device);  // TBD: keep track of connection state
+			   Sleep(1000);               // only do this when needed 
 			ganglion_startData();
-			//else if(r>0) { report_error("Cannot connect with the Device"); 
+			//else { report_error("Cannot connect with the Device"); 
 			//SendMessage(ghWndStatusbox,WM_COMMAND, IDC_STOPSESSION,0);}
 		} 
 	}
@@ -577,7 +600,7 @@ void GANGLIONOBJ::update_channelinfo(void)
 	{	
 		if(filehandle==INVALID_HANDLE_VALUE) return;
 		if (pos>filelength) pos=filelength;
-		SetFilePointer(filehandle,pos*(sizeof(float))*4,NULL,FILE_BEGIN);
+		SetFilePointer(filehandle,pos*(sizeof(float))*5,NULL,FILE_BEGIN);
 	} 
 
 	long GANGLIONOBJ::session_length(void) 
@@ -585,7 +608,7 @@ void GANGLIONOBJ::update_channelinfo(void)
 		if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode==FILE_READING))
 		{
 			DWORD sav= SetFilePointer(filehandle,0,NULL,FILE_CURRENT);
-			filelength= SetFilePointer(filehandle,0,NULL,FILE_END)/(sizeof(float))/4;
+			filelength= SetFilePointer(filehandle,0,NULL,FILE_END)/(sizeof(int))/5;
 			SetFilePointer(filehandle,sav,NULL,FILE_BEGIN);
 			return(filelength);
 		}
@@ -594,30 +617,29 @@ void GANGLIONOBJ::update_channelinfo(void)
 
 	void GANGLIONOBJ::work(void) 
 	{
-		/*
 		DWORD dwWritten,dwRead;
 
 		if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
 		{
-			ReadFile(filehandle,ganglion_chn,sizeof(float)*4, &dwRead, NULL);
-			if (dwRead != sizeof(float)*4) SendMessage (ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
+			ReadFile(filehandle,intbuffer,sizeof(int)*5, &dwRead, NULL);
+			if (dwRead != sizeof(int)*5) SendMessage (ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 			else 
 			{
 				DWORD x= SetFilePointer(filehandle,0,NULL,FILE_CURRENT);
-				x=x*1000/filelength/TTY.bytes_per_packet;
+				x=x*1000/filelength/sizeof(int)*5  ; //TTY.bytes_per_packet;
 				SetScrollPos(GetDlgItem(ghWndStatusbox, IDC_SESSIONPOS), SB_CTL, x, 1);
 			}
 		}
-		*/			
 
 		pass_values(0, (float)intbuffer[1] * scale_fac_uVolts_per_count);
 		pass_values(1, (float)intbuffer[2] * scale_fac_uVolts_per_count);
     	pass_values(2, (float)intbuffer[3] * scale_fac_uVolts_per_count); 
     	pass_values(3, (float)intbuffer[4] * scale_fac_uVolts_per_count);  
-		/*
-		if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING)) 
-				WriteFile(filehandle,ganglion_chn,sizeof(float)*4, &dwWritten, NULL);
 
+		if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING)) 
+				WriteFile(filehandle,intbuffer,sizeof(int)*5, &dwWritten, NULL);
+
+		/*
 		if ((!TIMING.dialog_update) && (hDlg==ghWndToolbox)) 
 		{
 			InvalidateRect(hDlg,NULL,FALSE);
