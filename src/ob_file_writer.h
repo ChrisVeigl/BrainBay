@@ -32,7 +32,11 @@ public:
 	int  state;
 	int  format;
 	int  append;
-
+	int  autocreate;
+	int  add_date;
+	int  averaging;
+	float averaging_buffers[MAX_PORTS];
+	int  avg_count;
 
     FILE_WRITEROBJ(int num);
 	void update_inports(void);
@@ -41,6 +45,10 @@ public:
 	void make_dialog(void);
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);
+	void session_reset(void);
+	void session_start(void);
+	void session_stop (void);
+	void session_pos (long pos);
     ~FILE_WRITEROBJ();
 
 };

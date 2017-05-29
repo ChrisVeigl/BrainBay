@@ -22,8 +22,118 @@
 
 #include "brainBay.h"
 #include "ob_file_writer.h"
+#include <time.h>
+
+#define STATE_FILE_IDLE 0
+#define STATE_FILE_OPEN 1
+#define STATE_FILE_WRITING 2
 
 
+void updateDialog(HWND hDlg, FILE_WRITEROBJ * st)
+{
+	switch (st->state)
+	{
+		case STATE_FILE_IDLE:
+			SetDlgItemText(hDlg,IDC_FILESTATUS,"no file opened");
+			EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);			
+			break;
+		case STATE_FILE_OPEN:
+			SetDlgItemText(hDlg,IDC_FILESTATUS,"file opened, writing stopped");
+			EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
+		break;
+		case STATE_FILE_WRITING:
+			SetDlgItemText(hDlg,IDC_FILESTATUS,"writing File");
+			EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
+		break;
+	}
+	CheckDlgButton(hDlg,IDC_APPEND,st->append);
+	CheckDlgButton(hDlg,IDC_AUTOCREATE,st->autocreate);
+	CheckDlgButton(hDlg,IDC_ADD_DATE,st->add_date);
+	SetDlgItemInt(hDlg,IDC_AVERAGING,st->averaging,0);
+	SetDlgItemText(hDlg,IDC_FILENAME,st->filename);
+	InvalidateRect(ghWndDesign,NULL,TRUE);
+}
+
+int openFile(FILE_WRITEROBJ * st)
+{						 
+	time_t rawtime;
+	struct tm * timeinfo;
+    long filesize=0;
+	char * findext;
+	char filename[255];
+
+	strcpy(filename,st->filename);
+	if (st->add_date)
+	{
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		//The years are since 1900 according the documentation, so add 1900 to the actual year result.
+		char timestr[100];
+		wsprintf(timestr, "_%d-%02d-%02d_%02d-%02d", timeinfo->tm_year + 1900, timeinfo->tm_mon, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min  );
+		//printf("time is: %s\n",timestr);
+
+		findext=strstr(filename,".");
+		if (findext) {
+			strcat (timestr,findext);
+		    strcpy (findext,timestr);
+		}
+		else strcat (filename,timestr);
+		//printf("new filename is: %s\n",filename);
+	}
+
+	if (!st->append) 
+	{
+		st->file=CreateFile(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
+	}
+	else  
+	{
+		st->file=CreateFile(filename, GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+		filesize=SetFilePointer(st->file,0,NULL,FILE_END);
+	}
+
+	if (st->file==INVALID_HANDLE_VALUE) {
+		st->state=STATE_FILE_IDLE;
+		return(0);
+	}
+
+	if (st->format==4) // bioexplorer format: write header!
+	{ 
+		char tmp[1024],tmp1[256];
+		int i,a;
+		DWORD dwWritten;
+
+		tmp[0]=0;
+		for(i=0;i<st->inports-1;i++)
+		{
+			sprintf(tmp1,"Sample Rate: %.4f",(float)PACKETSPERSECOND);
+			strcat(tmp,tmp1);
+			if (i!=st->inports-2) strcat (tmp,","); 
+			else { a=strlen(tmp); tmp[a++]=13;tmp[a++]=10;tmp[a]=0;}
+		}
+							 
+		for(i=0;i<st->inports-1;i++)
+		{
+			sprintf(tmp1,"Source %d:",i+1);
+			strcat(tmp,tmp1);
+			strcat(tmp,st->in_ports[i].in_desc);
+			if (i!=st->inports-2) strcat (tmp,","); 
+			else { a=strlen(tmp); tmp[a++]=13;tmp[a++]=10;tmp[a]=0;}
+		}
+		if ((!st->append)||(filesize<10))
+		WriteFile(st->file,tmp,strlen(tmp),&dwWritten,NULL);
+	}
+	st->state=STATE_FILE_OPEN;	
+	return(1);
+}
 
 
 LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
@@ -38,7 +148,6 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 	switch( message )
 	{
 		case WM_INITDIALOG:
-				SetDlgItemText(hDlg, IDC_FILENAME, st->filename);
 				SendDlgItemMessage(hDlg,IDC_FORMATCOMBO,CB_ADDSTRING,0,(LPARAM) (LPSTR) "ASCII-Integer Values, TAB / CR+LF delimited");
 				SendDlgItemMessage(hDlg,IDC_FORMATCOMBO,CB_ADDSTRING,0,(LPARAM) (LPSTR) "ASCII-Integer Values, Comma / CR+LF delimited");
 				SendDlgItemMessage(hDlg,IDC_FORMATCOMBO,CB_ADDSTRING,0,(LPARAM) (LPSTR) "ASCII-Float Values, TAB / CR+LF delimited");
@@ -47,32 +156,7 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 				SendDlgItemMessage(hDlg,IDC_FORMATCOMBO,CB_ADDSTRING,0,(LPARAM) (LPSTR) "1-Channel raw integer 16bit signed");
 				SendDlgItemMessage(hDlg,IDC_FORMATCOMBO,CB_ADDSTRING,0,(LPARAM) (LPSTR) "1-Channel raw integer 16bit unsigned");
 				SendDlgItemMessage(hDlg, IDC_FORMATCOMBO, CB_SETCURSEL, st->format, 0L ) ;
-				if (st->state)
-				{
-					SetDlgItemText(hDlg,IDC_FILESTATUS,"writing File");
-					EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
-				}
-				else
-				{
-					if (st->file!=INVALID_HANDLE_VALUE) 
-					{ 
-						SetDlgItemText(hDlg,IDC_FILESTATUS,"File opened");
-						EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
-					}
-					else 
-					{
-						SetDlgItemText(hDlg,IDC_FILESTATUS,"File not opened.");
-						EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
-					}
-					EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
-
-				}
-				CheckDlgButton(hDlg,IDC_APPEND,st->append);
+				updateDialog(hDlg, st);
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -140,91 +224,52 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 					}
 					if (open_file_dlg(ghWndMain,st->filename, FT_TXT, OPEN_SAVE))
 					{
-						 long filesize=0;
-
-						 if (!st->append) 
-						 {
-						   st->file=CreateFile(st->filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
-						 }
-						 else  
-						 {
-						   st->file=CreateFile(st->filename, GENERIC_WRITE|GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
-						   filesize=SetFilePointer(st->file,0,NULL,FILE_END);
-						 }
-
-						 if (st->file==INVALID_HANDLE_VALUE) 
+						 if (!openFile(st)) 
 						 {
 							 SetDlgItemText(hDlg,IDC_FILESTATUS,"Could not create File");
 							 strcpy(st->filename,"none");
-							 st->state=0;
-						 }
-						 else 
-						 if (st->format==4)
-						 { 
-							 char tmp[1024],tmp1[256];
-							 int i,a;
-							 DWORD dwWritten;
-
-							 tmp[0]=0;
-							 for(i=0;i<st->inports-1;i++)
-							 {
-								 sprintf(tmp1,"Sample Rate: %.4f",(float)PACKETSPERSECOND);
-								 strcat(tmp,tmp1);
-								 if (i!=st->inports-2) strcat (tmp,","); 
-								 else { a=strlen(tmp); tmp[a++]=13;tmp[a++]=10;tmp[a]=0;}
-							 }
-							 
-							 for(i=0;i<st->inports-1;i++)
-							 {
-								 sprintf(tmp1,"Source %d:",i+1);
-								 strcat(tmp,tmp1);
-								 strcat(tmp,st->in_ports[i].in_desc);
-								 if (i!=st->inports-2) strcat (tmp,","); 
-								 else { a=strlen(tmp); tmp[a++]=13;tmp[a++]=10;tmp[a]=0;}
-							 }
-							 if ((!st->append)||(filesize<10))
-								WriteFile(st->file,tmp,strlen(tmp),&dwWritten,NULL);
-							 EnableWindow(GetDlgItem(hDlg, IDC_SELECT), FALSE); EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-							 SetDlgItemText(hDlg,IDC_FILESTATUS,"File opened");
 						 }
 					}
-					SetDlgItemText(hDlg,IDC_FILENAME,st->filename);
-					InvalidateRect(ghWndDesign,NULL,TRUE);
+					updateDialog(hDlg, st);
+
 				 break; 
 
 			case IDC_APPEND:
 				st->append=IsDlgButtonChecked(hDlg,IDC_APPEND);
 				break;
+			case IDC_AUTOCREATE:
+				st->autocreate=IsDlgButtonChecked(hDlg,IDC_AUTOCREATE);
+				break;
+			case IDC_ADD_DATE:
+				st->add_date=IsDlgButtonChecked(hDlg,IDC_ADD_DATE);
+				break;
+			case IDC_AVERAGING:
+				st->averaging=GetDlgItemInt(hDlg,IDC_AVERAGING,NULL,0);
+				break;
+
 			case IDC_START:
-				if ((st->inports>0) &&(st->file!=INVALID_HANDLE_VALUE))
+				if ((st->inports>0) && (st->file!=INVALID_HANDLE_VALUE))
 				{
-					SetDlgItemText(hDlg,IDC_FILESTATUS, "writing File");
 					// START FILE WRITING
-					st->state=1;
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-  					EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
-				} else SetDlgItemText(hDlg,IDC_FILESTATUS, "No Channels available.");
+					st->state=STATE_FILE_WRITING;
+					st->avg_count=0;
+					updateDialog(hDlg, st);
+				} 
 				break; 
 
 			case IDC_STOP:
-					SetDlgItemText(hDlg,IDC_FILESTATUS, "stopped");
-					st->state=0;
-					EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
-					break; 
+				if (st->file!=INVALID_HANDLE_VALUE)
+					st->state=STATE_FILE_OPEN;
+				else
+					st->state=STATE_FILE_IDLE;
+				updateDialog(hDlg, st);
+				break; 
 
 			case IDC_CLOSE: 
-					SetDlgItemText(hDlg,IDC_FILESTATUS, "file closed.");
-					st->state=0;
 					if (st->file!=INVALID_HANDLE_VALUE) CloseHandle(st->file);
 					st->file=INVALID_HANDLE_VALUE;
-  				    EnableWindow(GetDlgItem(hDlg, IDC_SELECT), TRUE);
-					EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-					EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
- 				    InvalidateRect(ghWndDesign,NULL,TRUE);
+					st->state=STATE_FILE_IDLE;
+					updateDialog(hDlg, st);
 					break;
 
 			case IDC_FORMATCOMBO:
@@ -260,7 +305,17 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		width=70;
 		height=50;
 
-		state=0; format=0;append=FALSE;
+
+		state=STATE_FILE_IDLE; 
+		format=0;
+		append=FALSE;
+		autocreate=FALSE;
+		add_date=FALSE;
+		averaging=1;
+		avg_count=0;
+		for (int i=0;i<MAX_PORTS;i++)
+			averaging_buffers[i]=0;
+
 		file=INVALID_HANDLE_VALUE;
 		strcpy(filename,"none");
 	  }
@@ -290,6 +345,10 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  load_property("format",P_INT,&format);
 		  load_property("inports",P_INT,&inports);
 		  load_property("append",P_INT,&append);
+		  load_property("averaging",P_INT,&averaging);
+		  load_property("autocreate",P_INT,&autocreate);
+		  load_property("add_date",P_INT,&add_date);
+
 		  height=CON_START+inports*CON_HEIGHT+5;
 		  
 	  }
@@ -301,66 +360,101 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"format",P_INT,&format);
 		  save_property(hFile,"inports",P_INT,&inports);
 		  save_property(hFile,"append",P_INT,&append);
+		  save_property(hFile,"averaging",P_INT,&averaging);
+		  save_property(hFile,"autocreate",P_INT,&autocreate);
+		  save_property(hFile,"add_date",P_INT,&add_date);
 	  }
 
+	  void FILE_WRITEROBJ::session_reset(void) 
+	  {
+		  avg_count=0;
+	  }
+
+	  void FILE_WRITEROBJ::session_start(void)
+	  {
+  			if ((file==INVALID_HANDLE_VALUE) || (state != STATE_FILE_WRITING))
+			{  
+				if( openFile(this)) {
+					state=STATE_FILE_WRITING;
+					avg_count=0;
+				}
+			} 
+	  }
+
+	  void FILE_WRITEROBJ::session_stop(void)
+	  {
+			if (file!=INVALID_HANDLE_VALUE) CloseHandle(file);
+			file=INVALID_HANDLE_VALUE;
+			state=STATE_FILE_IDLE;
+	  }
+
+  	  void FILE_WRITEROBJ::session_pos(long pos) 
+	  {	
+			avg_count=0;
+	  } 
 
 	  void FILE_WRITEROBJ::incoming_data(int port, float value) 
 	  {	
 		in_ports[port].value=value;
+		averaging_buffers[port]+=value;
 	  }
-
 	  
 	  void FILE_WRITEROBJ::work(void) 
 	  {
 		int x;
 		char sztemp[100];
-	
-	
-		if ((inports==0)||(state==0)||(file==INVALID_HANDLE_VALUE)) return;
+		
+		if ((inports==0)||(state!=STATE_FILE_WRITING)||(file==INVALID_HANDLE_VALUE)) return;
 
-	
-		for (x=0;x<inports-1;x++)
+		if (++avg_count>=averaging) 
 		{
-			if ((format==0) || (format==1))
-  			   wsprintf(sztemp,"%d",(int)in_ports[x].value);
-			else if ((format==2) || (format==3))
-  			   sprintf(sztemp,"%.2f",in_ports[x].value);
-			else if (format==4)
+			avg_count=0;
+
+			for (x=0;x<inports-1;x++)
 			{
-				sprintf(sztemp,"%.11f",in_ports[x].value/1000000);
-			}
+				in_ports[x].value=averaging_buffers[x]/averaging;
+				averaging_buffers[x]=0;
+
+				if ((format==0) || (format==1))
+  				   wsprintf(sztemp,"%d",(int)in_ports[x].value);
+				else if ((format==2) || (format==3))
+  				   sprintf(sztemp,"%.2f",in_ports[x].value);
+				else if (format==4)
+				{
+					sprintf(sztemp,"%.11f",in_ports[x].value/1000000);
+				}
 			
+				if (format<5)
+				{
+					if (x<inports-2)
+					{
+					  if ((format==0) || (format==2)) strcat(sztemp,"\t");
+					  else if ((format==1) || (format==3)) strcat(sztemp,", ");
+					  else if (format==4) strcat(sztemp,",");
+					}
+					WriteFile(file,sztemp,strlen(sztemp),&dwWritten,NULL);
+				}
+
+				if ((format==5)&&(x==0))
+				{
+					sztemp[0]= (((int)in_ports[x].value) >> 8);
+					sztemp[1]= (((int)in_ports[x].value) & 0xff);
+					WriteFile(file,sztemp,2,&dwWritten,NULL);
+				}
+				if ((format==6)&&(x==0))
+				{
+					sztemp[0]= (((unsigned int)in_ports[x].value) >> 8);
+					sztemp[1]= (((unsigned int)in_ports[x].value) & 0xff);
+					WriteFile(file,sztemp,2,&dwWritten,NULL);
+				}
+			
+			}
 			if (format<5)
 			{
-				if (x<inports-2)
-				{
-				  if ((format==0) || (format==2)) strcat(sztemp,"\t");
-				  else if ((format==1) || (format==3)) strcat(sztemp,", ");
-				  else if (format==4) strcat(sztemp,",");
-				}
-				WriteFile(file,sztemp,strlen(sztemp),&dwWritten,NULL);
+			  wsprintf(sztemp,"\r\n");
+			  WriteFile(file,sztemp,strlen(sztemp),&dwWritten,NULL);
 			}
-
-			if ((format==5)&&(x==0))
-			{
-				sztemp[0]= (((int)in_ports[x].value) >> 8);
-				sztemp[1]= (((int)in_ports[x].value) & 0xff);
-				WriteFile(file,sztemp,2,&dwWritten,NULL);
-			}
-			if ((format==6)&&(x==0))
-			{
-				sztemp[0]= (((unsigned int)in_ports[x].value) >> 8);
-				sztemp[1]= (((unsigned int)in_ports[x].value) & 0xff);
-				WriteFile(file,sztemp,2,&dwWritten,NULL);
-			}
-			
-		}
-        if (format<5)
-		{
-		  wsprintf(sztemp,"\r\n");
-		  WriteFile(file,sztemp,strlen(sztemp),&dwWritten,NULL);
-		}
-
+		  }
 	  }
 
 
