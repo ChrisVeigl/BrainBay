@@ -99,9 +99,9 @@
 #define VINFO_PROTOCOL_SUBNUMBER 9 	// view sub version of protocoll 21 (read only)
 
 
-  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "OPI TrueSense Exploration Kit", "OpenBCI 16 Channels", "\0"};
-  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         66       ,        152                    ,          114   };
-  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         33       ,        1                      ,          57   };
+  char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "OPI TrueSense Exploration Kit", "OpenBCI 16 Channels", "Neurosky MindWave","\0"};
+  int  AMOUNT_TO_READ   []  = {     68,               66,               8           ,  21 ,            25   ,                  4   ,                  25,              40         ,    6 ,                  16 ,             24           ,         66       ,        152                    ,          114            ,      48      };
+  int  BYTES_PER_PACKET []  = {     17,               11,               2           ,  7  ,             5   ,                  1   ,                  5,               20         ,    6 ,                  16 ,             6            ,         33       ,        1                      ,          57             ,      8       };
 
 
 
@@ -919,6 +919,110 @@ void parse_byte_OPI(unsigned char actbyte)
 
 
 
+/********************************************************************
+
+  NEUROSKY 1chn - Neuosky Mindset/Mindwave & compatible protocol
+
+Neurosky packet protocol
+
+The raw packet is sent 512 times every second and the analyzed packet is sent out once every second. 
+
+Raw Packet 
+Byte:Example // [CODE] Explanation 
+[ 0]:0xAA // [SYNC] 
+[ 1]:0xAA // [SYNC] 
+[ 2]:0x04 // [PLENGTH] (payload length) of 4 bytes 
+[ 3]:0x80 // [RAW_WAVE_VALUE] Single Big-endian 16 bit two's compliment singed value 
+[ 4]:0x02 // [VLENGTH] 
+[ 5]:0x00 // Raw Value High Byte 
+[ 6]:0x05 // Raw Value Low Byte 
+[ 7]:0x78 // [CHKSUM] 
+ 
+Analyzed Packet 
+Byte:Example // [CODE] Explanation 
+[ 0]:0xAA // [SYNC] 
+[ 1]:0xAA // [SYNC] 
+[ 2]:0x20 // [PLENGTH] (payload length) of 32 bytes 
+[ 3]:0x02 // [POOR_SIGNAL] Quality 
+[ 4]:0x00 // No poor signal detected (0/200) 
+[ 5]:0x83 // [ASIC_EEG_POWER_INT] 
+[ 6]:0x18 // [VLENGTH] 24 bytes 
+[ 7]:0x00 // (1/3) Begin Delta bytes 
+[ 8]:0x00 // (2/3) 
+[ 9]:0x94 // (3/3) End Delta bytes 
+[10]:0x00 // (1/3) Begin Theta bytes  
+[11]:0x00 // (2/3) 
+[12]:0x42 // (3/3) End Theta bytes 
+[13]:0x00 // (1/3) Begin Low-alpha bytes 
+[14]:0x00 // (2/3) 
+[15]:0x0B // (3/3) End Low-alpha bytes 
+[16]:0x00 // (1/3) Begin High-alpha bytes 
+[17]:0x00 // (2/3) 
+[18]:0x64 // (3/3) End High-alpha bytes 
+[19]:0x00 // (1/3) Begin Low-beta bytes 
+[20]:0x00 // (2/3) 
+[21]:0x4D // (3/3) End Low-beta bytes 
+[22]:0x00 // (1/3) Begin High-beta bytes 
+[23]:0x00 // (2/3) 
+[24]:0x3D // (3/3) End High-beta bytes 
+[25]:0x00 // (1/3) Begin Low-gamma bytes 
+[26]:0x00 // (2/3) 
+[27]:0x07 // (3/3) End Low-gamma bytes 
+[28]:0x00 // (1/3) Begin Mid-gamma bytes 
+[29]:0x00 // (2/3) 
+[30]:0x05 // (3/3) End Mid-gamma bytes 
+[31]:0x04 // [ATTENTION] 
+[32]:0x0D // eSense Attention level of 13 eSense Attention level of 13 
+[33]:0x05 // [MEDITATION] 
+[34]:0x3D // eSense Meditation level of 61 eSense Meditation level of 61 
+[35]:0x34 // [CHKSUM] (1's comp inverse of 8-bit Payload sum of 0x) 
+ **********************************************************************/
+
+void parse_byte_Neurosky(unsigned char actbyte)
+{
+	static int pos=0;
+    static short tmpval=0;
+
+	switch (pos) 
+	{
+		  case 0: if (actbyte==0xAA) pos++;
+				  break;
+		  case 1: if (actbyte==0xAA) pos++;
+				  break;
+  		  case 2: if (actbyte==0x04) pos++;        // raw packet
+				  else if (actbyte==0x20) pos=10;  // analysed packet
+				  break;
+  		  case 3: if (actbyte==0x80) pos++;
+				  break;
+  		  case 4: if (actbyte==0x02) pos++;
+				  break;
+
+		  case 5: tmpval=actbyte<<8;
+			      pos++;
+				  break;
+
+		  case 6: tmpval |= actbyte;
+			      PACKET.buffer[0]=32767+tmpval; 
+			      pos++;
+				  break;
+
+		  case 7: process_packets();
+				  pos=0;  // next packet 
+				  break;
+
+		  case 10: pos=0; 
+			      // TBD: parse analysed packet
+			      // process_packets();
+				  break;
+
+
+	}
+		  
+}
+
+
+
+
 
 void ParseLocalInput(int BufLen)
 {
@@ -945,6 +1049,7 @@ void ParseLocalInput(int BufLen)
 			case DEV_OPENBCI8:	parse_byte_OPENBCI(actbyte, 8); break;
 			case DEV_OPENBCI16:	parse_byte_OPENBCI(actbyte, 16); break;
 			case DEV_OPI_EXPLORATION: parse_byte_OPI(actbyte); break;
+			case DEV_NEUROSKY:  parse_byte_Neurosky(actbyte); break;
 		}
 	}
 	return;
@@ -1211,6 +1316,10 @@ openbci:	// common section for OpenBCI devices
 			st->out_ports[6].out_min=0.0f;
 			st->out_ports[6].out_max=15.0f;
 			numChannels=7;
+			break;
+		case DEV_NEUROSKY:
+			st->resolution=16;
+			numChannels=1;
 			break;
 	}
 	st->outports=numChannels;
@@ -1608,6 +1717,9 @@ EEGOBJ::EEGOBJ(int num) : BASE_CL()
 				break;
 				case DEV_OPENBCI16:
 					desired_outports=16+3;
+				break;
+				case DEV_NEUROSKY:
+					desired_outports=1;
 				break;
 				default:
 					desired_outports=7;

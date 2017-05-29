@@ -187,7 +187,7 @@ extern "C" {
 #define FT_GANGLION_ARCHIVE 14
 
 
-#define MAX_COMPORT				80
+#define MAX_COMPORT				150
 #define DEFAULT_PORT            0
 #define DEF_BAUDRATE            CBR_57600
 #define MAX_WRITE_BUFFER        1024
@@ -224,6 +224,7 @@ extern "C" {
 #define DEV_OPENBCI8 11
 #define DEV_OPI_EXPLORATION 12
 #define DEV_OPENBCI16 13
+#define DEV_NEUROSKY 14
 
 
 #define MAX_TEMPSTRING    512
@@ -349,6 +350,7 @@ typedef struct GLOBALStruct
 	char configfile[256];
 	char emotivpath[256];
 	char ganglionhubpath[256];
+	char gangliondevicename[100];
 
 	long session_length;
 	long session_start;

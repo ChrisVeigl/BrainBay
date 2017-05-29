@@ -255,7 +255,6 @@
 #define IDC_CLOSE                       1170
 #define IDC_SESSTART                    1170
 #define IDC_TESTBAT                     1170
-#define IDC_EMOTIV_PATH2                1170
 #define IDC_GANGLION_PATH               1170
 #define IDC_WAVVOLUMEINPUTFROM          1171
 #define IDC_LIST                        1171
@@ -644,8 +643,11 @@
 #define IDC_UPPERLIMIT                  1492
 #define IDC_APPEND                      1493
 #define IDC_PLAY_ONCE                   1494
+#define IDC_APPEND2                     1494
+#define IDC_ADD_DATE                    1494
 #define IDC_PLAY_ONCE2                  1495
 #define IDC_VALUES                      1495
+#define IDC_AUTOCREATE                  1495
 #define IDC_AUTOSTART                   1496
 #define IDC_DEVICETYPE                  1496
 #define IDC_EMOTIV_ARCHIVE_NAME         1497
@@ -665,6 +667,7 @@
 #define IDC_CQ_F3                       1504
 #define IDC_GANGLION_ARCHIVE_NAME       1504
 #define IDC_DISCONNECT_GANGLION         1505
+#define IDC_AVERAGING                   1505
 #define IDC_CQ_FC5                      1506
 #define IDC_START_DATA                  1506
 #define IDC_CQ_T7                       1507
@@ -825,6 +828,8 @@
 #define ID_BIOSIGNAL_OPENBCIGANGLION    32932
 #define IDM_INSERT_GANGLION             32933
 #define IDM_INSERTGANGLION              32934
+#define ID_BIOSIGNAL_NEUROSKY           32935
+#define IDM_INSERT_EEG_NEUROSKY         32936
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -832,8 +837,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32935
-#define _APS_NEXT_CONTROL_VALUE         1505
+#define _APS_NEXT_COMMAND_VALUE         32937
+#define _APS_NEXT_CONTROL_VALUE         1506
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
