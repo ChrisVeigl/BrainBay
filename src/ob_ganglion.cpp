@@ -83,6 +83,44 @@ COLORREF GANGLION_COLORS[CI_NUM]=
 COLORREF ganglion_chncol[MAX_SIGNALS]={CI_GRAY,CI_GRAY,CI_GRAY,CI_GRAY};
 
 
+int prepare_fileRead (GANGLIONOBJ * st) {
+
+	st->filehandle = CreateFile(st->archivefile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (st->filehandle==INVALID_HANDLE_VALUE) {
+		st->filemode=0;
+		return(0);
+	}
+
+	get_session_length();
+	GLOBAL.ganglion_available=0;
+	st->filemode=FILE_READING;
+
+	GLOBAL.addtime=0;
+	FILETIME ftCreate, ftAccess, ftWrite;
+	SYSTEMTIME stUTC, stLocal;
+	DWORD dwRet;
+								
+	if (GetFileTime(st->filehandle, &ftCreate, &ftAccess, &ftWrite))
+	{ 
+		FileTimeToSystemTime(&ftWrite, &stUTC);
+		SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+		GLOBAL.addtime=stLocal.wHour*3600 + stLocal.wMinute*60 + stLocal.wSecond+ (float)stLocal.wMilliseconds/1000;
+	}
+	return(1);
+}
+
+int prepare_fileWrite(GANGLIONOBJ * st) {
+	st->filehandle = CreateFile(st->archivefile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0,NULL);
+	if (st->filehandle==INVALID_HANDLE_VALUE)
+	{
+		st->filemode=0;
+		return(0);
+	}
+	st->filemode=FILE_WRITING;
+	return(1);
+}
+
+
 int get_integers(int * buf, char* str)
 {
 	int i=0,actval=0,sign=1;
@@ -138,7 +176,10 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 	while (!tcpReaderThreadDone) 
 	{
 		if (sock) {
-			if (SDLNet_CheckSockets(set, sockettimeout) == -1)  return(-1);
+			if (SDLNet_CheckSockets(set, sockettimeout) == -1)  
+			{   printf("socket not active, closing reader thread\n");
+			 	return(-1);
+			}
 				
 			if (SDLNet_SocketReady(sock))
 			{
@@ -186,7 +227,7 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 					   actline=strstr(actline,";"); 
 					   if ((actline!=NULL) && (strlen(actline)>5)) actline+=2;  // skip semicolon and newline, go to next line
  				   }
-				}
+				} else  { printf ("read returned zero, closing reader thread\n"); return(-1); }
 			}
 			else Sleep(5);
 		} else Sleep(100);
@@ -319,6 +360,34 @@ void establish_ganglionconnection() {
 	}
 }
 
+void updateDialog(HWND hDlg, GANGLIONOBJ * st)
+{
+	switch (st->filemode)
+	{
+		case 0:
+			EnableWindow(GetDlgItem(hDlg, IDC_REC_GANGLION_ARCHIVE), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_OPEN_GANGLION_ARCHIVE), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_END_GANGLION_RECORDING), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_GANGLION_ARCHIVE), FALSE);			
+			SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,"none");
+			break;
+		case FILE_READING:
+			EnableWindow(GetDlgItem(hDlg, IDC_REC_GANGLION_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_OPEN_GANGLION_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_END_GANGLION_RECORDING), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_GANGLION_ARCHIVE), TRUE);			
+			SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,st->archivefile);
+		break;
+		case FILE_WRITING:
+			EnableWindow(GetDlgItem(hDlg, IDC_REC_GANGLION_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_OPEN_GANGLION_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_END_GANGLION_RECORDING), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_GANGLION_ARCHIVE), FALSE);			
+			SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,st->archivefile);
+		break;
+	}
+	InvalidateRect(ghWndDesign,NULL,TRUE);
+}
 
 
 LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
@@ -337,9 +406,11 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 		      for (int t = 0; t<num_ganglions; t++) 
 				SendDlgItemMessage( hDlg, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) GanglionNames[t] ) ;
 
-			   SetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,st->device);
+			   // SetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,st->device);
+			   SetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,GLOBAL.gangliondevicename);
 			   SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,st->archivefile);
 			   st->update_channelinfo();
+			   updateDialog(hDlg, st);
 			}
 			return TRUE;
 	
@@ -399,36 +470,20 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 					
 					if (open_file_dlg(ghWndMain,st->archivefile, FT_GANGLION_ARCHIVE, OPEN_LOAD))
 					{
-						st->filehandle = CreateFile(st->archivefile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-						if (st->filehandle==INVALID_HANDLE_VALUE)
-						{
-							SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,"none");
-							report_error("Could not open Archive-File");
-							get_session_length();
-
-						}
-						else
+						if (prepare_fileRead(st))
 						{
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 							SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,st->archivefile);
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_RESETBUTTON,0);
-							st->filemode=FILE_READING;
-							get_session_length();
 
-							GLOBAL.ganglion_available=0;
-
-							GLOBAL.addtime=0;
-							FILETIME ftCreate, ftAccess, ftWrite;
-							SYSTEMTIME stUTC, stLocal;
-							DWORD dwRet;
-								
-							if (GetFileTime(st->filehandle, &ftCreate, &ftAccess, &ftWrite))
-							{ 
-								FileTimeToSystemTime(&ftWrite, &stUTC);
-								SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
-								GLOBAL.addtime=stLocal.wHour*3600 + stLocal.wMinute*60 + stLocal.wSecond+ (float)stLocal.wMilliseconds/1000;
-							} 
 						}
+						else
+						{
+							SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,"none");
+							report_error("Could not open Archive-File");
+						}
+						get_session_length();
+					    updateDialog(hDlg, st);
 					}
 				break;
 			case IDC_CLOSE_GANGLION_ARCHIVE:
@@ -438,27 +493,22 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 						report_error("could not close Archive file");
 					st->filehandle=INVALID_HANDLE_VALUE;
 					SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,"none");
-					get_session_length();
 					GLOBAL.addtime=0;
 				}
+				st->filemode=0;
+				get_session_length();
+				updateDialog(hDlg, st);
 				break;
 			case IDC_REC_GANGLION_ARCHIVE:
 					strcpy(st->archivefile,GLOBAL.resourcepath);
 					strcat(st->archivefile,"ARCHIVES\\*.gla");
 					if (open_file_dlg(ghWndMain,st->archivefile, FT_GANGLION_ARCHIVE, OPEN_SAVE))
 					{
-						st->filehandle = CreateFile(st->archivefile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0,NULL);
-						if (st->filehandle==INVALID_HANDLE_VALUE)
-						{
-							SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,"none");
+						if (!prepare_fileWrite(st)) {
 							report_error("Could not open Archive-File");
 						}
-						else
-						{
-							SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,st->archivefile);
-							st->filemode=FILE_WRITING;
-						}
 					}
+					updateDialog(hDlg, st);
 			break;
 			case IDC_END_GANGLION_RECORDING :
 				if (st->filehandle!=INVALID_HANDLE_VALUE)
@@ -469,6 +519,8 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 					SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,"none");
 
 				}
+				st->filemode=0;
+				updateDialog(hDlg, st);
 				break;
 			}
 			return TRUE;
@@ -560,6 +612,14 @@ void GANGLIONOBJ::update_channelinfo(void)
 	void GANGLIONOBJ::load(HANDLE hFile) 
 	{
   		load_object_basics(this);
+		load_property("archivefile",P_STRING,archivefile);
+		load_property("filemode",P_INT,&filemode);
+		if (filemode == FILE_READING) {
+			prepare_fileRead (this);
+		} else if (filemode == FILE_WRITING) {
+			prepare_fileWrite (this);
+		}
+		if (hDlg==ghWndToolbox) updateDialog(hDlg, this);
 		//load_property("device",P_STRING,device);
 		//if ((GLOBAL.ganglion_available) && (strlen(device)>2)) {
 		//	printf("\nTrying to connect to Device: %s\n",device);
@@ -571,6 +631,9 @@ void GANGLIONOBJ::update_channelinfo(void)
 	void GANGLIONOBJ::save(HANDLE hFile) 
 	{	   
 		save_object_basics(hFile, this);
+		save_property(hFile,"archivefile",P_STRING,archivefile);
+		save_property(hFile,"filemode",P_INT,&filemode);
+
 		// save_property(hFile,"test",P_INT,&test);
 		// save_property(hFile,"device",P_STRING,device);
 	}
@@ -584,8 +647,10 @@ void GANGLIONOBJ::update_channelinfo(void)
   		if ((filehandle==INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
 		{  
 			update_channelinfo();
-			   ganglion_connect(device);  // TBD: keep track of connection state
-			   Sleep(1000);               // only do this when needed 
+			ganglion_connect(device);  // TBD: keep track of connection state
+			GLOBAL.ganglion_available=1;
+
+			Sleep(1000);               // only do this when needed 
 			ganglion_startData();
 			//else { report_error("Cannot connect with the Device"); 
 			//SendMessage(ghWndStatusbox,WM_COMMAND, IDC_STOPSESSION,0);}

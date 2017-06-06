@@ -303,6 +303,42 @@ int WriteCfgFile(word dc, const char *fname)
 	return n;
 }
 
+int prepare_fileRead (NEUROBITOBJ * st) {
+
+	st->filehandle = CreateFile(st->archivefile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	if (st->filehandle==INVALID_HANDLE_VALUE) {
+		st->filemode=0;
+		return(0);
+	}
+
+	get_session_length();
+	GLOBAL.neurobit_available=0;
+	st->filemode=FILE_READING;
+
+	GLOBAL.addtime=0;
+	FILETIME ftCreate, ftAccess, ftWrite;
+	SYSTEMTIME stUTC, stLocal;
+	DWORD dwRet;
+								
+	if (GetFileTime(st->filehandle, &ftCreate, &ftAccess, &ftWrite))
+	{ 
+		FileTimeToSystemTime(&ftWrite, &stUTC);
+		SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
+		GLOBAL.addtime=stLocal.wHour*3600 + stLocal.wMinute*60 + stLocal.wSecond+ (float)stLocal.wMilliseconds/1000;
+	}
+	return(1);
+}
+
+int prepare_fileWrite(NEUROBITOBJ * st) {
+	st->filehandle = CreateFile(st->archivefile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0,NULL);
+	if (st->filehandle==INVALID_HANDLE_VALUE)
+	{
+		st->filemode=0;
+		return(0);
+	}
+	st->filemode=FILE_WRITING;
+	return(1);
+}
 
 
 /* Init Neurobit driver library use */
@@ -361,6 +397,38 @@ static HMODULE InitNeurobitDrvLib(char * drvLibName)
 	return drv_lib;
 }
 
+
+void updateDialog(HWND hDlg, NEUROBITOBJ * st)
+{
+	switch (st->filemode)
+	{
+		case 0:
+			// SetDlgItemText(hDlg,IDC_FILESTATUS,"no file opened");
+			EnableWindow(GetDlgItem(hDlg, IDC_REC_NB_ARCHIVE), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_OPEN_NB_ARCHIVE), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_END_NB_RECORDING), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_NB_ARCHIVE), FALSE);			
+			SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
+			break;
+		case FILE_READING:
+			EnableWindow(GetDlgItem(hDlg, IDC_REC_NB_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_OPEN_NB_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_END_NB_RECORDING), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_NB_ARCHIVE), TRUE);			
+			SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,st->archivefile);
+		break;
+		case FILE_WRITING:
+			EnableWindow(GetDlgItem(hDlg, IDC_REC_NB_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_OPEN_NB_ARCHIVE), FALSE);
+			EnableWindow(GetDlgItem(hDlg, IDC_END_NB_RECORDING), TRUE);
+			EnableWindow(GetDlgItem(hDlg, IDC_CLOSE_NB_ARCHIVE), FALSE);			
+			SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,st->archivefile);
+		break;
+	}
+	InvalidateRect(ghWndDesign,NULL,TRUE);
+}
+
+
 LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	static int init;
@@ -374,13 +442,12 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 	{
 		case WM_INITDIALOG:
 			{
-
-		      for (int t = 0; DevTab[t] != NULL; t++) 
-				SendDlgItemMessage( hDlg, IDC_NB_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) DevTab[t] ) ;
+				for (int t = 0; DevTab[t] != NULL; t++) 
+					SendDlgItemMessage( hDlg, IDC_NB_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) DevTab[t] ) ;
 	  
-			  SetDlgItemText(hDlg,IDC_NB_DEVICECOMBO,st->device);
-			  SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,st->archivefile);
-			  st->update_channelinfo();
+				SetDlgItemText(hDlg,IDC_NB_DEVICECOMBO,st->device);
+				st->update_channelinfo();
+				updateDialog(hDlg, st);
 			}
 			return TRUE;
 	
@@ -416,34 +483,18 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 					
 					if (open_file_dlg(ghWndMain,st->archivefile, FT_NB_ARCHIVE, OPEN_LOAD))
 					{
-						st->filehandle = CreateFile(st->archivefile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-						if (st->filehandle==INVALID_HANDLE_VALUE)
-						{
-							SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
-							report_error("Could not open Archive-File");
-							get_session_length();
-
-						}
-						else
+						if (prepare_fileRead(st))
 						{
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 							SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,st->archivefile);
 							SendMessage(ghWndStatusbox,WM_COMMAND,IDC_RESETBUTTON,0);
-							st->filemode=FILE_READING;
-							get_session_length();
-
-							GLOBAL.addtime=0;
-							FILETIME ftCreate, ftAccess, ftWrite;
-							SYSTEMTIME stUTC, stLocal;
-							DWORD dwRet;
-								
-							if (GetFileTime(st->filehandle, &ftCreate, &ftAccess, &ftWrite))
-							{ 
-								FileTimeToSystemTime(&ftWrite, &stUTC);
-								SystemTimeToTzSpecificLocalTime(NULL, &stUTC, &stLocal);
-								GLOBAL.addtime=stLocal.wHour*3600 + stLocal.wMinute*60 + stLocal.wSecond+ (float)stLocal.wMilliseconds/1000;
-							} 
 						}
+						else
+						{
+							report_error("Could not open Archive-File");
+						}
+						get_session_length();
+					    updateDialog(hDlg, st);
 					}
 				break;
 			case IDC_CLOSE_NB_ARCHIVE:
@@ -453,27 +504,21 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						report_error("could not close Archive file");
 					st->filehandle=INVALID_HANDLE_VALUE;
 					SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
-					get_session_length();
 					GLOBAL.addtime=0;
 				}
+				st->filemode=0;
+				get_session_length();
+				updateDialog(hDlg, st);
 				break;
 			case IDC_REC_NB_ARCHIVE:
 					strcpy(st->archivefile,GLOBAL.resourcepath);
 					strcat(st->archivefile,"ARCHIVES\\*.nba");
 					if (open_file_dlg(ghWndMain,st->archivefile, FT_NB_ARCHIVE, OPEN_SAVE))
 					{
-						st->filehandle = CreateFile(st->archivefile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0,NULL);
-						if (st->filehandle==INVALID_HANDLE_VALUE)
-						{
-							SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
+						if (!prepare_fileWrite(st)) 
 							report_error("Could not open Archive-File");
-						}
-						else
-						{
-							SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,st->archivefile);
-							st->filemode=FILE_WRITING;
-						}
 					}
+					updateDialog(hDlg, st);
 			break;
 			case IDC_END_NB_RECORDING :
 				if (st->filehandle!=INVALID_HANDLE_VALUE)
@@ -482,8 +527,9 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						report_error("could not close Archive file");
 					st->filehandle=INVALID_HANDLE_VALUE;
 					SetDlgItemText(hDlg,IDC_NB_ARCHIVE_NAME,"none");
-
 				}
+				st->filemode=0;
+				updateDialog(hDlg, st);
 				break;
 			}
 			return TRUE;
@@ -693,6 +739,15 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		  load_devctx();
 		  update_channelinfo();
  		  GLOBAL.neurobit_available=1;
+
+  		  load_property("archivefile",P_STRING,archivefile);
+		  load_property("filemode",P_INT,&filemode);
+		  if (filemode == FILE_READING) {
+			prepare_fileRead (this);
+		  } else if (filemode == FILE_WRITING) {
+			prepare_fileWrite (this);
+		  }
+		  if (hDlg==ghWndToolbox) updateDialog(hDlg, this);
 	  }
 		
 	  void NEUROBITOBJ::save(HANDLE hFile) 
@@ -700,6 +755,8 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		  save_object_basics(hFile, this);
 		  save_property(hFile,"test",P_INT,&test);
 		  save_property(hFile,"device",P_STRING,device);
+		  save_property(hFile,"archivefile",P_STRING,archivefile);
+		  save_property(hFile,"filemode",P_INT,&filemode);
 		  save_devctx();
 	  }
 
