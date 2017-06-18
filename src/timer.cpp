@@ -62,7 +62,7 @@ void process_packets(void)
 		SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 		
 		TIMING.packetcounter= GLOBAL.session_start;
-		for (t=0;t<GLOBAL.objects;t++) objects[t]->session_pos(TIMING.packetcounter);
+		//	for (t=0;t<GLOBAL.objects;t++) objects[t]->session_pos(TIMING.packetcounter);
 
 		if ((!sav_fly)&&(GLOBAL.session_loop) )
 		{

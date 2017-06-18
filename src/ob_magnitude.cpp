@@ -216,10 +216,11 @@ MAGNITUDEOBJ::MAGNITUDEOBJ(int num) : BASE_CL()
 
 	void MAGNITUDEOBJ::session_start(void)
 	{
-		if (lp1fbuf!=NULL)	 fid_run_freebuf(lp1fbuf);
-		lp1fbuf=fid_run_newbuf(lp1run);
-		if (lp2fbuf!=NULL)	 fid_run_freebuf(lp2fbuf);
-		lp2fbuf=fid_run_newbuf(lp2run);
+		if (lp1fbuf==NULL)	// fid_run_freebuf(lp1fbuf);
+		  lp1fbuf=fid_run_newbuf(lp1run);
+		if (lp2fbuf==NULL)	//  fid_run_freebuf(lp2fbuf);
+	  	  lp2fbuf=fid_run_newbuf(lp2run);
+
 	}
 	void MAGNITUDEOBJ::session_reset(void)
 	{

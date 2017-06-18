@@ -318,12 +318,12 @@ FILTEROBJ::FILTEROBJ(int num) : BASE_CL()
 	  }
 	void FILTEROBJ::session_start(void)
 	{
-		if (fbuf!=NULL)	 fid_run_freebuf(fbuf);
+		if (fbuf==NULL)	// fid_run_freebuf(fbuf);
 		fbuf=fid_run_newbuf(run);
 	}
 	void FILTEROBJ::session_reset(void)
 	{
-		if (fbuf!=NULL)	 fid_run_freebuf(fbuf);
+		if (fbuf!=NULL)  fid_run_freebuf(fbuf);
 		fbuf=fid_run_newbuf(run);
 	}
 	void FILTEROBJ::session_pos(long pos)

@@ -1244,6 +1244,7 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						update_statusinfo();
 						for (t=0;t<GLOBAL.objects;t++) objects[t]->session_reset();
 						GLOBAL.syncloss=0;
+						if (GLOBAL.session_length>0) set_session_pos(0);
 					break;
 
 				case IDC_RUNSESSION:
@@ -1880,45 +1881,40 @@ void update_status_window(void)
 	WINDOWPLACEMENT  wndpl;
 	int rm,lm,bm,bh;
 
-	if (GLOBAL.os_version==1)	{   // Windows-7 : other dialog size
-		if (GLOBAL.session_length==0)  {
-			lm=8;rm=16;
-			bm=48;bh=41;
-		}
-		else {
-			lm=8;rm=16;
-			bm=83;bh=76;
-		}
+	if (GLOBAL.session_length==0)  {
+		lm=8;rm=16;
+		bm=48;bh=41;
 	}
-	else	{
-		if (GLOBAL.session_length==0)  {
-			lm=4;rm=8;
-			bm=40;bh=36;
-		}
-		else {
-			lm=4;rm=8;
-			bm=75;bh=71;
-		}
+	else {
+		lm=8;rm=16;
+		bm=83;bh=76;
 	}
 
-	if (!GLOBAL.main_maximized)
+//	if (!GLOBAL.main_maximized)
 	{
-		GetWindowPlacement(ghWndMain, &wndpl);
+		RECT rc;
+		GetWindowRect(ghWndMain, &rc); 
+
+		// GetWindowPlacement(ghWndMain, &wndpl);
 		SetWindowPos(ghWndMain,ghWndMain,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
 		if (GLOBAL.hidestatus)
-			SetWindowPos(ghWndStatusbox, ghWndMain, wndpl.rcNormalPosition.left+lm, wndpl.rcNormalPosition.bottom-bm, 
-             wndpl.rcNormalPosition.right-wndpl.rcNormalPosition.left-rm,bh, 0); //SWP_NOACTIVATE|SWP_NOZORDER);
-		else SetWindowPos(ghWndStatusbox, ghWndMain, wndpl.rcNormalPosition.left+lm, wndpl.rcNormalPosition.bottom-bm, 
-	         wndpl.rcNormalPosition.right-wndpl.rcNormalPosition.left-rm,bh,SWP_SHOWWINDOW); //SWP_NOACTIVATE|SWP_NOZORDER);
+//			SetWindowPos(ghWndStatusbox, ghWndMain, wndpl.rcNormalPosition.left+lm, wndpl.rcNormalPosition.bottom-bm, 
+//             wndpl.rcNormalPosition.right-wndpl.rcNormalPosition.left-rm,bh, 0); //SWP_NOACTIVATE|SWP_NOZORDER);
+			SetWindowPos(ghWndStatusbox, ghWndMain, rc.left+lm, rc.bottom-bm, rc.right-rc.left-rm,bh, 0); //SWP_NOACTIVATE|SWP_NOZORDER);
+		else 
+			 SetWindowPos(ghWndStatusbox, ghWndMain, rc.left+lm, rc.bottom-bm, rc.right-rc.left-rm,bh,SWP_SHOWWINDOW); //SWP_NOACTIVATE|SWP_NOZORDER);
+//			 SetWindowPos(ghWndStatusbox, ghWndMain, wndpl.rcNormalPosition.left+lm, wndpl.rcNormalPosition.bottom-bm, 
+//	         wndpl.rcNormalPosition.right-wndpl.rcNormalPosition.left-rm,bh,SWP_SHOWWINDOW); //SWP_NOACTIVATE|SWP_NOZORDER);
 	}
-	else	{
+
+/*	else	{
 		if (GLOBAL.session_length==0)
   		     SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(GLOBAL.main_maximized)+15, 
 		               LOWORD(GLOBAL.main_maximized)-8,HIWORD(GLOBAL.main_maximized), 0);
-		else SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(GLOBAL.main_maximized)-20, 
+		else SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(GLOBAL.main_maximized)-80, 
 		               LOWORD(GLOBAL.main_maximized)-8,HIWORD(GLOBAL.main_maximized), 0);
 	}
-	
+	*/
 }
 
 

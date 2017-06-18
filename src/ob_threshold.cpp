@@ -45,7 +45,7 @@ void draw_meter(THRESHOLDOBJ * st)
 	max=st->in_ports[0].in_max;
 
 	hdc = BeginPaint (st->displayWnd, &ps);
-	bottom=rect.bottom-10;
+	bottom=rect.bottom-15;
 	height=(bottom-rect.top-20);
 
     act=bottom-(int)(size_value(min,max,st->gained_value,0.0f,(float)height,0));
@@ -111,7 +111,12 @@ void draw_meter(THRESHOLDOBJ * st)
 		txtpos.top=0;txtpos.bottom=0;
 		sprintf(szdata, " %.2f ",st->to_input);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
-		txtpos.top=y2+1;txtpos.bottom+=y2+1;
+//		txtpos.top=y2+1;txtpos.bottom+=y2+1;
+
+		x=txtpos.bottom;
+		txtpos.top=y2-x;txtpos.bottom=txtpos.top+x;
+
+
 		DrawText(hdc, szdata, -1, &txtpos, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 		
 	}
