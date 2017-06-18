@@ -23,6 +23,8 @@ class OSCIOBJ : public BASE_CL
 
 	float    input[MAX_EEG_CHANNELS];
 	int      inputcount[MAX_EEG_CHANNELS];
+	unsigned int showgroupsignal;
+	char	 filename[256];
 
 	float    pixelbuffer[MAX_EEG_CHANNELS][LEN_PIXELBUFFER];
 	int	     prev_pixel[MAX_EEG_CHANNELS];
@@ -37,6 +39,8 @@ class OSCIOBJ : public BASE_CL
 	int		 within;
 	int		 group;
 	int		 gradual;
+	int		 savebitmap;
+	int		 add_date;
 	int		 gain;
 	int		 mempos;
 	int		 redraw;
@@ -47,6 +51,7 @@ class OSCIOBJ : public BASE_CL
 	int		 drawstart,drawend,periods;
 	int		 groupselect;
 	float	 laststamp;
+	char	 wndcaption[50];
 
 	int      top,left,right,bottom;
 	COLORREF bkcol;
@@ -63,6 +68,7 @@ class OSCIOBJ : public BASE_CL
 	OSCIOBJ(int num);
 	void update_inports(void);
 	void session_reset(void);
+	void session_stop(void);
 	void session_pos(long pos);
 	void make_dialog(void);
 	void load(HANDLE hFile);

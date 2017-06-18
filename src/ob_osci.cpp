@@ -19,8 +19,70 @@
 
 #include "brainBay.h"
 #include "ob_osci.h"
+#include <time.h>
+#include <fstream>
 
 #define Y_OFFSET 5
+
+
+//int HDCToFile(char* FilePath, HDC Context, RECT Area, int BitsPerPixel = 24)
+int HDCToFile(char* filename, HWND window, int add_date)
+{
+	RECT Area;
+	HDC Context=GetDC(window);
+	GetClientRect(window,&Area);
+    int Width = Area.right - Area.left;
+    int Height = Area.bottom - Area.top;
+	int BitsPerPixel = 24;
+    BITMAPINFO Info;
+    BITMAPFILEHEADER Header;
+	char tmpname[256];
+	time_t rawtime;
+	struct tm * timeinfo;
+
+  	strcpy(tmpname,GLOBAL.resourcepath);
+	strcat(tmpname,"REPORTS\\");
+	strcat(tmpname,filename);
+	if (add_date) {
+		time(&rawtime);
+		timeinfo = localtime(&rawtime);
+		char timestr[100];
+		wsprintf(timestr, "_%d-%02d-%02d_%02d-%02d-%02d", timeinfo->tm_year + 1900, timeinfo->tm_mon+1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec  );
+		strcat(tmpname,timestr);
+	}
+
+	strcat(tmpname,".bmp");
+
+    memset(&Info, 0, sizeof(Info));
+    memset(&Header, 0, sizeof(Header));
+    Info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    Info.bmiHeader.biWidth = Width;
+    Info.bmiHeader.biHeight = Height;
+    Info.bmiHeader.biPlanes = 1;
+    Info.bmiHeader.biBitCount = BitsPerPixel;
+    Info.bmiHeader.biCompression = BI_RGB;
+    Info.bmiHeader.biSizeImage = Width * Height * (BitsPerPixel > 24 ? 4 : 3);
+    Header.bfType = 0x4D42;
+    Header.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+    char* Pixels = NULL;
+    HDC MemDC = CreateCompatibleDC(Context);
+    HBITMAP Section = CreateDIBSection(Context, &Info, DIB_RGB_COLORS, (void**)&Pixels, 0, 0);
+    DeleteObject(SelectObject(MemDC, Section));
+    BitBlt(MemDC, 0, 0, Width, Height, Context, Area.left, Area.top, SRCCOPY);
+    DeleteDC(MemDC);
+    std::fstream hFile(tmpname, std::ios::out | std::ios::binary);
+    if (hFile.is_open())
+    {
+        hFile.write((char*)&Header, sizeof(Header));
+        hFile.write((char*)&Info.bmiHeader, sizeof(Info.bmiHeader));
+        hFile.write(Pixels, (((BitsPerPixel * Width + 31) & ~31) / 8) * Height);
+        hFile.close();
+        DeleteObject(Section);
+        return true;
+    }
+    DeleteObject(Section);
+    return false;
+}
 
 void draw_osci(OSCIOBJ * st)
 {
@@ -45,7 +107,7 @@ void draw_osci(OSCIOBJ * st)
 
 	SetBkColor(hdc,st->bkcol);
 	count=st->inports-1;
-	if (count<=1) count=1;
+	if (count<1) count=1;
 
 //    if (st->showgrid) st->drawstart=50; else st->drawstart=35;
     if (st->showgrid) st->drawstart=60; else st->drawstart=45;
@@ -98,6 +160,22 @@ void draw_osci(OSCIOBJ * st)
 				actbrush=CreateSolidBrush(st->sigcol[i]);
 				txtpos.left-=15; txtpos.right=txtpos.left+10;
 				FillRect(hdc,&txtpos,actbrush);
+				if (!(st->showgroupsignal&(1<<i)))	{
+					txtpos.left+=2;	txtpos.top+=2;
+					txtpos.right-=2; txtpos.bottom-=2;
+					FillRect(hdc,&txtpos,st->bkbrush);
+				}
+/*				if (!st->showgroupsignal&(1<<i))	{
+				else {
+					SelectObject (hdc, st->gridpen);
+					Rectangle(hdc,txtpos.left, txtpos.top,txtpos.right, txtpos.bottom);
+				}
+
+					SelectObject (hdc, st->gridpen);
+					MoveToEx(hdc,txtpos.left, txtpos.top,NULL);	
+					LineTo(hdc,txtpos.right, txtpos.bottom);
+				}
+				*/
 				DeleteObject(actbrush);
 		   }
 	   }
@@ -126,8 +204,9 @@ void draw_osci(OSCIOBJ * st)
 			LineTo(hdc,st->drawend, upper);
 
 			if (st->group) 
-			{	act=&(st->in_ports[st->groupselect]);
-				SetTextColor(hdc,st->sigcol[st->groupselect]);
+			{	// act=&(st->in_ports[st->groupselect]);
+				// SetTextColor(hdc,st->sigcol[st->groupselect]);
+				act=&(st->in_ports[0]);
 			}
 			else act=&(st->in_ports[i]);
 
@@ -140,6 +219,7 @@ void draw_osci(OSCIOBJ * st)
 		    MoveToEx(hdc,st->drawstart-5, channel_mid,NULL);	
 		    LineTo(hdc,st->drawstart+5, channel_mid);
 
+		    SetTextColor(hdc,st->captcol);
 			sprintf(szdata,"%.2f ",(act->in_max/(st->gain/100.0f)+act->in_min/(st->gain/100.0f))/2);
 			if (strcmp(act->in_dim,"none")) strcat(szdata,act->in_dim); 
 			ExtTextOut( hdc, 2,channel_mid-5, 0, &rect,szdata, strlen(szdata), NULL ) ;
@@ -198,90 +278,74 @@ void draw_osci(OSCIOBJ * st)
 		  
 	   }
 	   
-
 	   if((st->signal_pos<st->drawstart)||(st->signal_pos>=st->drawend)) 
 		   st->signal_pos=st->drawstart;
-	  // else  // repaint memory
-	   {
-		   for (i=0;i<count;i++)
-		   {
-		   
-  			 if (!st->group) channel_mid=ypos*(i*2+1);  
-			 else channel_mid=ypos;  
-			 act=&(st->in_ports[i]);
-			 SelectObject (hdc, st->drawpen[i]);
 
-			 setnew=TRUE;
-			 if (!st->gradual)
-			   for (t=1;t<st->signal_pos-st->drawstart;t++)
-			   {
+	   for (i=0;i<count;i++)
+	   {		   
+  			if (!st->group) channel_mid=ypos*(i*2+1);  
+			else channel_mid=ypos;  
+			act=&(st->in_ports[i]);
+			SelectObject (hdc, st->drawpen[i]);
 
-				/*	if ((st->secpos>-1)&&(st->showseconds))
+			setnew=TRUE;
+			if (!st->gradual) {
+				for (t=1;t<st->signal_pos-st->drawstart;t++)
 				{
-					SelectObject (hdc, st->captpen);
-					MoveToEx(hdc,x+st->secpos, channel_mid-half_chn_height,NULL);	
-					LineTo(hdc,x+st->secpos, channel_mid+half_chn_height);
-				} 
-				*/
-		
-				d=st->mempos-t;
-				while (d<0) d+=1024;
+					d=st->mempos-t;
+					while (d<0) d+=1024;
 
-				if (act)
-				y=channel_mid-(int)size_value (act->in_min,act->in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
-				else y=channel_mid;
+					if (act) {
+						if (st->group) 
+							y=channel_mid-(int)size_value (st->in_ports[0].in_min,st->in_ports[0].in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+						else
+							y=channel_mid-(int)size_value (act->in_min,act->in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+					}
+					else y=channel_mid;
 
-				if (y<top) y=top;
-				if (st->pixelmem[i][d]!=INVALID_VALUE) 
-				{ 
-					if (setnew) { MoveToEx(hdc,st->signal_pos-t, y,NULL); setnew=FALSE;}
-					LineTo(hdc,st->signal_pos-t, y); 
-				} else setnew=TRUE;
-			   }
-			 else
-		       for (t=1;t<st->drawend-st->drawstart;t++)
-			   {
-
-				/*	if ((st->secpos>-1)&&(st->showseconds))
+					if (y<top) y=top;
+					if ((st->pixelmem[i][d]!=INVALID_VALUE)&&(st->showgroupsignal&(1<<i))) 
+					{ 
+						if (setnew) { MoveToEx(hdc,st->signal_pos-t, y,NULL); setnew=FALSE;}
+						LineTo(hdc,st->signal_pos-t, y); 
+					} else setnew=TRUE;
+				}
+			}
+			else 
+			{
+				for (t=1;t<st->drawend-st->drawstart;t++)
 				{
-					SelectObject (hdc, st->captpen);
-					MoveToEx(hdc,x+st->secpos, channel_mid-half_chn_height,NULL);	
-					LineTo(hdc,x+st->secpos, channel_mid+half_chn_height);
-				} 
-				*/
-		
-				d=st->mempos-t;
-				while (d<0) d+=1024;
+					d=st->mempos-t;
+					while (d<0) d+=1024;
 
-				if (act)
-				y=channel_mid-(int)size_value (act->in_min,act->in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
-				else y=channel_mid;
+					if (act)
+					y=channel_mid-(int)size_value (act->in_min,act->in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+					else y=channel_mid;
 
-				if (y<top) y=top;
-				if (st->pixelmem[i][d]!=INVALID_VALUE) 
-				{ 
-					if (st->signal_pos-t+1>st->drawstart)
-					{
-					  if (setnew) { MoveToEx(hdc,st->signal_pos-t, y,NULL); setnew=FALSE;}
-					  LineTo(hdc,st->signal_pos-t, y);
-					}
-					else
-					{
-					   if (st->signal_pos-t+1==st->drawstart) { setnew=true;bcount=1;}
-					   if (setnew) { MoveToEx(hdc,st->drawend-bcount, y,NULL); 
-					   setnew=FALSE;}
-					   LineTo(hdc,st->drawend-bcount, y); bcount++;
-					}
-
-				} else setnew=TRUE;
-			  }
-
-		  }
-	   }
+					if (y<top) y=top;
+					if (st->pixelmem[i][d]!=INVALID_VALUE) 
+					{ 
+						if (st->signal_pos-t+1>st->drawstart)
+						{
+							if (setnew) { MoveToEx(hdc,st->signal_pos-t, y,NULL); setnew=FALSE;}
+							LineTo(hdc,st->signal_pos-t, y);
+						}
+						else
+						{
+							if (st->signal_pos-t+1==st->drawstart) { setnew=true;bcount=1;}
+							if (setnew) { MoveToEx(hdc,st->drawend-bcount, y,NULL); 
+							setnew=FALSE;}
+							LineTo(hdc,st->drawend-bcount, y); bcount++;
+						}
+					} 
+					else setnew=TRUE;
+				}
+			}
+		}
 	}
 
-//	wsprintf(tmp,"%d,%d",st->drawend,st->signal_pos);
-//   ExtTextOut(hdc, 0,0, 0, &rect,tmp, strlen(tmp), NULL ) ;
+	//	wsprintf(tmp,"%d,%d",st->drawend,st->signal_pos);
+	//   ExtTextOut(hdc, 0,0, 0, &rect,tmp, strlen(tmp), NULL ) ;
 
     np=st->newpixels;
 	if (np>0)
@@ -294,7 +358,6 @@ void draw_osci(OSCIOBJ * st)
 	    for (i=0;i<count;i++)
 	      for (t=0;t<np;t++)
 		     pbuf[i][t]=st->pixelbuffer[i][t];
-
 
 	  x=st->signal_pos;
 	  for (i=0;i<count;i++)
@@ -328,7 +391,12 @@ void draw_osci(OSCIOBJ * st)
 
 		for (t=0; t<np; t++)
 		{ 
-			if (act) y=channel_mid-(int)size_value (act->in_min,act->in_max,pbuf[i][t]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+			if (act) {
+				if (st->group)
+				  y=channel_mid-(int)size_value (st->in_ports[0].in_min,st->in_ports[0].in_max,pbuf[i][t]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+				else
+				  y=channel_mid-(int)size_value (act->in_min,act->in_max,pbuf[i][t]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
+			}
 			else y=channel_mid;
 			st->pixelmem[i][st->mempos+t]=pbuf[i][t];
 
@@ -361,7 +429,8 @@ void draw_osci(OSCIOBJ * st)
 			{ 
 				SelectObject (hdc, st->drawpen[i]);
 				if (setnew) { MoveToEx(hdc,x+t, y,NULL); setnew=FALSE;}
-				LineTo(hdc,x+t, y);
+				if ((!st->group) || (st->showgroupsignal&(1<<i)))
+					LineTo(hdc,x+t, y);
 			} else setnew=TRUE;
 		}
 		if (setnew) st->prev_pixel[i]=-1; else st->prev_pixel[i]=y;
@@ -375,6 +444,30 @@ void draw_osci(OSCIOBJ * st)
 	  
 	}
 	st->signal_pos+=np;
+	if ((st->savebitmap) && (st->signal_pos>=st->drawend)) {
+/*
+		char tmpname[256];
+		time_t rawtime;
+		struct tm * timeinfo;
+
+  		strcpy(tmpname,GLOBAL.resourcepath);
+		strcat(tmpname,"REPORTS\\");
+		strcat(tmpname,st->filename);
+		if (st->add_date) {
+			time(&rawtime);
+			timeinfo = localtime(&rawtime);
+			char timestr[100];
+			wsprintf(timestr, "_%d-%02d-%02d_%02d-%02d-%02d", timeinfo->tm_year + 1900, timeinfo->tm_mon+1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec  );
+			strcat(tmpname,timestr);
+		}
+
+		strcat(tmpname,".bmp");
+		// printf("saving bitmap to %s!\n",tmpname);
+		//HDCToFile(tmpname,hdc,rect);
+		*/
+		HDCToFile(st->filename,st->displayWnd,st->add_date);
+	}
+
 	EndPaint( st->displayWnd, &ps );
 }
 
@@ -416,12 +509,16 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				SetDlgItemInt(hDlg, IDC_OSCIGAIN, st->gain,0);
 
 				SetDlgItemInt(hDlg,IDC_SECONDS,st->showseconds,0);
+				SetDlgItemText(hDlg, IDC_OSCICAPTION, st->wndcaption);
+				SetDlgItemText(hDlg, IDC_OSCIFILENAME, st->filename);
 
 				CheckDlgButton(hDlg,IDC_GROUP,st->group);
 				CheckDlgButton(hDlg,IDC_GRID,st->showgrid);
 				CheckDlgButton(hDlg,IDC_LINE,st->showline);
 				CheckDlgButton(hDlg,IDC_WITHIN,st->within);
 				CheckDlgButton(hDlg,IDC_GRADUAL,st->gradual);
+				CheckDlgButton(hDlg,IDC_SAVEBITMAP,st->savebitmap);
+				CheckDlgButton(hDlg,IDC_ADD_DATE,st->add_date);
 
 				for (t=0;t<st->inports;t++)
 				{
@@ -462,11 +559,27 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 						InvalidateRect(st->displayWnd,NULL,TRUE);
 				}
 				break;
-			case IDC_WITHIN:  st->within=IsDlgButtonChecked(hDlg, IDC_WITHIN);
-							InvalidateRect(st->displayWnd,NULL,TRUE);
+			case IDC_OSCICAPTION:
+					GetDlgItemText(hDlg, IDC_OSCICAPTION, st->wndcaption, 50);
+				    SetWindowText(st->displayWnd,st->wndcaption);
 				break;
-			case IDC_GRADUAL:  st->gradual=IsDlgButtonChecked(hDlg, IDC_GRADUAL);
-							InvalidateRect(st->displayWnd,NULL,TRUE);
+			case IDC_OSCIFILENAME:
+					GetDlgItemText(hDlg, IDC_OSCIFILENAME, st->filename, 50);
+				break;
+
+			case IDC_WITHIN:  
+					st->within=IsDlgButtonChecked(hDlg, IDC_WITHIN);
+					InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_GRADUAL:  
+					st->gradual=IsDlgButtonChecked(hDlg, IDC_GRADUAL);
+					InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_SAVEBITMAP:  
+					st->savebitmap=IsDlgButtonChecked(hDlg, IDC_SAVEBITMAP);
+				break;
+			case IDC_ADD_DATE:  
+					st->add_date=IsDlgButtonChecked(hDlg, IDC_ADD_DATE);
 				break;
 			
 			case IDC_SIGCOMBO:  
@@ -575,14 +688,48 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
     if (st==NULL)	return DefWindowProc( hWnd, message, wParam, lParam );
 
+#define KEY_UP 38
+#define KEY_DOWN 40
+#define KEY_LEFT 37
+#define KEY_RIGHT 39
+		int step=0;
 	
 	switch( message ) 
 	{	
-
 		case WM_DESTROY:
 		 break;
 		case WM_KEYDOWN:
-			  SendMessage(ghWndMain, message,wParam,lParam);
+			// printf("keydown: %ld, %ld\n",lParam,wParam);
+		    switch(wParam) {
+				case KEY_UP:
+				  step=st->gain/50; 
+				  if (step<1) step=1;
+  				  st->gain+=step;
+	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+				case KEY_DOWN:
+				  step=st->gain/50; 
+				  if (step<1) step=1;
+			  	  if (st->gain>step) st->gain-=step;
+	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+				case KEY_LEFT:
+			  	  if (st->timer>1) st->timer--;
+				  st->signal_pos=0;
+				  st->timercount=0;
+				  st->newpixels=0;
+				  st->laststamp=(float)TIMING.packetcounter/(float)PACKETSPERSECOND;
+	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+				case KEY_RIGHT:
+			  	  st->timer++;
+				  st->signal_pos=0;
+				  st->timercount=0;
+				  st->newpixels=0;
+				  st->laststamp=(float)TIMING.packetcounter/(float)PACKETSPERSECOND;
+	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+				}
 		break;
 
 		case WM_MOUSEACTIVATE:
@@ -599,24 +746,23 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 			   actx=(int)LOWORD(lParam);
 			   acty=(int)HIWORD(lParam);
-				  
+			   // printf("lbuttondown in wnd %ld at: %ld, %ld\n",hWnd, actx,acty);				  
 			   mindist=10000;minpoint=-1;
 				  
 			   if (st->group)
 			   {
 				  for (i=0;i<st->inports-1;i++)
 				  {
-					  
-				       actdist = ((90+i*150.0f)-actx)*((90+i*150.0f)-actx)
-						   + (10.0f-acty)*(10.0f-acty);
+					  actdist = ((90+i*150.0f)-actx)*((90+i*150.0f)-actx)
+						+ (10.0f-acty)*(10.0f-acty);
 				
 					   if (actdist<mindist) { mindist=actdist; minpoint=i; }
-
 				  }
 
 				  if (mindist<300) 
 				  {
 					  st->groupselect=minpoint;
+					  st->showgroupsignal^=(1<<minpoint);
 					  st->redraw=1;
 				  }
 			   }
@@ -675,7 +821,6 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			return 0;
 
 		case WM_PAINT:
-			
 			  draw_osci(st);
   	    	break;
 		default:
@@ -698,10 +843,11 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		inports = 1;
 		
 		newpixels=0;signal_pos=0;drawstart=25;drawend=20000;
-		groupselect=0;
+		groupselect=0;savebitmap=0;add_date=0;
 		mysec=0; mysec_total=0;
 		inc_mysec=0;
-
+		strcpy (wndcaption,"Oscilloscope");
+		strcpy (filename,"oscigraph");
 
 		for (t=0;t<MAX_EEG_CHANNELS;t++) input[t]=0.0f; //512.0;
 		for (t=0;t<MAX_PORTS;t++) sprintf(in_ports[t].in_name,"Chn%d",t+1);
@@ -717,9 +863,8 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 
 		captcol=RGB(100,100,150);
 		captpen=CreatePen(PS_SOLID,1,captcol);
-		redraw=TRUE;
-		
-
+		redraw=TRUE;		
+		showgroupsignal=0xffffffff;
 
 		for (t=0;t<MAX_EEG_CHANNELS;t++) 
 		{
@@ -727,7 +872,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 			drawpen[t]=CreatePen(PS_SOLID,1,sigcol[t]);
 		}
 		left=30;right=800;top=210;bottom=450;
-		if(!(displayWnd=CreateWindow("Osci_Class", "Oscilloscope", WS_CLIPSIBLINGS | WS_CAPTION  | WS_THICKFRAME | WS_CHILD ,left, top, right-left, bottom-top, ghWndMain, NULL, hInst, NULL))) 
+		if(!(displayWnd=CreateWindow("Osci_Class", wndcaption, WS_CLIPSIBLINGS | WS_CAPTION  | WS_THICKFRAME | WS_CHILD ,left, top, right-left, bottom-top, ghWndMain, NULL, hInst, NULL))) 
 		    report_error("can't create Oscillocope Window");
 		else {SetForegroundWindow(displayWnd); ShowWindow( displayWnd, TRUE ); UpdateWindow( displayWnd ); }
 		InvalidateRect(displayWnd, NULL, TRUE);
@@ -798,6 +943,11 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		load_property("within",P_INT,&within);
   	    load_property("group",P_INT,&group);
   	    load_property("gradual",P_INT,&gradual);
+	    load_property("wndcaption",P_STRING,wndcaption);
+	    load_property("showgroupsignal",P_INT,&showgroupsignal);
+	    load_property("savebitmap",P_INT,&savebitmap);
+	    load_property("add_date",P_INT,&add_date);
+		load_property("oscifilename",P_STRING,filename);
   	    
 
 		temp=RGB(255,255,255);
@@ -831,6 +981,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		}
 		height=CON_START+inports*CON_HEIGHT+5;
 		MoveWindow(displayWnd,left,top,right-left,bottom-top,TRUE);
+	    SetWindowText(displayWnd,wndcaption);
 	  }
 	
 	  void OSCIOBJ::save(HANDLE hFile) 
@@ -851,6 +1002,11 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		  save_property(hFile,"within",P_INT,&within);
 		  save_property(hFile,"group",P_INT,&group);
 		  save_property(hFile,"gradual",P_INT,&gradual);
+		  save_property(hFile,"wndcaption",P_STRING,wndcaption);
+	      save_property(hFile,"showgroupsignal",P_INT,&showgroupsignal);
+	      save_property(hFile,"savebitmap",P_INT,&savebitmap);
+	      save_property(hFile,"add_date",P_INT,&add_date);
+		  save_property(hFile,"oscifilename",P_STRING,filename);
 		  
 		  temp=(float)bkcol;
 		  save_property(hFile,"background",P_FLOAT,&temp);
@@ -892,6 +1048,14 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 			InvalidateRect(displayWnd,NULL,TRUE);
 	  }
 
+	  void OSCIOBJ::session_stop(void) 
+	  {
+		  if (savebitmap) {
+			HDCToFile(filename,displayWnd,add_date);
+		    printf("stopping session -> save bitmap");
+		  }
+	  }
+
 	  void OSCIOBJ::session_pos(long pos) 
 	  {
   			signal_pos=0;
@@ -924,8 +1088,14 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 					} else v=input[t];
 					if (within)
 					{
-						if (v>in_ports[t].in_max) v=in_ports[t].in_max;
-						if (v<in_ports[t].in_min) v=in_ports[t].in_min;
+						if (group) {
+							if (v>in_ports[0].in_max/(gain/100.0f)) v=in_ports[0].in_max/(gain/100.0f);
+							if (v<in_ports[0].in_min/(gain/100.0f)) v=in_ports[0].in_min/(gain/100.0f);
+						}
+						else {
+							if (v>in_ports[t].in_max/(gain/100.0f)) v=in_ports[t].in_max/(gain/100.0f);
+							if (v<in_ports[t].in_min/(gain/100.0f)) v=in_ports[t].in_min/(gain/100.0f);
+						}
 					}
 					pixelbuffer[t][newpixels]=v;
 				}
