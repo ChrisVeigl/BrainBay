@@ -135,9 +135,9 @@ extern "C" {
 #define OB_BUFFER       59
 #define OB_GANGLION     60
 #define OB_SESSIONTIME  61
+#define OB_SESSIONMANAGER 62
 
-
-#define OBJECT_COUNT 	62
+#define OBJECT_COUNT 	63
 
 
 
@@ -154,7 +154,7 @@ extern "C" {
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
-				 "SESSIONTIME"
+				 "SESSIONTIME", "SESSIONMANAGER"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -331,6 +331,7 @@ typedef struct GLOBALStruct
 	int showtoolbox;
 	int hidestatus;
 	int startup;
+	int startdesign;
 	int autorun;
 	int use_cv_capture;
 	int os_version;
@@ -351,6 +352,7 @@ typedef struct GLOBALStruct
 	char resourcepath[256];
 	char configfile[256];
 	char emotivpath[256];
+	char startdesignpath[256];
 	char ganglionhubpath[256];
 	char gangliondevicename[100];
 
@@ -750,6 +752,7 @@ void midi_Vol(HMIDIOUT * midiout, int chn, int vol);
 LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
+LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK CounterWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK BallgameWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK MartiniWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );

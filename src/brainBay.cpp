@@ -48,6 +48,7 @@
 
 #include "brainBay.h"
 #include "ob_osci.h"
+#include "ob_sessionmanager.h"
 #include "ob_skindialog.h"
 #include "ob_neurobit.h"
 
@@ -106,7 +107,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// conv_file();
 
-	 AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
+	// AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
 
 	init_path();
 	register_classes(hInstance);
@@ -141,7 +142,21 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		ShowWindow( ghWndDesign, TRUE ); UpdateWindow( ghWndDesign ); 
 	}
 
-	if (GLOBAL.startup) 
+	if (GLOBAL.startdesign) {
+		if (strlen(GLOBAL.startdesignpath) > 3)
+		{
+			char configfilename[MAX_PATH];
+			close_toolbox();
+			strcpy(configfilename,GLOBAL.resourcepath); 
+			strcat(configfilename,"CONFIGURATIONS\\");
+			strcat(configfilename,GLOBAL.startdesignpath);
+			strcat(configfilename,".con");
+			// printf("trying to load configfile: %s\n",configfilename);
+			if (load_configfile(configfilename)) 
+			sort_objects();					  
+		}
+	}
+	else if (GLOBAL.startup) 
 	{
 		if (!load_configfile(GLOBAL.configfile)) report_error("Could not load Config File");
 		//else sort_objects();
@@ -150,6 +165,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	update_status_window();
 	UINT timerid= timeSetEvent(30,5,AnimProc,1,TIME_PERIODIC | TIME_CALLBACK_FUNCTION);
 
+	SetFocus(ghWndMain);
 	// main message loop
 	while (TRUE)
 	{
@@ -500,6 +516,9 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERTSESSIONTIME:
 					create_object(OB_SESSIONTIME);
 					break;
+				case IDM_INSERTSESSIONMANAGER:
+					create_object(OB_SESSIONMANAGER);
+					break;
 
 				// here are the supported EED devices
 				case IDM_INSERT_EEG_GENERIC8: 
@@ -635,13 +654,23 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			break;
 
 		case WM_KEYDOWN:
-		    if (lParam==KEY_DELETE )
+		    if (lParam==KEY_DELETE ) 
 			   SendMessage(ghWndDesign, message,wParam,lParam);
-			if (actobject) {
-				if (actobject->type==OB_OSCI) {
-					// printf("sending keydown to oscilloscope window");
-					SendMessage(((OSCIOBJ *)actobject)->displayWnd, message,wParam,lParam);
-				}
+			else {
+				int found=0;
+				for (int x=0;x<GLOBAL.objects;x++) 
+					if (objects[x]->type==OB_SESSIONMANAGER) {
+						SendMessage(((SESSIONMANAGEROBJ *)objects[x])->displayWnd, message,wParam,lParam);
+						found=1;
+						break;
+					}
+
+				if ((actobject) && (!found)) {
+					if (actobject->type==OB_OSCI) {
+						// printf("sending keydown to oscilloscope window");
+						SendMessage(((OSCIOBJ *)actobject)->displayWnd, message,wParam,lParam);
+					}
+				 }
 			 }
 			 break;
 

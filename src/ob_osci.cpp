@@ -23,7 +23,10 @@
 #include <fstream>
 
 #define Y_OFFSET 5
-
+#define KEY_UP 38
+#define KEY_DOWN 40
+#define KEY_LEFT 37
+#define KEY_RIGHT 39
 
 //int HDCToFile(char* FilePath, HDC Context, RECT Area, int BitsPerPixel = 24)
 int HDCToFile(char* filename, HWND window, int add_date)
@@ -653,9 +656,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 			  }
 			  st->redraw=TRUE;
  			  InvalidateRect(st->displayWnd,NULL,TRUE);
-
 			}
-		
 		} break;
 		
 		case WM_PAINT:
@@ -688,12 +689,7 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
     if (st==NULL)	return DefWindowProc( hWnd, message, wParam, lParam );
 
-#define KEY_UP 38
-#define KEY_DOWN 40
-#define KEY_LEFT 37
-#define KEY_RIGHT 39
-		int step=0;
-	
+	int step=0;	
 	switch( message ) 
 	{	
 		case WM_DESTROY:

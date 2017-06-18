@@ -644,6 +644,7 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				SetDlgItemText(hDlg, IDC_MIDIPORTCOMBO, MIDIPORTS[port].portname);
 				SetDlgItemText(hDlg, IDC_EMOTIV_PATH, GLOBAL.emotivpath);
 				SetDlgItemText(hDlg, IDC_GANGLION_PATH, GLOBAL.ganglionhubpath);
+				SetDlgItemText(hDlg, IDC_STARTDESIGN_PATH, GLOBAL.startdesignpath);
 
 				for (wCount = 0; wCount < MAX_COMPORT; wCount++) 
 				{
@@ -668,6 +669,7 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 
 				CheckDlgButton(hDlg, IDC_CONNECTED, TTY.CONNECTED);
 				CheckDlgButton(hDlg, IDC_STARTUP, GLOBAL.startup);
+				CheckDlgButton(hDlg, IDC_STARTDESIGN, GLOBAL.startdesign);
 				CheckDlgButton(hDlg, IDC_AUTORUN, GLOBAL.autorun);
 				CheckDlgButton(hDlg, IDC_MINIMIZED, GLOBAL.minimized);
 				CheckDlgButton(hDlg, IDC_USE_CVCAPTURE, GLOBAL.use_cv_capture);
@@ -731,8 +733,10 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 			case IDC_STARTUP:
 				 GLOBAL.startup= IsDlgButtonChecked(hDlg, IDC_STARTUP);
 		 		 GLOBAL.tool_top=0;
-				 GLOBAL.tool_left=0;
-					 
+				 GLOBAL.tool_left=0;					 
+				 break;
+			case IDC_STARTDESIGN:
+				 GLOBAL.startdesign= IsDlgButtonChecked(hDlg, IDC_STARTDESIGN);
 				 break;
 			case IDC_ADDARCHIVETIME:
 				 GLOBAL.add_archivetime= IsDlgButtonChecked(hDlg, IDC_ADDARCHIVETIME);
@@ -759,6 +763,9 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 			case IDC_GANGLION_PATH:
 				GetDlgItemText(hDlg,IDC_GANGLION_PATH, GLOBAL.ganglionhubpath, 255);
+				break;
+			case IDC_STARTDESIGN_PATH:
+				GetDlgItemText(hDlg,IDC_STARTDESIGN_PATH, GLOBAL.startdesignpath, 255);
 				break;
 			case IDC_SAVESETTINGS:
 				   if (!save_settings())  report_error("Could not save Settings");

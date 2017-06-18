@@ -86,6 +86,8 @@
 #include "ob_buffer.h"
 #include "ob_ganglion.h"
 #include "ob_sessiontime.h"
+#include "ob_sessionmanager.h"
+
 //
 // GLOBAL VARIABLES
 //
@@ -268,6 +270,8 @@ void create_object(int type)
 							 actobject->object_size=sizeof(GANGLIONOBJ);break;
 		case OB_SESSIONTIME: actobject=new SESSIONTIMEOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(SESSIONTIMEOBJ);break;
+		case OB_SESSIONMANAGER: actobject=new SESSIONMANAGEROBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(SESSIONMANAGEROBJ);break;
 
 
 	}
@@ -589,6 +593,21 @@ void register_classes (HINSTANCE hInstance)
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = 0;//CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = (WNDPROC)SessionManagerWndHandler;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_MYEEG);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName	= NULL;
+	wcex.lpszClassName	= "SessionManager_Class";
+	wcex.hIconSm		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
+	if(!RegisterClassEx(&wcex))
+        report_error("Can't register SessionManager-Windowclass");
+
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = 0;//CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc = (WNDPROC)CounterWndHandler;
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
@@ -717,6 +736,7 @@ void GlobalInitialize()
 	GLOBAL.design_left=20;GLOBAL.design_right=500;
 	GLOBAL.design_top=20;GLOBAL.design_bottom=400;
 	GLOBAL.startup=0; GLOBAL.autorun=0; GLOBAL.configfile[0]=0;
+	GLOBAL.startdesign=0;
 	GLOBAL.syncloss=0;
 	GLOBAL.dialog_interval=DIALOG_UPDATETIME;
 	GLOBAL.draw_interval=DRAW_UPDATETIME;
@@ -727,6 +747,7 @@ void GlobalInitialize()
 	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");
 	strcpy(GLOBAL.ganglionhubpath,"C:\\data\\works\\openbci\\data\\GanglionHub.exe");
 	strcpy(GLOBAL.gangliondevicename,"idle");
+	strcpy(GLOBAL.startdesignpath,"");
 
 	GLOBAL.loading=false;
 	GLOBAL.read_tcp=0;

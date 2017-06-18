@@ -770,6 +770,8 @@ BOOL save_settings(void)
 	save_property(hFile,"ganglionhubpath",P_STRING,GLOBAL.ganglionhubpath);
 	save_property(hFile,"gangliondevicename",P_STRING,GLOBAL.gangliondevicename);
 	save_property(hFile,"addtime",P_INT,&GLOBAL.add_archivetime);
+	save_property(hFile,"startdesign",P_INT,&GLOBAL.startdesign);
+	save_property(hFile,"startdesignpath",P_STRING,GLOBAL.startdesignpath);
 
 	x=0;
 	for (t=0;t<GLOBAL.midiports;t++)
@@ -812,6 +814,8 @@ BOOL load_settings(void)
 	load_property("emotivpath",P_STRING,GLOBAL.emotivpath);
 	load_property("ganglionhubpath",P_STRING,GLOBAL.ganglionhubpath);
 	load_property("gangliondevicename",P_STRING,GLOBAL.gangliondevicename);
+	load_property("startdesign",P_INT,&GLOBAL.startdesign);
+	load_property("startdesignpath",P_STRING,GLOBAL.startdesignpath);
 
 
 	load_property("midiports",P_INT,&x);

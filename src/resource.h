@@ -90,6 +90,7 @@
 #define IDD_EEGBOX_SBT2                 251
 #define IDD_GANGLIONBOX                 254
 #define IDD_SESSIONTIMEBOX              255
+#define IDD_SESSIONMANAGERBOX           256
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -264,6 +265,8 @@
 #define IDC_DBG                         1171
 #define IDC_TESTBAT2                    1171
 #define IDC_SETCUTOFF                   1171
+#define IDC_STARTDESIGNNAME             1171
+#define IDC_STARTDESIGN_PATH            1171
 #define IDC_WAVVOLUMEINPUTTO            1172
 #define IDC_PATIENT                     1172
 #define IDC_WAVVOLUMEFROMBAR            1173
@@ -396,6 +399,7 @@
 #define IDC_ADDARCHIVETIME              1262
 #define IDC_LENGTH                      1263
 #define IDC_SESSIONPOS                  1263
+#define IDC_STARTDESIGN                 1263
 #define IDC_STOPCAPTURE                 1264
 #define IDC_XINC                        1264
 #define IDC_SAVEERP                     1265
@@ -684,9 +688,12 @@
 #define IDC_SESSIONTIME                 1508
 #define IDC_CQ_O1                       1509
 #define IDC_STOP_IMPEDANCECHECK         1509
+#define IDC_SESSIONLIST                 1509
 #define IDC_CQ_O2                       1510
 #define IDC_START_IMPEDANCECHECK        1510
+#define IDC_WNDCAPTION                  1510
 #define IDC_CQ_P8                       1511
+#define IDC_DISPLAYREPORTS              1511
 #define IDC_CQ_T8                       1512
 #define IDC_CQ_FC6                      1513
 #define IDC_CQ_F4                       1514
@@ -839,6 +846,9 @@
 #define ID_OTHERS_STOPSESSION           32937
 #define IDM_INSERT_STOPSESSION          32938
 #define IDM_INSERTSESSIONTIME           32939
+#define ID_OTHERS_SESSIONMANAGER        32940
+#define IDM_INSERT_SESSIONMANAGER       32941
+#define IDM_INSERTSESSIONMANAGER        32942
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -846,8 +856,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32940
-#define _APS_NEXT_CONTROL_VALUE         1509
+#define _APS_NEXT_COMMAND_VALUE         32943
+#define _APS_NEXT_CONTROL_VALUE         1512
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
