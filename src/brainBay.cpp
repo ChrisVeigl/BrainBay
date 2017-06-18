@@ -497,6 +497,9 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERTVECTORBUFFER:
 					create_object(OB_BUFFER);
 					break;
+				case IDM_INSERTSESSIONTIME:
+					create_object(OB_SESSIONTIME);
+					break;
 
 				// here are the supported EED devices
 				case IDM_INSERT_EEG_GENERIC8: 
@@ -630,9 +633,16 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			}
 
 			break;
+
 		case WM_KEYDOWN:
 		    if (lParam==KEY_DELETE )
-			  SendMessage(ghWndDesign, message,wParam,lParam);
+			   SendMessage(ghWndDesign, message,wParam,lParam);
+			if (actobject) {
+				if (actobject->type==OB_OSCI) {
+					// printf("sending keydown to oscilloscope window");
+					SendMessage(((OSCIOBJ *)actobject)->displayWnd, message,wParam,lParam);
+				}
+			 }
 			 break;
 
 		case WM_SIZE:
@@ -641,39 +651,53 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				 GLOBAL.main_maximized=lParam;
 				 ShowWindow(ghWndStatusbox,TRUE);
 				 GLOBAL.hidestatus=FALSE;
+				 update_status_window();
+/*
 				 if (GLOBAL.session_length==0)
   				    SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(lParam)+15, 
 			                   LOWORD(lParam)-8,HIWORD(lParam), 0);
 				 else SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(lParam)-20, 
 			                   LOWORD(lParam)-8,HIWORD(lParam), 0);
-			 }
-			 else if (wParam== SIZE_RESTORED) 
-			 {
-				WINDOWPLACEMENT  wndpl;
-				GetWindowPlacement(ghWndMain, &wndpl);
-				GLOBAL.top=wndpl.rcNormalPosition.top;
-				GLOBAL.left=wndpl.rcNormalPosition.left;
-				GLOBAL.right=wndpl.rcNormalPosition.right;
-				GLOBAL.bottom=wndpl.rcNormalPosition.bottom;
-				GLOBAL.main_maximized=0;
-				update_status_window();
-
+							*/
 			 }
 			 else if (wParam== SIZE_MINIMIZED) 
 			 {
 				 ShowWindow(ghWndStatusbox,FALSE);
 				 GLOBAL.hidestatus=TRUE;
 			 }
-			break;
-    	case WM_MOVE:
-			{
+			 else // if (wParam== SIZE_RESTORED) 
+			 {
+				/*
 				WINDOWPLACEMENT  wndpl;
 				GetWindowPlacement(ghWndMain, &wndpl);
 				GLOBAL.top=wndpl.rcNormalPosition.top;
 				GLOBAL.left=wndpl.rcNormalPosition.left;
 				GLOBAL.right=wndpl.rcNormalPosition.right;
 				GLOBAL.bottom=wndpl.rcNormalPosition.bottom;
+				*/
+				RECT rc;
+				GetWindowRect(ghWndMain, &rc); 
+				GLOBAL.top=rc.top;
+				GLOBAL.left=rc.left;
+				GLOBAL.right=rc.right;
+				GLOBAL.bottom=rc.bottom;
+				GLOBAL.main_maximized=0;
 				update_status_window();
+				// printf("Size: %d,%d,%d,%d \n",rc.left,rc.top,rc.right,rc.bottom);
+			 }
+
+			break;
+    	case WM_MOVE:
+			{
+				RECT rc;
+				GetWindowRect(ghWndMain, &rc); 
+				GLOBAL.top=rc.top;
+				GLOBAL.left=rc.left;
+				GLOBAL.right=rc.right;
+				GLOBAL.bottom=rc.bottom;
+				GLOBAL.main_maximized=0;
+				update_status_window();
+				// printf("move: %d,%d,%d,%d \n",GLOBAL.top,GLOBAL.left,GLOBAL.right,GLOBAL.bottom);
 			}
 			break;
 		//case WM_PAINT:

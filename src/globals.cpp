@@ -85,6 +85,7 @@
 #include "ob_displayvector.h"
 #include "ob_buffer.h"
 #include "ob_ganglion.h"
+#include "ob_sessiontime.h"
 //
 // GLOBAL VARIABLES
 //
@@ -265,6 +266,8 @@ void create_object(int type)
 		case OB_GANGLION:    actobject=new GANGLIONOBJ(GLOBAL.objects); 
 							 deviceobject=actobject;
 							 actobject->object_size=sizeof(GANGLIONOBJ);break;
+		case OB_SESSIONTIME: actobject=new SESSIONTIMEOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(SESSIONTIMEOBJ);break;
 
 
 	}

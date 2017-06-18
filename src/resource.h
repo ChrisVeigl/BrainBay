@@ -89,6 +89,7 @@
 #define IDD_EEGBOX_GENERIC              250
 #define IDD_EEGBOX_SBT2                 251
 #define IDD_GANGLIONBOX                 254
+#define IDD_SESSIONTIMEBOX              255
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -130,6 +131,7 @@
 #define IDC_PAR2TEXT2                   1049
 #define IDC_PAR1TEXT3                   1050
 #define IDC_AVGGAINBAR                  1051
+#define IDC_PAR1TEXT4                   1051
 #define IDC_HARMONICLIST                1052
 #define IDC_ADAPTINTERVALBAR            1052
 #define IDC_SAVEHARMONIC                1054
@@ -223,6 +225,7 @@
 #define IDC_REC_ARCHIVE                 1157
 #define IDC_GRADUAL                     1157
 #define IDC_CLOSE_ARCHIVE               1158
+#define IDC_SAVEBITMAP                  1158
 #define IDC_ARCHIVE_FILENAME            1159
 #define IDC_ARCHIVE_POSBAR              1160
 #define IDC_SHOWMETER                   1161
@@ -643,7 +646,6 @@
 #define IDC_UPPERLIMIT                  1492
 #define IDC_APPEND                      1493
 #define IDC_PLAY_ONCE                   1494
-#define IDC_APPEND2                     1494
 #define IDC_ADD_DATE                    1494
 #define IDC_PLAY_ONCE2                  1495
 #define IDC_VALUES                      1495
@@ -670,12 +672,16 @@
 #define IDC_AVERAGING                   1505
 #define IDC_CQ_FC5                      1506
 #define IDC_START_DATA                  1506
+#define IDC_OSCICAPTION                 1506
 #define IDC_CQ_T7                       1507
 #define IDC_SELECT_GANGLION2            1507
 #define IDC_SELECT_GANGLION             1507
 #define IDC_CONNECT_GANGLION            1507
+#define IDC_OSCIFILENAME                1507
+#define IDC_STOPWHENFINISH              1507
 #define IDC_CQ_P7                       1508
 #define IDC_STOP_DATA                   1508
+#define IDC_SESSIONTIME                 1508
 #define IDC_CQ_O1                       1509
 #define IDC_STOP_IMPEDANCECHECK         1509
 #define IDC_CQ_O2                       1510
@@ -830,6 +836,9 @@
 #define IDM_INSERTGANGLION              32934
 #define ID_BIOSIGNAL_NEUROSKY           32935
 #define IDM_INSERT_EEG_NEUROSKY         32936
+#define ID_OTHERS_STOPSESSION           32937
+#define IDM_INSERT_STOPSESSION          32938
+#define IDM_INSERTSESSIONTIME           32939
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -837,8 +846,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32937
-#define _APS_NEXT_CONTROL_VALUE         1506
+#define _APS_NEXT_COMMAND_VALUE         32940
+#define _APS_NEXT_CONTROL_VALUE         1509
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

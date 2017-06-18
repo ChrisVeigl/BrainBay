@@ -78,7 +78,7 @@ int openFile(FILE_WRITEROBJ * st)
 		timeinfo = localtime(&rawtime);
 		//The years are since 1900 according the documentation, so add 1900 to the actual year result.
 		char timestr[100];
-		wsprintf(timestr, "_%d-%02d-%02d_%02d-%02d", timeinfo->tm_year + 1900, timeinfo->tm_mon, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min  );
+		wsprintf(timestr, "_%d-%02d-%02d_%02d-%02d-%02d", timeinfo->tm_year + 1900, timeinfo->tm_mon+1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec  );
 		//printf("time is: %s\n",timestr);
 
 		findext=strstr(filename,".");
@@ -220,7 +220,7 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 					if (!strcmp(st->filename,"none"))
 					{
 			 		  strcpy(st->filename,GLOBAL.resourcepath);
-					  strcat(st->filename,"ARCHIVES\\*.*");
+					  strcat(st->filename,"REPORTS\\*.*");
 					}
 					if (open_file_dlg(ghWndMain,st->filename, FT_TXT, OPEN_SAVE))
 					{

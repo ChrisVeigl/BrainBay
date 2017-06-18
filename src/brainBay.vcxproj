@@ -497,6 +497,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_sessiontime.cpp" />
     <ClCompile Include="ob_tcp_receive.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -613,6 +614,7 @@
     <ClInclude Include="ob_signal.h" />
     <ClInclude Include="ob_skindialog.h" />
     <ClInclude Include="ob_speller.h" />
+    <ClInclude Include="ob_sessiontime.h" />
     <ClInclude Include="ob_tcp_receive.h" />
     <ClInclude Include="ob_tcp_sender.h" />
     <ClInclude Include="ob_threshold.h" />
