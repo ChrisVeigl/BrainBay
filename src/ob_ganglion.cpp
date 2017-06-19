@@ -722,8 +722,8 @@ GANGLIONOBJ::~GANGLIONOBJ()
 	tcpReaderThreadDone=1;
 	close_tcp();
 	dlgWindow=0;
-	killProcess("GanglionHub.exe");
-	Sleep(200);
+//	killProcess("GanglionHub.exe");
+//	Sleep(200);
 }  
 
 

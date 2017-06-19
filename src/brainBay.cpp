@@ -337,7 +337,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					}
 
 					break;
-				case IDM_EXIT:	
+				case IDM_EXIT:
+					killProcess("GanglionHub.exe");
 					DestroyWindow( hWnd );
 				    break;
                 
@@ -734,6 +735,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case WM_DESTROY:
 			actobject=0;
 			GlobalCleanup();
+			killProcess("GanglionHub.exe");
 			PostQuitMessage( 0 );
 			break;
 		case WM_INPUT:
