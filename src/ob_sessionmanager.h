@@ -30,16 +30,19 @@ class SESSIONMANAGEROBJ : public BASE_CL
 	int displayreports;
 	int menuitems;
 	int actmenuitem;
+	int actreportitem;
 	char wndcaption[80];
 	char sessionlist[4096];
 	char sessionname[20][100];
 	char sessionpath[20][256];
 	char sessionreport[20][256];
+	int  maxreportitems[20];
+	char actreport[256];
 
 	HFONT font;
 	COLORREF color,bkcolor, fontcolor, fontbkcolor;
-	int barsize,fontsize;
-	int  top,left,right,bottom;
+	int fontsize;
+	int top,left,right,bottom;
 	int redraw;
 
     SESSIONMANAGEROBJ(int num);

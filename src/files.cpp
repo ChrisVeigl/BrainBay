@@ -476,6 +476,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 	const char * d_name;
 	char new_name[256],szdata[20];
 
+	SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 	write_logfile("loading design configuration: %s",(char *)pszFileName);
 
     hFile = CreateFile(pszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);

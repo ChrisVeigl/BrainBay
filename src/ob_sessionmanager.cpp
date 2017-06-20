@@ -31,6 +31,31 @@
 #define KEY_ENTER 13
 
 
+int find_bmpfiles(char * reportname, int select, char * targetfilename) {
+	char reportpath[256];
+	strcpy(reportpath,GLOBAL.resourcepath); 
+	strcat(reportpath,"REPORTS\\");
+	strcat(reportpath,reportname);
+	strcat(reportpath,"*.bmp");
+	// printf("folder: %s\n",reportpath);
+
+	HANDLE hFind;
+	WIN32_FIND_DATA data;
+	int count =0;
+
+	hFind = FindFirstFile(reportpath, &data);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			// printf("found: %s\n", data.cFileName);
+			if (count==select)
+				strcpy (targetfilename, data.cFileName);
+			count++;
+		} while (FindNextFile(hFind, &data));
+		FindClose(hFind);
+	}
+	return(count);
+}
+
 void parse_menuitems(SESSIONMANAGEROBJ* st)
 {
 	int pos=0;
@@ -73,10 +98,11 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 			}
 		}
 		st->sessionreport[st->menuitems][pos2]=0;
-
+		st->maxreportitems[st->menuitems] = find_bmpfiles(st->sessionreport[st->menuitems], -1, NULL);
 		st->menuitems++;
 	}
 }
+
 
 void draw_meter(SESSIONMANAGEROBJ * st)
 {
@@ -84,23 +110,11 @@ void draw_meter(SESSIONMANAGEROBJ * st)
 	HDC hdc;
 	char szdata[256];
 	RECT rect;
-	int  act,width,mid,height,bottom,y1,y2;
 	HBRUSH actbrush,bkbrush;
 	HPEN bkpen;
 
 	GetClientRect(st->displayWnd, &rect);
-	//width=rect.right>>1;
-	width=(int)((float)rect.right/200.0f*st->barsize);
-	mid=rect.right>>1;
-    	
 	hdc = BeginPaint (st->displayWnd, &ps);
-	bottom=rect.bottom-15;
-	height=(bottom-rect.top-20);
-
-   // act=bottom-(int)(size_value(min,max,st->gained_value,0.0f,(float)height,0));
-
-	// if (act>bottom) act=bottom;
-	//if (act<bottom-height) act=bottom-height;
 
 	actbrush=CreateSolidBrush(st->color);
     bkbrush=CreateSolidBrush(st->bkcolor);
@@ -109,67 +123,55 @@ void draw_meter(SESSIONMANAGEROBJ * st)
     
    	SelectObject (hdc, bkpen);		
    	SelectObject (hdc, bkbrush);
-	/*
-	Rectangle(hdc,15,st->old_y1,50,st->old_y1+15);
-	MoveToEx(hdc,5, st->old_y1,NULL);	
-	LineTo(hdc,rect.right, st->old_y1);
-	*/
-	
-		RECT txtpos;int x;
-		SelectObject(hdc, st->font);
-		SetBkMode(hdc, OPAQUE);
-		SetBkColor(hdc, st->fontbkcolor);
-		SetTextColor(hdc,st->fontcolor);
 
-		for (int i=0; i<st->menuitems; i++) {
-			if (i==st->actmenuitem) {
-				SetBkColor(hdc, st->fontbkcolor);
-			} else {
-				SetBkColor(hdc, st->color);
-			}
-			ExtTextOut( hdc, rect.left+40,20+i*(40+st->fontsize), 0, &rect,st->sessionname[i], strlen(st->sessionname[i]), NULL );
-			// ExtTextOut( hdc, rect.left+240,20+i*(40+st->fontsize), 0, &rect,st->sessionpath[i], strlen(st->sessionpath[i]), NULL );
-			// ExtTextOut( hdc, rect.left+540,20+i*(40+st->fontsize), 0, &rect,st->sessionreport[i], strlen(st->sessionreport[i]), NULL );
+	if (strlen(st->actreport)>0) {
+		HBITMAP hBitmap = NULL;
+		BITMAP          bitmap;
+		HDC             hdcMem;
+		HGDIOBJ         oldBitmap;
+		char reportpath[256];
+		strcpy(reportpath,GLOBAL.resourcepath); 
+		strcat(reportpath,"REPORTS\\");
+		strcat(reportpath,st->actreport);
+
+		hBitmap = (HBITMAP)LoadImage(hInst, reportpath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hdcMem = CreateCompatibleDC(hdc);
+		oldBitmap = SelectObject(hdcMem, hBitmap);
+		GetObject(hBitmap, sizeof(bitmap), &bitmap);
+		// BitBlt(hdc, 0, rect.bottom/2, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+		StretchBlt(hdc, 0, rect.bottom/2, rect.right, rect.bottom/2,
+                         hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
+		SelectObject(hdcMem, oldBitmap);
+		DeleteDC(hdcMem);
+	}
+ 	
+	SelectObject(hdc, st->font);
+	SetBkMode(hdc, OPAQUE);
+	SetBkColor(hdc, st->fontbkcolor);
+	SetTextColor(hdc,st->fontcolor);
+	char actname[100];
+	for (int i=0; i<st->menuitems; i++) {
+		if (i==st->actmenuitem) {
+			SetBkColor(hdc, st->fontbkcolor);
+			if (st->maxreportitems[i]) 
+				wsprintf(actname,"%s (%d/%d)",st->sessionname[i],st->actreportitem+1, st->maxreportitems[i]);
+			else
+				wsprintf(actname,"%s",st->sessionname[i]);
+		} else {
+			SetBkColor(hdc, st->color);
+			if (st->maxreportitems[i]) 
+				wsprintf(actname,"%s (%d)",st->sessionname[i],st->maxreportitems[i]);
+			else
+				wsprintf(actname,"%s",st->sessionname[i]);
 		}
-		txtpos.left=5;txtpos.right=50;
-		txtpos.top=0;txtpos.bottom=0;
-		sprintf(szdata, " %.2f ",123);
-		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
-		x=txtpos.bottom;
-		// txtpos.top=y1-x;txtpos.bottom=txtpos.top+x;
-		// DrawText(hdc, szdata, -1, &txtpos, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+		ExtTextOut(hdc, rect.left+40,25+i*(40+st->fontsize), 0, &rect,actname, strlen(actname), NULL );
+	}
 		
-	
-	SelectObject (hdc, DRAW.pen_ltblue);		
-	//  MoveToEx(hdc,5, y1,NULL);	
-	//  LineTo(hdc,rect.right, y1);
-
 	DeleteObject(actbrush);
 	DeleteObject(bkbrush);
 	DeleteObject(bkpen);
 	st->redraw=0;
 	EndPaint( st->displayWnd, &ps );
-}
-
-
-
-void apply_threshold(HWND hDlg, SESSIONMANAGEROBJ * st)
-{
-  static int updating=FALSE;
-
-  if (!updating)
-  { 
-	updating=TRUE;
-	
-	st->barsize=GetDlgItemInt(hDlg, IDC_BARSIZE,NULL,TRUE);
-	st->fontsize=GetDlgItemInt(hDlg, IDC_FONTSIZE,NULL,TRUE);
-	if (st->font) DeleteObject(st->font);
-	if (!(st->font = CreateFont(-MulDiv(st->fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
-		report_error("Font creation failed!");
-	GetDlgItemText(hDlg, IDC_METERCAPTION, st->wndcaption, 50);
-	SetWindowText(st->displayWnd,st->wndcaption);
-	updating=FALSE;
-  }
 }
 
 
@@ -182,13 +184,7 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 	
 	st = (SESSIONMANAGEROBJ *) actobject;
     if ((st==NULL)||(st->type!=OB_SESSIONMANAGER)) return(FALSE);
-
-	for (x=0;x<GLOBAL.objects;x++) if (objects[x]==actobject) 
-	{ char tmp[10]; wsprintf(tmp,"%d",x); 
-	  //SendDlgItemMessage(ghWndStatusbox,IDC_LISTE,LB_ADDSTRING, 0, (LPARAM)(tmp)); 
-	}
 					
-
 	switch( message )
 	{
 		case WM_INITDIALOG:
@@ -223,6 +219,7 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 				break;
 			case IDC_SESSIONLIST:
 				GetDlgItemText(hDlg,IDC_SESSIONLIST,st->sessionlist,4096); 
+				parse_menuitems(st);
 				break;
 			case IDC_WNDCAPTION:
 				GetDlgItemText(hDlg,IDC_WNDCAPTION,st->wndcaption,80); 
@@ -266,17 +263,35 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 			// printf("key: %d",wParam);
 		    switch(wParam) {
 				case KEY_UP:
-				  if (st->actmenuitem>0) st->actmenuitem--;
+				  if (st->actmenuitem>0) {
+					  st->actmenuitem--;
+					  st->actreportitem=0;
+					  st->actreport[0]=0;
+				  }
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 				case KEY_DOWN:
-				  if (st->actmenuitem<st->menuitems-1) st->actmenuitem++;
+				  if (st->actmenuitem<st->menuitems-1) {
+					  st->actmenuitem++;
+ 					  st->actreportitem=0; 
+					  st->actreport[0]=0;
+				  }
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 				case KEY_LEFT:
+					if (st->maxreportitems[st->actmenuitem]) {
+							if (st->actreportitem>0) st->actreportitem--;
+							find_bmpfiles(st->sessionreport[st->actmenuitem], st->actreportitem, st->actreport);
+					}
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
+
 				case KEY_RIGHT:
+					if (st->maxreportitems[st->actmenuitem]) {
+							if (st->actreportitem<st->maxreportitems[st->actmenuitem]-1) 
+								st->actreportitem++;
+							find_bmpfiles(st->sessionreport[st->actmenuitem], st->actreportitem, st->actreport);
+					}
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 				case KEY_ENTER:
@@ -350,15 +365,17 @@ SESSIONMANAGEROBJ::SESSIONMANAGEROBJ(int num) : BASE_CL()
 	strcpy (sessionlist,"Testsession1,test,smr-graph\r\nTestsession2,opi_test,opi-graph");
 	displayreports=1;
 	redraw=1;
-	fontsize=18; barsize=30;
+	fontsize=18;
 	left=10;right=550;top=20;bottom=400;
 
 	actmenuitem=0;
+	actreportitem=0;
+	actreport[0]=0;
 	parse_menuitems(this);
 
-	color=RGB(100,100,100);
-	bkcolor=RGB(55,55,100);
-	fontcolor=RGB(255,255,0);
+	color=RGB(100,200,100);
+	bkcolor=RGB(55,55,55);
+	fontcolor=RGB(50,50,200);
 	fontbkcolor=RGB(255,255,255);
 
 	if (!(font = CreateFont(-MulDiv(fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
@@ -455,7 +472,6 @@ void SESSIONMANAGEROBJ::work(void)
 		InvalidateRect(displayWnd,NULL,FALSE);	  
 }
 	  
-
 SESSIONMANAGEROBJ::~SESSIONMANAGEROBJ()
 {
 	if  (displayWnd!=NULL){ DestroyWindow(displayWnd); displayWnd=NULL; }
