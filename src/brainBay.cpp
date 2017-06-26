@@ -49,6 +49,7 @@
 #include "brainBay.h"
 #include "ob_osci.h"
 #include "ob_sessionmanager.h"
+#include "ob_threshold.h"
 #include "ob_skindialog.h"
 #include "ob_neurobit.h"
 
@@ -671,7 +672,11 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 						// printf("sending keydown to oscilloscope window");
 						SendMessage(((OSCIOBJ *)actobject)->displayWnd, message,wParam,lParam);
 					}
+					if (actobject->type==OB_THRESHOLD) {
+						// printf("sending keydown to threshold window");
+						SendMessage(((THRESHOLDOBJ *)actobject)->displayWnd, message,wParam,lParam);
 				 }
+				}
 			 }
 			 break;
 

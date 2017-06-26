@@ -40,6 +40,7 @@ class OSCIOBJ : public BASE_CL
 	int		 group;
 	int		 gradual;
 	int		 savebitmap;
+	int		 saveatend;
 	int		 add_date;
 	int		 gain;
 	int		 mempos;
@@ -69,6 +70,7 @@ class OSCIOBJ : public BASE_CL
 	void update_inports(void);
 	void session_reset(void);
 	void session_stop(void);
+	void session_end(void);
 	void session_pos(long pos);
 	void make_dialog(void);
 	void load(HANDLE hFile);

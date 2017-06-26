@@ -36,11 +36,13 @@ class SESSIONMANAGEROBJ : public BASE_CL
 	char sessionname[20][100];
 	char sessionpath[20][256];
 	char sessionreport[20][256];
+	char logopath[256];
 	int  maxreportitems[20];
 	char actreport[256];
+	int bitmapsize;
 
-	HFONT font;
-	COLORREF color,bkcolor, fontcolor, fontbkcolor;
+	HFONT font, smallfont;
+	COLORREF selectcolor, bkcolor, fontcolor, fontbkcolor;
 	int fontsize;
 	int top,left,right,bottom;
 	int redraw;

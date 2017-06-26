@@ -241,6 +241,13 @@ extern "C" {
 #define FILTERTYPES	  9
 #define PASSTYPES	  2
 
+#define KEY_UP 38
+#define KEY_DOWN 40
+#define KEY_LEFT 37
+#define KEY_RIGHT 39
+#define KEY_ENTER 13
+
+
 #define DEF_ZOOM    100
 #define DEF_STARTBAND 1
 #define DEF_ENDBAND  40
@@ -323,6 +330,7 @@ typedef struct GLOBALStruct
 	int running;
 	int minimized;
 	int session_sliding;
+	int locksession;
 
 	int fly;
 	int run_exception;
@@ -349,6 +357,7 @@ typedef struct GLOBALStruct
 
 	WORD actcolumn;
 	char configbuffer[50000];
+	char nextconfigname[256];
 	char resourcepath[256];
 	char configfile[256];
 	char emotivpath[256];

@@ -228,6 +228,7 @@
 #define IDC_CLOSE_ARCHIVE               1158
 #define IDC_SAVEBITMAP                  1158
 #define IDC_ARCHIVE_FILENAME            1159
+#define IDC_SAVEATEND                   1159
 #define IDC_ARCHIVE_POSBAR              1160
 #define IDC_SHOWMETER                   1161
 #define IDC_STOP_ARCHIVE                1161
@@ -248,6 +249,7 @@
 #define IDC_WAVFILENAME                 1167
 #define IDC_TIME                        1167
 #define IDC_DIALOGINTERVAL              1167
+#define IDC_USE_MEDIAN                  1167
 #define IDC_WAVLENGTH                   1168
 #define IDC_JUMPPOS                     1168
 #define IDC_DRAWINTERVAL                1168
@@ -265,7 +267,6 @@
 #define IDC_DBG                         1171
 #define IDC_TESTBAT2                    1171
 #define IDC_SETCUTOFF                   1171
-#define IDC_STARTDESIGNNAME             1171
 #define IDC_STARTDESIGN_PATH            1171
 #define IDC_WAVVOLUMEINPUTTO            1172
 #define IDC_PATIENT                     1172
@@ -318,6 +319,8 @@
 #define IDC_CORRINTERVALBAR             1200
 #define IDC_FLY                         1200
 #define IDC_CORRINTERVAL                1201
+#define IDC_ENDBUTTON                   1201
+#define IDC_ENDSESSION                  1201
 #define IDC_BIGADAPT                    1204
 #define IDC_SMALLADAPT                  1205
 #define IDC_MIN                         1205
@@ -402,6 +405,7 @@
 #define IDC_STARTDESIGN                 1263
 #define IDC_STOPCAPTURE                 1264
 #define IDC_XINC                        1264
+#define IDC_LOCKSESSION                 1264
 #define IDC_SAVEERP                     1265
 #define IDC_YINC                        1265
 #define IDC_LOADERP                     1266
@@ -505,9 +509,11 @@
 #define IDC_BARSIZEBAR                  1345
 #define IDC_COMMABAR                    1345
 #define IDC_DIGITSBAR                   1345
+#define IDC_BITMAPSIZEBAR               1345
 #define IDC_FONTSIZE                    1346
 #define IDC_FONTCOLOR                   1347
 #define IDC_BARSIZE                     1347
+#define IDC_BITMAPSIZE                  1347
 #define IDC_INTEGER                     1348
 #define IDC_DIGITS                      1349
 #define IDC_TAG                         1350
@@ -689,13 +695,17 @@
 #define IDC_CQ_O1                       1509
 #define IDC_STOP_IMPEDANCECHECK         1509
 #define IDC_SESSIONLIST                 1509
+#define IDC_NEXTCONFIGNAME              1509
 #define IDC_CQ_O2                       1510
 #define IDC_START_IMPEDANCECHECK        1510
 #define IDC_WNDCAPTION                  1510
 #define IDC_CQ_P8                       1511
 #define IDC_DISPLAYREPORTS              1511
 #define IDC_CQ_T8                       1512
+#define IDC_NEXTCONFIG                  1512
+#define IDC_LOGOPATH                    1512
 #define IDC_CQ_FC6                      1513
+#define IDC_LOADNEXTCONFIG              1513
 #define IDC_CQ_F4                       1514
 #define IDC_CQ_F8                       1515
 #define IDC_CQ_AF4                      1516
@@ -857,7 +867,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
 #define _APS_NEXT_COMMAND_VALUE         32943
-#define _APS_NEXT_CONTROL_VALUE         1512
+#define _APS_NEXT_CONTROL_VALUE         1514
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

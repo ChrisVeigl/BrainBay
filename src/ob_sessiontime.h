@@ -22,7 +22,9 @@ class SESSIONTIMEOBJ : public BASE_CL
 {
 	public:
 	int stopwhenfinish;
+	int loadnextconfig;
 	int sessiontime;
+	char nextconfigname[100];
 	long count;
 
 	SESSIONTIMEOBJ(int num);

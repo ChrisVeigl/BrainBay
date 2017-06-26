@@ -737,6 +737,7 @@ void GlobalInitialize()
 	GLOBAL.design_top=20;GLOBAL.design_bottom=400;
 	GLOBAL.startup=0; GLOBAL.autorun=0; GLOBAL.configfile[0]=0;
 	GLOBAL.startdesign=0;
+	GLOBAL.locksession=0;
 	GLOBAL.syncloss=0;
 	GLOBAL.dialog_interval=DIALOG_UPDATETIME;
 	GLOBAL.draw_interval=DRAW_UPDATETIME;

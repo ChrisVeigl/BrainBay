@@ -247,6 +247,7 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				CheckDlgButton(hDlg, IDC_SHOWMETER,st->showmeter);
 				CheckDlgButton(hDlg, IDC_RISING,st->rising);
 				CheckDlgButton(hDlg, IDC_FALLING,st->falling);
+				CheckDlgButton(hDlg, IDC_USE_MEDIAN,st->usemedian);
 				init=FALSE;
 			}
 			return TRUE;
@@ -262,6 +263,7 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_OR:  st->op=FALSE; break;
 			case IDC_RISING: st->rising=IsDlgButtonChecked(hDlg,IDC_RISING); break;
 			case IDC_FALLING: st->falling=IsDlgButtonChecked(hDlg,IDC_FALLING); break;
+			case IDC_USE_MEDIAN: st->usemedian=IsDlgButtonChecked(hDlg,IDC_USE_MEDIAN); break;
 			case IDC_SELECTCOLOR:
 				st->color=select_color(hDlg,st->color);
 				st->redraw=1;
@@ -381,8 +383,23 @@ LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	{	case WM_DESTROY:
 		 break;
 		case WM_KEYDOWN:
-			  SendMessage(ghWndMain, message,wParam,lParam);
-			break;
+			// printf("keydown: %ld, %ld\n",lParam,wParam);
+		    switch(wParam) {
+				case KEY_UP:
+				  // step=st->gain/50; 
+				  //if (step<1) step=1;
+  				  st->from_input+=1;
+	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+				case KEY_DOWN:
+				  // step=st->gain/50; 
+				  // if (step<1) step=1;
+  				  st->from_input-=1;
+	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+				}
+		break;
+
 		case WM_MOUSEACTIVATE:
    	      st->redraw=1;
 		  close_toolbox();
@@ -395,13 +412,26 @@ LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 			{
 			WINDOWPLACEMENT  wndpl;
 			GetWindowPlacement(st->displayWnd, &wndpl);
-			st->top=wndpl.rcNormalPosition.top;
-			st->left=wndpl.rcNormalPosition.left;
-			st->right=wndpl.rcNormalPosition.right;
-			st->bottom=wndpl.rcNormalPosition.bottom;
+
+
+			  if (GLOBAL.locksession) {
+				  wndpl.rcNormalPosition.top=st->top;
+				  wndpl.rcNormalPosition.left=st->left;
+				  wndpl.rcNormalPosition.right=st->right;
+				  wndpl.rcNormalPosition.bottom=st->bottom;
+				  SetWindowPlacement(st->displayWnd, &wndpl);
+ 				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			  }
+			  else {
+				  st->top=wndpl.rcNormalPosition.top;
+				  st->left=wndpl.rcNormalPosition.left;
+				  st->right=wndpl.rcNormalPosition.right;
+				  st->bottom=wndpl.rcNormalPosition.bottom;
+				  st->redraw=TRUE;
+				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE) | WS_SIZEBOX);
+			  }
+			  InvalidateRect(hWnd,NULL,TRUE);
 			}
-			st->redraw=1;
-			InvalidateRect(hWnd,NULL,TRUE);
 			break;
 
 		case WM_ERASEBKGND:
@@ -435,7 +465,6 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		strcpy(in_ports[0].in_name,"in");
 		strcpy(out_ports[0].out_name,"out");
 
-		
 		play_interval=0;from_input=1; to_input=512;	signal_gain=100;
 		strcpy (wndcaption,"Meter");
 
@@ -443,6 +472,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		for (accupos=0;accupos<ACCULEN;accupos++) accu[accupos]=0; 
 		accupos=0;redraw=1;
 		interval_len=1; op=TRUE;
+		usemedian=1;avgsum=0;
 		showmeter=1;rising=0;falling=0; bigadapt=0;smalladapt=0;adapt_interval=200;
 		input=0;gained_value=0;
 		fontsize=10; barsize=30;
@@ -499,6 +529,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		  load_property("show-meter",P_INT,&showmeter);
 		  load_property("only-rising",P_INT,&rising);
 		  load_property("only-falling",P_INT,&falling);
+		  load_property("usemedian",P_INT,&usemedian);
 		  load_property("color",P_FLOAT,&temp);
 		  color=(COLORREF)temp;
 		  load_property("bkcol",P_FLOAT,&temp);
@@ -534,8 +565,13 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		else 
 		{ 
 			MoveWindow(displayWnd,left,top,right-left,bottom-top,TRUE); 
-		    SetWindowText(displayWnd,wndcaption);
 
+			if (GLOBAL.locksession) {
+	 			SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+				//SetWindowLong(displayWnd, GWL_STYLE, 0);
+			} else { SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
+		    SetWindowText(displayWnd,wndcaption);
+			InvalidateRect (displayWnd, NULL, TRUE);
 		}
 		redraw=1;
 	  }
@@ -553,6 +589,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		  save_property(hFile,"show-meter",P_INT,&showmeter);
 		  save_property(hFile,"only-rising",P_INT,&rising);
 		  save_property(hFile,"only-falling",P_INT,&falling);
+		  save_property(hFile,"usemedian",P_INT,&usemedian);
 		  temp=(float)color;
 		  save_property(hFile,"color",P_FLOAT,&temp);
 		  temp=(float)bkcolor;
@@ -583,12 +620,12 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
       {
 		int i;
 		input=value;
-        i = (int)size_value(in_ports[0].in_min,in_ports[0].in_max,value,-512.0f,512.0f,0);
-        if ((i >= -512) && (i <= 512))
-        {
-            buckets[i+512]++;
-	        adapt_num++;
-        }
+		i = (int)size_value(in_ports[0].in_min,in_ports[0].in_max,value,-512.0f,512.0f,0);
+		if ((i >= -512) && (i <= 512))
+		{
+			buckets[i+512]++;
+			adapt_num++;
+		}
       }
         
 
@@ -599,37 +636,54 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		
 		x=(float)((input)*signal_gain/100.0);
 		l=accu[accupos];
+		avgsum+=(float)input;
 		
 		if ((accupos>=999)||(accupos<0)) accupos=0; 
 		else accupos++;
 
 		accu[accupos]=x;
-        
+
         if (adapt_num >= adapt_interval)
         {
-        	int numtrue, i, sum;
-        	if (bigadapt != 0)
-            {
-            	numtrue = (int)(adapt_num * bigadapt / 100.0f);
-                for (i = 1024, sum = 0; (i >= 0) && (sum < numtrue); i--)
-                {
-                	sum += buckets[i];
-                }
-                from_input = size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0);
-				redraw=1;
-            }
-        	if (smalladapt != 0)
-            {
-            	numtrue = (int)(adapt_num * smalladapt / 100.0f);
-                for (i = 0, sum = 0; (i <= 1024) && (sum < numtrue); i++)
-                {
-                	sum += buckets[i];
-                }
-                to_input = size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0);
-				redraw=1;
-            }
-            empty_buckets();
-        }
+			if (usemedian) {
+        		int numtrue, i, sum;
+        		if (bigadapt != 0)
+				{
+            		numtrue = (int)(adapt_num * bigadapt / 100.0f);
+					for (i = 1024, sum = 0; (i >= 0) && (sum < numtrue); i--)
+					{
+                		sum += buckets[i];
+					}
+					from_input = size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0);
+					redraw=1;
+				}
+        		if (smalladapt != 0)
+				{
+            		numtrue = (int)(adapt_num * smalladapt / 100.0f);
+					for (i = 0, sum = 0; (i <= 1024) && (sum < numtrue); i++)
+					{
+                		sum += buckets[i];
+					}
+					to_input = size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0);
+					redraw=1;
+				}
+				empty_buckets();
+			}
+			else {
+        		if (bigadapt != 0)
+				{
+					from_input = avgsum/adapt_interval*bigadapt/100.0f;
+					redraw=1;
+				}
+        		if (smalladapt != 0)
+				{
+					to_input = avgsum/adapt_interval*smalladapt/100.0f;
+					redraw=1;
+				}
+			}
+			adapt_num=0;
+			avgsum=0;
+		}
 		
    		sum=0;
 		for (t=0;t<interval_len;t++)
@@ -656,7 +710,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 			  sprintf(temp,"%.2f",to_input);
 			  SetDlgItemText(hDlg, IDC_AVGTO, temp);
 
-			  if (smalladapt) SetScrollPos(GetDlgItem(hDlg,IDC_AVGTOBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, to_input ,0.0f,1000.0f,0),TRUE);
+			  if (smalladapt) SetScrollPos(GetDlgItem(hDlg,IDC_AVGTOBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, to_input,0.0f,1000.0f,0),TRUE);
 			  if (bigadapt) SetScrollPos(GetDlgItem(hDlg,IDC_AVGFROMBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, from_input ,0.0f,1000.0f,0),TRUE);
 			  
 		}

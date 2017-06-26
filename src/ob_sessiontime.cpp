@@ -32,7 +32,9 @@ LRESULT CALLBACK SessiontimeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, 
 	{
 		case WM_INITDIALOG:
 				SetDlgItemInt(hDlg, IDC_SESSIONTIME, st->sessiontime, 0) ;
-				CheckDlgButton(hDlg,IDC_STOPWHENFINISH,st->stopwhenfinish);
+				SetDlgItemText(hDlg, IDC_NEXTCONFIGNAME, st->nextconfigname) ;
+				CheckDlgButton(hDlg, IDC_STOPWHENFINISH,st->stopwhenfinish);
+				CheckDlgButton(hDlg, IDC_LOADNEXTCONFIG,st->loadnextconfig);
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -45,6 +47,12 @@ LRESULT CALLBACK SessiontimeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, 
 			{ 
 			case IDC_STOPWHENFINISH:
 				st->stopwhenfinish=IsDlgButtonChecked(hDlg,IDC_STOPWHENFINISH);
+				break;
+			case IDC_LOADNEXTCONFIG:
+				st->loadnextconfig=IsDlgButtonChecked(hDlg,IDC_LOADNEXTCONFIG);
+				break;
+			case IDC_NEXTCONFIGNAME:
+				GetDlgItemText(hDlg, IDC_NEXTCONFIGNAME, st->nextconfigname, 100);
 				break;
 			case IDC_SESSIONTIME:
 				st->sessiontime=GetDlgItemInt(hDlg,IDC_SESSIONTIME,NULL,0);
@@ -68,9 +76,11 @@ SESSIONTIMEOBJ::SESSIONTIMEOBJ(int num) : BASE_CL()
 	width=95;
 	count=0;
 	stopwhenfinish=true;
+	loadnextconfig=false;
 	sessiontime=120;
 	sprintf(in_ports[0].in_name,"stop");
 	sprintf(out_ports[0].out_name,"time");
+	strcpy(nextconfigname,"test.con");
 }
 	
 void SESSIONTIMEOBJ::load(HANDLE hFile) 
@@ -78,6 +88,8 @@ void SESSIONTIMEOBJ::load(HANDLE hFile)
 	load_object_basics(this);
 	load_property("sessiontime",P_INT,&sessiontime);
 	load_property("stopwhenfinish",P_INT,&stopwhenfinish);
+	load_property("nextconfigname",P_STRING,nextconfigname);
+	load_property("loadnextconfig",P_INT,&loadnextconfig);
 }
 
 void SESSIONTIMEOBJ::save(HANDLE hFile) 
@@ -85,6 +97,8 @@ void SESSIONTIMEOBJ::save(HANDLE hFile)
 	save_object_basics(hFile, this);
 	save_property(hFile,"sessiontime",P_INT,&sessiontime);
 	save_property(hFile,"stopwhenfinish",P_INT,&stopwhenfinish);
+	save_property(hFile,"nextconfigname",P_STRING,nextconfigname);
+	save_property(hFile,"loadnextconfig",P_INT,&loadnextconfig);
 }
 
 void SESSIONTIMEOBJ::make_dialog(void) 
@@ -115,8 +129,14 @@ void SESSIONTIMEOBJ::work(void)
 	count++;
 	int seconds=count/PACKETSPERSECOND;
 	pass_values(0,(float)seconds);
-	if ((seconds>sessiontime) && (stopwhenfinish))
+	if ((seconds>sessiontime) && (stopwhenfinish)) {
 		SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
+		for (int t=0;t<GLOBAL.objects;t++) objects[t]->session_end();
+		if (loadnextconfig) {
+			strcpy(GLOBAL.nextconfigname, nextconfigname);
+			SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,1);
+		}
+	}
 }
 
 SESSIONTIMEOBJ::~SESSIONTIMEOBJ() {}

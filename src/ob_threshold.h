@@ -36,11 +36,13 @@ class THRESHOLDOBJ : public BASE_CL
 	int  play_interval;
 	int  interval_len;
 	int  signal_gain;
-	float  from_input;
-	float  to_input;
+	float from_input;
+	float to_input;
+	float avgsum;
 	int  op;
 	int  showmeter;
 	int  rising,falling;
+	int  usemedian;
 	int  bigadapt,smalladapt;
 	int  adapt_interval;
 	int old_y1,old_y2;

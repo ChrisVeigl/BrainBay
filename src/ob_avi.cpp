@@ -118,14 +118,26 @@ LRESULT CALLBACK AVIWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 		//	Size_GL(hWnd, st->GLRC,1); 		 
 	case WM_MOVE:
 			{
-			WINDOWPLACEMENT  wndpl;
-			GetWindowPlacement(st->displayWnd, &wndpl);
-			st->top=wndpl.rcNormalPosition.top;
-			st->left=wndpl.rcNormalPosition.left;
-			st->right=wndpl.rcNormalPosition.right;
-			st->bottom=wndpl.rcNormalPosition.bottom;
+  			  WINDOWPLACEMENT  wndpl;
+			  GetWindowPlacement(st->displayWnd, &wndpl);
+
+			  if (GLOBAL.locksession) {
+				  wndpl.rcNormalPosition.top=st->top;
+				  wndpl.rcNormalPosition.left=st->left;
+				  wndpl.rcNormalPosition.right=st->right;
+				  wndpl.rcNormalPosition.bottom=st->bottom;
+				  SetWindowPlacement(st->displayWnd, &wndpl);
+ 				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			  }
+			  else {
+				  st->top=wndpl.rcNormalPosition.top;
+				  st->left=wndpl.rcNormalPosition.left;
+				  st->right=wndpl.rcNormalPosition.right;
+				  st->bottom=wndpl.rcNormalPosition.bottom;
+				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE) | WS_SIZEBOX);
+			  }
+			  InvalidateRect(hWnd,NULL,TRUE);
 			}
-			InvalidateRect(st->displayWnd,NULL,FALSE);
 			break;
 		 
 	case WM_PAINT:
@@ -322,6 +334,10 @@ void AVIOBJ::load(HANDLE hFile)
 			}
 		}
 		MoveWindow(displayWnd,left,top,right-left,bottom-top,TRUE);
+		if (GLOBAL.locksession) {
+	 		SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			//SetWindowLong(displayWnd, GWL_STYLE, 0);
+		} else { SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
 }
 
 void AVIOBJ::save(HANDLE hFile) 

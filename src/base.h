@@ -173,6 +173,7 @@ class BASE_CL
 	virtual void update_inports (void) {}
 	virtual void session_start (void) {}
 	virtual void session_stop (void) {}
+	virtual void session_end (void) {}
 	virtual void session_reset (void) {}
 	virtual void session_pos (long pos) {}
 	virtual long session_length (void) { return 0; }

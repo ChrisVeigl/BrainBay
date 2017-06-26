@@ -219,14 +219,26 @@ LRESULT CALLBACK CounterWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARA
 		case WM_SIZE: 
 		case WM_MOVE:
 			{
-			WINDOWPLACEMENT  wndpl;
-			GetWindowPlacement(st->displayWnd, &wndpl);
-			st->top=wndpl.rcNormalPosition.top;
-			st->left=wndpl.rcNormalPosition.left;
-			st->right=wndpl.rcNormalPosition.right;
-			st->bottom=wndpl.rcNormalPosition.bottom;
+  			  WINDOWPLACEMENT  wndpl;
+			  GetWindowPlacement(st->displayWnd, &wndpl);
+
+			  if (GLOBAL.locksession) {
+				  wndpl.rcNormalPosition.top=st->top;
+				  wndpl.rcNormalPosition.left=st->left;
+				  wndpl.rcNormalPosition.right=st->right;
+				  wndpl.rcNormalPosition.bottom=st->bottom;
+				  SetWindowPlacement(st->displayWnd, &wndpl);
+ 				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			  }
+			  else {
+				  st->top=wndpl.rcNormalPosition.top;
+				  st->left=wndpl.rcNormalPosition.left;
+				  st->right=wndpl.rcNormalPosition.right;
+				  st->bottom=wndpl.rcNormalPosition.bottom;
+				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE) | WS_SIZEBOX);
+			  }
+			  InvalidateRect(hWnd,NULL,TRUE);
 			}
-			InvalidateRect(hWnd,NULL,TRUE);
 			break;
 		case WM_PAINT:
 			draw_counter(st);
@@ -323,6 +335,12 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		{ 
 			MoveWindow(displayWnd,left,top,right-left,bottom-top,TRUE); 
 		    SetWindowText(displayWnd,wndcaption);
+
+			if (GLOBAL.locksession) {
+ 				SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+				//SetWindowLong(displayWnd, GWL_STYLE, 0);
+			} else { SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
+			InvalidateRect (displayWnd, NULL, TRUE);
 		}
 	  }
 		

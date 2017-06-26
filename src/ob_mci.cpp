@@ -248,6 +248,11 @@ void MCIOBJ::load(HANDLE hFile)
 				MCIWndSetActiveTimer(m_video,500);
 				if ((!strstr(mcifile,".mp3")) && (!strstr(mcifile,".wav"))) SetWindowPos(m_video,HWND_TOPMOST,left,top,right-left,bottom-top,SWP_SHOWWINDOW);
 				else ShowWindow(m_video,FALSE);
+
+				if (GLOBAL.locksession) {
+	 				SetWindowLong(m_video, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+					//SetWindowLong(displayWnd, GWL_STYLE, 0);
+				} else { SetWindowLong(m_video, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
 			}
 		}
 }

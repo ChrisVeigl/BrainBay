@@ -28,7 +28,7 @@
 #define KEY_LEFT 37
 #define KEY_RIGHT 39
 
-//int HDCToFile(char* FilePath, HDC Context, RECT Area, int BitsPerPixel = 24)
+
 int HDCToFile(char* filename, HWND window, int add_date)
 {
 	RECT Area;
@@ -447,27 +447,7 @@ void draw_osci(OSCIOBJ * st)
 	  
 	}
 	st->signal_pos+=np;
-	if ((st->savebitmap) && (st->signal_pos>=st->drawend)) {
-/*
-		char tmpname[256];
-		time_t rawtime;
-		struct tm * timeinfo;
-
-  		strcpy(tmpname,GLOBAL.resourcepath);
-		strcat(tmpname,"REPORTS\\");
-		strcat(tmpname,st->filename);
-		if (st->add_date) {
-			time(&rawtime);
-			timeinfo = localtime(&rawtime);
-			char timestr[100];
-			wsprintf(timestr, "_%d-%02d-%02d_%02d-%02d-%02d", timeinfo->tm_year + 1900, timeinfo->tm_mon+1, timeinfo->tm_mday, timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec  );
-			strcat(tmpname,timestr);
-		}
-
-		strcat(tmpname,".bmp");
-		// printf("saving bitmap to %s!\n",tmpname);
-		//HDCToFile(tmpname,hdc,rect);
-		*/
+	if ((st->savebitmap) && (st->signal_pos>=st->drawend) && (!st->saveatend)) {
 		HDCToFile(st->filename,st->displayWnd,st->add_date);
 	}
 
@@ -581,6 +561,9 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 			case IDC_SAVEBITMAP:  
 					st->savebitmap=IsDlgButtonChecked(hDlg, IDC_SAVEBITMAP);
 				break;
+			case IDC_SAVEATEND:  
+					st->saveatend=IsDlgButtonChecked(hDlg, IDC_SAVEATEND);
+				break;
 			case IDC_ADD_DATE:  
 					st->add_date=IsDlgButtonChecked(hDlg, IDC_ADD_DATE);
 				break;
@@ -674,6 +657,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
     return FALSE;
 }
 
+
 LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {   
 	int t;
@@ -762,24 +746,11 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					  st->redraw=1;
 				  }
 			   }
-			   if ((actx>st->drawstart)&&(actx<st->drawend)&&(acty>30))
-			   {
-				    long ppos= (long) st->laststamp*PACKETSPERSECOND 
-									+ (actx-st->drawstart)*st->timer;
-
-					int pos = get_sliderpos(ppos);
-					if (ppos!=GLOBAL.session_end)
-					{
-						SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELSTART,TRUE,pos);
-						GLOBAL.session_start=ppos;
-						update_statusinfo();
-					}
-			   }
 			}
  	 	case WM_RBUTTONDOWN:
-			{
+			  /*   // setting the out- point for archive replay 
+   			  {
 			   int actx,acty;
-
 			   actx=(int)LOWORD(lParam);
 			   acty=(int)HIWORD(lParam);
 
@@ -797,6 +768,7 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					}
 			   }
 			}
+			*/
 			break;
 
 		case WM_SIZE: 
@@ -804,11 +776,25 @@ LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			{
   			  WINDOWPLACEMENT  wndpl;
 			  GetWindowPlacement(st->displayWnd, &wndpl);
-			  st->top=wndpl.rcNormalPosition.top;
-			  st->left=wndpl.rcNormalPosition.left;
-			  st->right=wndpl.rcNormalPosition.right;
-			  st->bottom=wndpl.rcNormalPosition.bottom;
-			  st->redraw=TRUE;
+  	 	      st->redraw=TRUE;
+
+			  if (GLOBAL.locksession) {
+				  wndpl.rcNormalPosition.top=st->top;
+				  wndpl.rcNormalPosition.left=st->left;
+				  wndpl.rcNormalPosition.right=st->right;
+				  wndpl.rcNormalPosition.bottom=st->bottom;
+				  SetWindowPlacement(st->displayWnd, &wndpl);
+ 				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			  }
+			  else {
+				  st->top=wndpl.rcNormalPosition.top;
+				  st->left=wndpl.rcNormalPosition.left;
+				  st->right=wndpl.rcNormalPosition.right;
+				  st->bottom=wndpl.rcNormalPosition.bottom;
+				  st->redraw=TRUE; 
+				  st->redraw=TRUE;
+				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE) | WS_SIZEBOX);
+			  }
 			  InvalidateRect(hWnd,NULL,TRUE);
 			}
 			break;
@@ -839,7 +825,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		inports = 1;
 		
 		newpixels=0;signal_pos=0;drawstart=25;drawend=20000;
-		groupselect=0;savebitmap=0;add_date=0;
+		groupselect=0;savebitmap=0;add_date=0;saveatend=0;
 		mysec=0; mysec_total=0;
 		inc_mysec=0;
 		strcpy (wndcaption,"Oscilloscope");
@@ -943,6 +929,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 	    load_property("showgroupsignal",P_INT,&showgroupsignal);
 	    load_property("savebitmap",P_INT,&savebitmap);
 	    load_property("add_date",P_INT,&add_date);
+	    load_property("saveatend",P_INT,&saveatend);
 		load_property("oscifilename",P_STRING,filename);
   	    
 
@@ -977,7 +964,14 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 		}
 		height=CON_START+inports*CON_HEIGHT+5;
 		MoveWindow(displayWnd,left,top,right-left,bottom-top,TRUE);
-	    SetWindowText(displayWnd,wndcaption);
+
+		if (GLOBAL.locksession) {
+ 			SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			//SetWindowLong(displayWnd, GWL_STYLE, 0);
+		} else { SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
+		InvalidateRect (displayWnd, NULL, TRUE);
+
+		SetWindowText(displayWnd,wndcaption);
 	  }
 	
 	  void OSCIOBJ::save(HANDLE hFile) 
@@ -1002,6 +996,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 	      save_property(hFile,"showgroupsignal",P_INT,&showgroupsignal);
 	      save_property(hFile,"savebitmap",P_INT,&savebitmap);
 	      save_property(hFile,"add_date",P_INT,&add_date);
+		  save_property(hFile,"saveatend",P_INT,&saveatend);
 		  save_property(hFile,"oscifilename",P_STRING,filename);
 		  
 		  temp=(float)bkcol;
@@ -1046,9 +1041,17 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 
 	  void OSCIOBJ::session_stop(void) 
 	  {
-		  if (savebitmap) {
+		  if (savebitmap && (!saveatend)) {
 			HDCToFile(filename,displayWnd,add_date);
-		    printf("stopping session -> save bitmap");
+		    // printf("stopping session -> save bitmap");
+		  }
+	  }
+
+	  void OSCIOBJ::session_end(void) 
+	  {
+		  if (savebitmap && (saveatend)) {
+			HDCToFile(filename,displayWnd,add_date);
+		    // printf("stopping session -> save bitmap");
 		  }
 	  }
 

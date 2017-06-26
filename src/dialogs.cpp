@@ -672,6 +672,7 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				CheckDlgButton(hDlg, IDC_STARTDESIGN, GLOBAL.startdesign);
 				CheckDlgButton(hDlg, IDC_AUTORUN, GLOBAL.autorun);
 				CheckDlgButton(hDlg, IDC_MINIMIZED, GLOBAL.minimized);
+				CheckDlgButton(hDlg, IDC_LOCKSESSION, GLOBAL.locksession);
 				CheckDlgButton(hDlg, IDC_USE_CVCAPTURE, GLOBAL.use_cv_capture);
 				CheckDlgButton(hDlg, IDC_USE_VIDEOINPUT, !GLOBAL.use_cv_capture);
 				CheckDlgButton(hDlg, IDC_ADDARCHIVETIME, GLOBAL.add_archivetime);
@@ -747,6 +748,27 @@ LRESULT CALLBACK SETTINGSDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 			case IDC_MINIMIZED:
 				 GLOBAL.minimized= IsDlgButtonChecked(hDlg, IDC_MINIMIZED);
 				break;
+			case IDC_LOCKSESSION:
+				 GLOBAL.locksession= IsDlgButtonChecked(hDlg, IDC_LOCKSESSION);
+				 for (int i=0;i<GLOBAL.objects;i++)
+					 if (objects[i]->displayWnd) {
+						 SendMessage(objects[i]->displayWnd,WM_MOVE,0,0);
+						 SendMessage(objects[i]->displayWnd,WM_MOUSEACTIVATE,0,0);
+ 						 InvalidateRect(objects[i]->displayWnd,NULL,TRUE);
+					 }
+
+					if (GLOBAL.locksession) 
+					{  
+							GLOBAL.showdesign=FALSE;
+							ShowWindow(ghWndDesign,FALSE);
+							SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Show Design");
+						    ShowWindow(GetDlgItem(ghWndStatusbox,IDC_DESIGN), SW_HIDE);
+					}
+					else 
+					{
+							ShowWindow(GetDlgItem(ghWndStatusbox,IDC_DESIGN), SW_SHOW);
+					}
+				 break;
 			case IDC_USE_CVCAPTURE:
 			case IDC_USE_VIDEOINPUT:
 				 GLOBAL.use_cv_capture= IsDlgButtonChecked(hDlg, IDC_USE_CVCAPTURE);
@@ -1263,12 +1285,40 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session running");
 					break;
 				case IDC_STOPSESSION:
+					 if (lParam==1) {
+						char configfilename[MAX_PATH];
+						close_toolbox();
+						strcpy(configfilename,GLOBAL.resourcepath); 
+						strcat(configfilename,"CONFIGURATIONS\\");
+						strcat(configfilename,GLOBAL.nextconfigname);
+						strcat(configfilename,".con");
+						printf("trying to load configfile: %s\n",configfilename);
+						if (!load_configfile(configfilename)) 
+							report_error("Could not load Config File");
+						else sort_objects();					  
+					 }
+					 else {
 							GLOBAL.fly=0;
 							TTY.read_pause=1;
 							GLOBAL.session_sliding=-1;
 							stop_timer(); 							
 							for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
 							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session paused");
+					 }
+					break;
+
+				case IDC_ENDSESSION:
+					{
+						char configfilename[MAX_PATH];
+						close_toolbox();
+						strcpy(configfilename,GLOBAL.resourcepath); 
+						strcat(configfilename,"CONFIGURATIONS\\");
+						strcat(configfilename,GLOBAL.startdesignpath);
+						strcat(configfilename,".con");
+						// printf("trying to load configfile: %s\n",configfilename);
+						if (load_configfile(configfilename)) 
+							sort_objects();					  
+					}
 					break;
 				case IDC_JUMP:
 						GetDlgItemText(hDlg, IDC_JUMPPOS, str, 20);

@@ -2,16 +2,9 @@
 
   BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
   
-  MODULE: OB_SESSIONMANAGER.CPP:  contains functions for the Threshold-Generator-Object
+  MODULE: OB_SESSIONMANAGER.CPP:  contains functions for the Sessionmanager-Object
 
-  The Threshold-Object has its own window, it uses GDI-drawings 
-  Min- and Max- values can be selected, also a pre-gain. 
-  With the additional 'only rising' and 'only falling' - properties, segments of 
-  a signal can be passed / filtered out.
-  draw_meter: draws the meter and shows threshold- and actual values
-  apply_threshold: stores the current setting of the toolbox-window
-  ThresholdDlgHandler: processes the events for the Threshold-toolbox window
-  MeterWndHandler: processes the events for the Meter - drawing window
+  The Sessionmanager-Object has its own window, it uses GDI-drawings 
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -24,12 +17,14 @@
 #include "ob_sessionmanager.h"
 #include <wingdi.h> 
 
-#define KEY_UP 38
-#define KEY_DOWN 40
-#define KEY_LEFT 37
-#define KEY_RIGHT 39
-#define KEY_ENTER 13
+#define TEXT_LEFTMARGIN 40
+#define TEXT_TOPMARGIN 40
 
+#define NAVI_X 750
+#define NAVI_Y 140
+#define NAVI_WIDTH 200
+#define NAVI_HEIGHT 200
+#define NAVI_SELECTDISTANCE 40
 
 int find_bmpfiles(char * reportname, int select, char * targetfilename) {
 	char reportpath[256];
@@ -70,12 +65,12 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 			szdata[pos++]=*tmp;
 			tmp++;
 		}
-		while ((*tmp=='\r') || (*tmp=='\n')) tmp++;
+		while ((*tmp!=0)&& (*tmp=='\r') || (*tmp=='\n')) tmp++;
 		szdata[pos]=0;
 
 		char *tmp2=szdata;
 		int pos2=0;
-		while ((*tmp2) && (*tmp2!=',')) {
+		while ((*tmp2) && (*tmp2!='#')) {
 		   st->sessionname[st->menuitems][pos2++]=*tmp2;
 		   tmp2++;
 		}
@@ -83,7 +78,7 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 
 		if (*tmp2) {
 			tmp2++; pos2=0;
-			while ((*tmp2) && (*tmp2!=',')) {
+			while ((*tmp2) && (*tmp2!='#')) {
 			   st->sessionpath[st->menuitems][pos2++]=*tmp2;
 			   tmp2++;
 			}
@@ -92,7 +87,7 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 
 		if (*tmp2) {
 			tmp2++; pos2=0;
-			while ((*tmp2) && (*tmp2!=',')) {
+			while ((*tmp2) && (*tmp2!='#')) {
 			   st->sessionreport[st->menuitems][pos2++]=*tmp2;
 			   tmp2++;
 			}
@@ -104,7 +99,7 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 }
 
 
-void draw_meter(SESSIONMANAGEROBJ * st)
+void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
@@ -112,11 +107,15 @@ void draw_meter(SESSIONMANAGEROBJ * st)
 	RECT rect;
 	HBRUSH actbrush,bkbrush;
 	HPEN bkpen;
+	HBITMAP hBitmap = NULL;
+	BITMAP          bitmap;
+	HDC             hdcMem;
+	HGDIOBJ         oldBitmap;
 
 	GetClientRect(st->displayWnd, &rect);
 	hdc = BeginPaint (st->displayWnd, &ps);
 
-	actbrush=CreateSolidBrush(st->color);
+	actbrush=CreateSolidBrush(st->selectcolor);
     bkbrush=CreateSolidBrush(st->bkcolor);
 	bkpen =CreatePen (PS_SOLID,1,st->bkcolor);
 	if (st->redraw) FillRect(hdc, &rect,bkbrush);
@@ -124,11 +123,32 @@ void draw_meter(SESSIONMANAGEROBJ * st)
    	SelectObject (hdc, bkpen);		
    	SelectObject (hdc, bkbrush);
 
-	if (strlen(st->actreport)>0) {
-		HBITMAP hBitmap = NULL;
-		BITMAP          bitmap;
-		HDC             hdcMem;
-		HGDIOBJ         oldBitmap;
+	if (strlen(st->logopath)>0) {
+		char bitmappath[256];
+		strcpy(bitmappath,GLOBAL.resourcepath); 
+		strcat(bitmappath,st->logopath);
+
+		hBitmap = (HBITMAP)LoadImage(hInst, bitmappath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (hBitmap) {
+			hdcMem = CreateCompatibleDC(hdc);
+			oldBitmap = SelectObject(hdcMem, hBitmap);
+			GetObject(hBitmap, sizeof(bitmap), &bitmap);
+			BitBlt(hdc, rect.right/3*2, 50, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+
+			strcpy(bitmappath,GLOBAL.resourcepath); 
+			strcat(bitmappath,"\\GRAPHICS\\navigation-buttons.bmp");
+			hBitmap = (HBITMAP)LoadImage(hInst, bitmappath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+			oldBitmap = SelectObject(hdcMem, hBitmap);
+			GetObject(hBitmap, sizeof(bitmap), &bitmap);
+
+	   		TransparentBlt(hdc, NAVI_X, NAVI_Y, NAVI_WIDTH, NAVI_HEIGHT,
+                          hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, RGB(0,255,0));
+
+			SelectObject(hdcMem, oldBitmap);
+			DeleteDC(hdcMem);
+		}
+	}
+	if ((strlen(st->actreport)>0)&&(st->displayreports)) {
 		char reportpath[256];
 		strcpy(reportpath,GLOBAL.resourcepath); 
 		strcat(reportpath,"REPORTS\\");
@@ -139,10 +159,21 @@ void draw_meter(SESSIONMANAGEROBJ * st)
 		oldBitmap = SelectObject(hdcMem, hBitmap);
 		GetObject(hBitmap, sizeof(bitmap), &bitmap);
 		// BitBlt(hdc, 0, rect.bottom/2, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
-		StretchBlt(hdc, 0, rect.bottom/2, rect.right, rect.bottom/2,
+
+		float g= st->bitmapsize/100.0f;
+		StretchBlt(hdc, 0, rect.bottom-bitmap.bmHeight*g, bitmap.bmWidth*g, bitmap.bmHeight*g,
                          hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
+
 		SelectObject(hdcMem, oldBitmap);
 		DeleteDC(hdcMem);
+
+		SelectObject(hdc, st->smallfont);
+		SetTextColor(hdc,st->selectcolor);
+		SetBkColor(hdc, st->bkcolor);
+		char reportcaption[256];
+		//wsprintf(reportcaption,"Results for Session %d: %s",st->actreportitem+1, st->actreport);
+		wsprintf(reportcaption,"Results for Session %d:",st->actreportitem+1);
+		ExtTextOut(hdc, 10, rect.bottom-bitmap.bmHeight*g-25, 0, &rect,reportcaption, strlen(reportcaption), NULL );
 	}
  	
 	SelectObject(hdc, st->font);
@@ -152,19 +183,19 @@ void draw_meter(SESSIONMANAGEROBJ * st)
 	char actname[100];
 	for (int i=0; i<st->menuitems; i++) {
 		if (i==st->actmenuitem) {
-			SetBkColor(hdc, st->fontbkcolor);
+			SetBkColor(hdc, st->selectcolor);
 			if (st->maxreportitems[i]) 
 				wsprintf(actname,"%s (%d/%d)",st->sessionname[i],st->actreportitem+1, st->maxreportitems[i]);
 			else
 				wsprintf(actname,"%s",st->sessionname[i]);
 		} else {
-			SetBkColor(hdc, st->color);
+			SetBkColor(hdc, st->fontbkcolor);
 			if (st->maxreportitems[i]) 
 				wsprintf(actname,"%s (%d)",st->sessionname[i],st->maxreportitems[i]);
 			else
 				wsprintf(actname,"%s",st->sessionname[i]);
 		}
-		ExtTextOut(hdc, rect.left+40,25+i*(40+st->fontsize), 0, &rect,actname, strlen(actname), NULL );
+		ExtTextOut(hdc, TEXT_LEFTMARGIN,TEXT_TOPMARGIN+i*2*(st->fontsize+3), 0, &rect,actname, strlen(actname), NULL );
 	}
 		
 	DeleteObject(actbrush);
@@ -172,6 +203,11 @@ void draw_meter(SESSIONMANAGEROBJ * st)
 	DeleteObject(bkpen);
 	st->redraw=0;
 	EndPaint( st->displayWnd, &ps );
+}
+
+int distance(int x1,int y1, int x2, int y2)
+{
+	return(sqrt ((float)((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))));
 }
 
 
@@ -189,9 +225,23 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 	{
 		case WM_INITDIALOG:
 			{
+				SCROLLINFO lpsi;
+				lpsi.cbSize=sizeof(SCROLLINFO);
+				lpsi.fMask=SIF_RANGE; // |SIF_POS;
+				lpsi.nMin=0; lpsi.nMax=100;
+				SetScrollInfo(GetDlgItem(hDlg,IDC_FONTSIZEBAR),SB_CTL,&lpsi,TRUE);
+				SetScrollPos(GetDlgItem(hDlg,IDC_FONTSIZEBAR), SB_CTL,st->fontsize,TRUE);
+				SetDlgItemInt(hDlg, IDC_FONTSIZE, st->fontsize,0);
+
+				lpsi.nMin=0; lpsi.nMax=500;
+				SetScrollInfo(GetDlgItem(hDlg,IDC_BITMAPSIZEBAR),SB_CTL,&lpsi,TRUE);
+				SetScrollPos(GetDlgItem(hDlg,IDC_BITMAPSIZEBAR), SB_CTL,st->fontsize,TRUE);
+				SetDlgItemInt(hDlg, IDC_BITMAPSIZE, st->bitmapsize,0);
+
 				SetDlgItemText(hDlg, IDC_WNDCAPTION, st->wndcaption);
 				SetDlgItemText(hDlg, IDC_SESSIONLIST, st->sessionlist);
 				CheckDlgButton(hDlg, IDC_DISPLAYREPORTS, st->displayreports);
+
 			}
 			return TRUE;
 	
@@ -203,41 +253,76 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 			switch (LOWORD(wParam)) 
 			{
 			case IDC_SELECTCOLOR:
-				st->color=select_color(hDlg,st->color);
+				st->selectcolor=select_color(hDlg,st->selectcolor);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			case IDC_FONTCOL:
 				st->fontcolor=select_color(hDlg,st->fontcolor);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			case IDC_FONTBKCOL:
 				st->fontbkcolor=select_color(hDlg,st->fontbkcolor);
 				st->redraw=1;
 				InvalidateRect(hDlg,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,FALSE);
+				break;
+			case IDC_BKCOLOR:
+				st->bkcolor=select_color(hDlg,st->bkcolor);
+				st->redraw=1;
+				InvalidateRect(hDlg,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			case IDC_SESSIONLIST:
 				GetDlgItemText(hDlg,IDC_SESSIONLIST,st->sessionlist,4096); 
 				parse_menuitems(st);
+				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			case IDC_WNDCAPTION:
 				GetDlgItemText(hDlg,IDC_WNDCAPTION,st->wndcaption,80); 
 				SetWindowText(st->displayWnd,st->wndcaption);
+				InvalidateRect(st->displayWnd,NULL,FALSE);
+				break;
+			case IDC_LOGOPATH:
+				GetDlgItemText(hDlg,IDC_LOGOPATH,st->logopath,100); 
+				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			case IDC_DISPLAYREPORTS:
 				 st->displayreports=  IsDlgButtonChecked(hDlg,IDC_DISPLAYREPORTS);
   				 st->redraw=1;
+  				 InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			}
 			return TRUE;
-			
+
+		case WM_HSCROLL:
+		{
+			int nNewPos;
+			nNewPos=get_scrollpos(wParam,lParam);
+			if (lParam == (long) GetDlgItem(hDlg,IDC_FONTSIZEBAR))  {
+				SetDlgItemInt(hDlg, IDC_FONTSIZE,nNewPos,TRUE);
+				st->fontsize=nNewPos;
+				if (st->font) DeleteObject(st->font);
+				st->font = CreateFont(-MulDiv(st->fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial");
+			}
+			if (lParam == (long) GetDlgItem(hDlg,IDC_BITMAPSIZEBAR))  {
+				SetDlgItemInt(hDlg, IDC_BITMAPSIZE,nNewPos,TRUE);
+				st->bitmapsize=nNewPos;
+			}
+			if (st->displayWnd) {st->redraw=1; InvalidateRect(st->displayWnd,NULL,TRUE);}		
+		}	break;
+
 		case WM_SIZE:
 		case WM_MOVE:  update_toolbox_position(hDlg);
 		case WM_PAINT:
-			color_button(GetDlgItem(hDlg,IDC_SELECTCOLOR),st->color);
+			color_button(GetDlgItem(hDlg,IDC_SELECTCOLOR),st->selectcolor);
 			color_button(GetDlgItem(hDlg,IDC_FONTCOL),st->fontcolor);
-		break;
+			color_button(GetDlgItem(hDlg,IDC_BKCOLOR),st->bkcolor);
+			color_button(GetDlgItem(hDlg,IDC_FONTBKCOL),st->fontbkcolor);
+			break;
 	}
     return FALSE;
 }
@@ -265,16 +350,22 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 				case KEY_UP:
 				  if (st->actmenuitem>0) {
 					  st->actmenuitem--;
-					  st->actreportitem=0;
-					  st->actreport[0]=0;
+					  if (st->maxreportitems[st->actmenuitem]) {
+							st->actreportitem=st->maxreportitems[st->actmenuitem]-1;
+							find_bmpfiles(st->sessionreport[st->actmenuitem], st->actreportitem, st->actreport);
+					  }
+					  else { st->actreportitem=0; st->actreport[0]=0;}
 				  }
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 				case KEY_DOWN:
 				  if (st->actmenuitem<st->menuitems-1) {
 					  st->actmenuitem++;
- 					  st->actreportitem=0; 
-					  st->actreport[0]=0;
+					  if (st->maxreportitems[st->actmenuitem]) {
+							st->actreportitem=st->maxreportitems[st->actmenuitem]-1;
+							find_bmpfiles(st->sessionreport[st->actmenuitem], st->actreportitem, st->actreport);
+					  }
+					  else { st->actreportitem=0; st->actreport[0]=0;}
 				  }
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
@@ -319,18 +410,50 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 		  SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
 		  InvalidateRect(ghWndDesign,NULL,TRUE);
 			break;
+
+		case WM_LBUTTONDOWN:
+			{  int actx,acty,minpoint,i;
+			   float actdist,mindist;
+
+			   actx=(int)LOWORD(lParam);
+			   acty=(int)HIWORD(lParam);
+			   // printf("lbuttondown in wnd %ld at: %ld, %ld\n",hWnd, actx,acty);
+			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+33) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_UP,0); 
+			   if (distance (actx, acty, NAVI_X+33, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_LEFT,0); 
+			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_DOWN,0); 
+			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_RIGHT,0); 
+			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_ENTER,0); 
+
+			}
+			break;
+
+
 		case WM_SIZE: 
 		case WM_MOVE:
 			{
-			WINDOWPLACEMENT  wndpl;
-			GetWindowPlacement(st->displayWnd, &wndpl);
-			st->top=wndpl.rcNormalPosition.top;
-			st->left=wndpl.rcNormalPosition.left;
-			st->right=wndpl.rcNormalPosition.right;
-			st->bottom=wndpl.rcNormalPosition.bottom;
+  			  WINDOWPLACEMENT  wndpl;
+			  GetWindowPlacement(st->displayWnd, &wndpl);
+  	 	      st->redraw=TRUE;
+
+			  if (GLOBAL.locksession) {
+				  wndpl.rcNormalPosition.top=st->top;
+				  wndpl.rcNormalPosition.left=st->left;
+				  wndpl.rcNormalPosition.right=st->right;
+				  wndpl.rcNormalPosition.bottom=st->bottom;
+				  SetWindowPlacement(st->displayWnd, &wndpl);
+ 				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+			  }
+			  else {
+				  st->top=wndpl.rcNormalPosition.top;
+				  st->left=wndpl.rcNormalPosition.left;
+				  st->right=wndpl.rcNormalPosition.right;
+				  st->bottom=wndpl.rcNormalPosition.bottom;
+				  st->redraw=TRUE; 
+				  st->redraw=TRUE;
+				  SetWindowLong(st->displayWnd, GWL_STYLE, GetWindowLong(st->displayWnd, GWL_STYLE) | WS_SIZEBOX);
+			  }
+			  InvalidateRect(hWnd,NULL,TRUE);
 			}
-			st->redraw=1;
-			InvalidateRect(hWnd,NULL,TRUE);
 			break;
 
 		case WM_ERASEBKGND:
@@ -338,7 +461,7 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 			return 0;
 
 		case WM_PAINT:
-			draw_meter(st);
+			draw_sessionmanager(st);
   	    	break;
 		default:
 			return DefWindowProc( hWnd, message, wParam, lParam );
@@ -362,7 +485,8 @@ SESSIONMANAGEROBJ::SESSIONMANAGEROBJ(int num) : BASE_CL()
 	// strcpy(out_ports[0].out_name,"out");
 
 	strcpy (wndcaption,"Session Manager");
-	strcpy (sessionlist,"Testsession1,test,smr-graph\r\nTestsession2,opi_test,opi-graph");
+	strcpy (logopath,"");
+	strcpy (sessionlist,"Testsession1#testconfig#testgraph1\r\nTestsession2#testconfig2#testgraph2");
 	displayreports=1;
 	redraw=1;
 	fontsize=18;
@@ -373,12 +497,14 @@ SESSIONMANAGEROBJ::SESSIONMANAGEROBJ(int num) : BASE_CL()
 	actreport[0]=0;
 	parse_menuitems(this);
 
-	color=RGB(100,200,100);
+	selectcolor=RGB(100,200,100);
 	bkcolor=RGB(55,55,55);
 	fontcolor=RGB(50,50,200);
 	fontbkcolor=RGB(255,255,255);
 
 	if (!(font = CreateFont(-MulDiv(fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
+		report_error("Font creation failed!");
+	if (!(smallfont = CreateFont(-MulDiv(10, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
 		report_error("Font creation failed!");
 
 	if(!(displayWnd=CreateWindow("SessionManager_Class", wndcaption, WS_CLIPSIBLINGS| WS_CHILD | WS_CAPTION | WS_THICKFRAME ,left, top, right-left, bottom-top, ghWndMain, NULL, hInst, NULL)))
@@ -396,38 +522,50 @@ void SESSIONMANAGEROBJ::load(HANDLE hFile)
 {
 	float temp;
 	load_object_basics(this);
-	/*
-	load_property("color",P_FLOAT,&temp);
-	color=(COLORREF)temp;
+
+	load_property("selectcolor",P_FLOAT,&temp);
+	selectcolor=(COLORREF)temp;
 	load_property("bkcol",P_FLOAT,&temp);
 	bkcolor=(COLORREF)temp;
-	if (bkcolor==color) bkcolor=RGB(255,255,255);
-	temp=0;
+	if (bkcolor==selectcolor) bkcolor=RGB(255,255,255);
+	temp=0;bitmapsize=100;
 	load_property("fontcol",P_FLOAT,&temp);
 	fontcolor=(COLORREF)temp;
 	temp=RGB(255,255,255);
 	load_property("fontbkcol",P_FLOAT,&temp);
 	fontbkcolor=(COLORREF)temp;
-	*/
+	
 	load_property("top",P_INT,&top);
 	load_property("left",P_INT,&left);
 	load_property("right",P_INT,&right);
 	load_property("bottom",P_INT,&bottom);
-/*	load_property("fontsize",P_INT,&fontsize);
+	load_property("fontsize",P_INT,&fontsize);
 	if (fontsize)
 	{
 		if (font) DeleteObject(font);
 		if (!(font = CreateFont(-MulDiv(fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
 			report_error("Font creation failed!");
-	} */
+	} 
 	load_property("wndcaption",P_STRING,wndcaption);
+	load_property("logopath",P_STRING,logopath);
 	load_property("sessionlist",P_STRING,sessionlist);
 	char * tmp=sessionlist;
-	while (*tmp) { if (*tmp==';') *tmp='\n'; if (*tmp==':') *tmp='\r'; tmp++; } 
+	while (*tmp) { if (*tmp=='§') *tmp='\n'; if (*tmp=='~') *tmp='\r'; tmp++; } 
 	load_property("displayreports",P_INT,&displayreports);
+	load_property("bitmapsize",P_INT,&bitmapsize);
 
 	parse_menuitems(this);
+	if (maxreportitems[0]>0)
+		actreportitem=maxreportitems[0]-1;
+	else actreportitem=0;
+
 	MoveWindow(displayWnd,left,top,right-left,bottom-top,TRUE); 
+	if (GLOBAL.locksession) {
+ 		SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+		//SetWindowLong(displayWnd, GWL_STYLE, 0);
+	} else { SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
+	InvalidateRect (displayWnd, NULL, TRUE);
+
 	SetWindowText(displayWnd,wndcaption);
 	redraw=1;
 }
@@ -436,30 +574,32 @@ void SESSIONMANAGEROBJ::save(HANDLE hFile)
 {	  
 	float temp;
 	save_object_basics(hFile, this);
-	/*
-	temp=(float)color;
-	save_property(hFile,"color",P_FLOAT,&temp);
+	
+	temp=(float)selectcolor;
+	save_property(hFile,"selectcolor",P_FLOAT,&temp);
 	temp=(float)bkcolor;
 	save_property(hFile,"bkcol",P_FLOAT,&temp);
 	temp=(float)fontcolor;
 	save_property(hFile,"fontcol",P_FLOAT,&temp);
 	temp=(float)fontbkcolor;
 	save_property(hFile,"fontbkcol",P_FLOAT,&temp);
-	*/
+	
 	save_property(hFile,"top",P_INT,&top);
 	save_property(hFile,"left",P_INT,&left);
 	save_property(hFile,"right",P_INT,&right);
 	save_property(hFile,"bottom",P_INT,&bottom);
 	save_property(hFile,"fontsize",P_INT,&fontsize);
 	save_property(hFile,"wndcaption",P_STRING,wndcaption);
+	save_property(hFile,"logopath",P_STRING,logopath);
 
 	char * tmp=sessionlist;
-	while (*tmp) { if (*tmp=='\n') *tmp=';'; if (*tmp=='\r') *tmp=':'; tmp++; } 
+	while (*tmp) { if (*tmp=='\n') *tmp='§'; if (*tmp=='\r') *tmp='~'; tmp++; } 
 	save_property(hFile,"sessionlist",P_STRING,sessionlist);
 	tmp=sessionlist;
-	while (*tmp) { if (*tmp==';') *tmp='\n'; if (*tmp==':') *tmp='\r'; tmp++; } 
+	while (*tmp) { if (*tmp=='§') *tmp='\n'; if (*tmp=='~') *tmp='\r'; tmp++; } 
 
 	save_property(hFile,"displayreports",P_INT,&displayreports);
+	save_property(hFile,"bitmapsize",P_INT,&bitmapsize);
 }
 
 void SESSIONMANAGEROBJ::incoming_data(int port, float value)

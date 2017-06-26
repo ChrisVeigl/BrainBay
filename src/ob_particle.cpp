@@ -348,28 +348,42 @@ LRESULT CALLBACK AnimationWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPA
 {
 	PAINTSTRUCT ps;
 	HDC	hDC;
+	int t;
 
 	switch( message ) 
 	{
 	case WM_CLOSE:
-		 DRAW.particles=0;
-		 Shutdown_GL(GLRC_Animation);
-		 ghWndAnimation=NULL;
-  		 DefWindowProc( hWnd, message, wParam, lParam );
+			DRAW.particles=0;
+			Shutdown_GL(GLRC_Animation);
+			ghWndAnimation=NULL;
+  			DefWindowProc( hWnd, message, wParam, lParam );
 		break;
 
 	case WM_KEYDOWN:
-			  SendMessage(ghWndMain, message,wParam,lParam);
+				SendMessage(ghWndMain, message,wParam,lParam);
 	case WM_SIZE: 
-		  Size_GL(hWnd, GLRC_Animation,0);	
+			Size_GL(hWnd, GLRC_Animation,0);	
 	case WM_MOVE:
 			{
-			WINDOWPLACEMENT  wndpl;
-			GetWindowPlacement(hWnd, &wndpl);
-			GLOBAL.anim_top=wndpl.rcNormalPosition.top;
-			GLOBAL.anim_left=wndpl.rcNormalPosition.left;
-			GLOBAL.anim_right=wndpl.rcNormalPosition.right;
-			GLOBAL.anim_bottom=wndpl.rcNormalPosition.bottom;
+  				WINDOWPLACEMENT  wndpl;
+				GetWindowPlacement(hWnd, &wndpl);
+
+				if (GLOBAL.locksession) {
+					wndpl.rcNormalPosition.top=GLOBAL.anim_top;
+					wndpl.rcNormalPosition.left=GLOBAL.anim_left;
+					wndpl.rcNormalPosition.right=GLOBAL.anim_right;
+					wndpl.rcNormalPosition.bottom=GLOBAL.anim_bottom;
+					SetWindowPlacement(hWnd, &wndpl);
+ 					SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE)&~WS_SIZEBOX);
+				}
+				else {
+					GLOBAL.anim_top=wndpl.rcNormalPosition.top;
+					GLOBAL.anim_left=wndpl.rcNormalPosition.left;
+					GLOBAL.anim_right=wndpl.rcNormalPosition.right;
+					GLOBAL.anim_bottom=wndpl.rcNormalPosition.bottom;
+					SetWindowLong(hWnd, GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) | WS_SIZEBOX);
+				}
+				InvalidateRect(hWnd,NULL,TRUE);
 			}
 			break;
 	case WM_PAINT:
@@ -382,8 +396,8 @@ LRESULT CALLBACK AnimationWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPA
 		break;
 	default:
 			return DefWindowProc( hWnd, message, wParam, lParam );
-   }
-   return 0;
+	}
+	return 0;
 }
 
 
@@ -524,6 +538,11 @@ PARTICLEOBJ::PARTICLEOBJ(int num) : BASE_CL()
 			load_property(actpropname,P_INT,&remote[t]);
 			
 		  }
+			if (GLOBAL.locksession) {
+	 			SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE)&~WS_SIZEBOX);
+				//SetWindowLong(displayWnd, GWL_STYLE, 0);
+			} else { SetWindowLong(displayWnd, GWL_STYLE, GetWindowLong(displayWnd, GWL_STYLE) | WS_SIZEBOX); }
+
 	  }
 		
 	  void PARTICLEOBJ::save(HANDLE hFile) 

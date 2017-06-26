@@ -535,6 +535,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 load_property("tool-bottom",P_INT,&GLOBAL.tool_bottom);
 		 load_property("showdesign",P_INT,&GLOBAL.showdesign);
 		 load_property("hidestatus",P_INT,&GLOBAL.hidestatus);
+		 load_property("locksession",P_INT,&GLOBAL.locksession);
 		 load_property("showtoolbox",P_INT,&GLOBAL.showtoolbox);
 		 load_property("autorun",P_INT,&GLOBAL.autorun);
 		 load_property("minimized",P_INT,&GLOBAL.minimized);
@@ -574,7 +575,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 MoveWindow(ghWndDesign,GLOBAL.design_left,GLOBAL.design_top,GLOBAL.design_right-GLOBAL.design_left,GLOBAL.design_bottom-GLOBAL.design_top,TRUE);
 		 		 InvalidateRect(ghWndMain,NULL,TRUE);
 
-		 if (!GLOBAL.showdesign)
+		 if ((!GLOBAL.showdesign) || (GLOBAL.locksession))
 		 {  
 			 ShowWindow(ghWndDesign, FALSE); 
 			 SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Show Design"); 
@@ -585,6 +586,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		     SetWindowPos(ghWndDesign,0,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
 			 SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Hide Design"); 
 		 }
+
 		 if (!GLOBAL.hidestatus)
 		 	 ShowWindow(ghWndStatusbox, TRUE); 
 		 else	 ShowWindow(ghWndStatusbox,FALSE);
@@ -624,6 +626,19 @@ BOOL load_configfile(LPCTSTR pszFileName)
 				 open_captfile(CAPTFILE.filename);
 			 }
 		 }
+
+		for (int i=0;i<GLOBAL.objects;i++)
+			if (objects[i]->displayWnd) {
+				SendMessage(objects[i]->displayWnd,WM_MOVE,0,0);
+				SendMessage(objects[i]->displayWnd,WM_MOUSEACTIVATE,0,0);
+ 				InvalidateRect(objects[i]->displayWnd,NULL,TRUE);
+			}
+
+		if (GLOBAL.locksession) 
+				ShowWindow(GetDlgItem(ghWndStatusbox,IDC_DESIGN), SW_HIDE);
+		else 
+				ShowWindow(GetDlgItem(ghWndStatusbox,IDC_DESIGN), SW_SHOW);
+
 
 		 init_system_time();
 		 reset_oscilloscopes();
@@ -710,6 +725,7 @@ BOOL save_configfile(LPCTSTR pszFileName)
 		save_property(hFile,"tool-bottom",P_INT,&GLOBAL.tool_bottom);
 		save_property(hFile,"showdesign",P_INT,&GLOBAL.showdesign);
 		save_property(hFile,"hidestatus",P_INT,&GLOBAL.hidestatus);
+		save_property(hFile,"locksession",P_INT,&GLOBAL.locksession);
 		save_property(hFile,"showtoolbox",P_INT,&GLOBAL.showtoolbox);
 		save_property(hFile,"autorun",P_INT,&GLOBAL.autorun);
 		save_property(hFile,"minimized",P_INT,&GLOBAL.minimized);

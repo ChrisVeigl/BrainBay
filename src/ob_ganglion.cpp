@@ -292,7 +292,8 @@ int sendstring_tcp(char * buf)
 void ganglion_connect(char * device) {
 	char tmpstr[256];
 	strcpy(tmpstr,"c,"); strcat(tmpstr,device);strcat(tmpstr,",;\n");
-	sendstring_tcp(tmpstr);				
+	sendstring_tcp(tmpstr);
+	Sleep(500);   // dirty! wait a bit until ganglion is connected ... 
 }
 
 void ganglion_disconnect() {
