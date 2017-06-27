@@ -43,6 +43,8 @@ class THRESHOLDOBJ : public BASE_CL
 	int  showmeter;
 	int  rising,falling;
 	int  usemedian;
+	int  baseline;
+	int  firstadapt;
 	int  bigadapt,smalladapt;
 	int  adapt_interval;
 	int old_y1,old_y2;

@@ -100,7 +100,9 @@ void draw_meter(THRESHOLDOBJ * st)
 
 		txtpos.left=5;txtpos.right=50;
 		txtpos.top=0;txtpos.bottom=0;
-		sprintf(szdata, " %.2f ",st->from_input);
+		if ((st->baseline) && (st->firstadapt)) 
+			sprintf(szdata, " baseline ");
+		else sprintf(szdata, " %.2f ",st->from_input);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
 		x=txtpos.bottom;
 		txtpos.top=y1-x;txtpos.bottom=txtpos.top+x;
@@ -109,7 +111,9 @@ void draw_meter(THRESHOLDOBJ * st)
 
 		txtpos.left=5;txtpos.right=50;
 		txtpos.top=0;txtpos.bottom=0;
-		sprintf(szdata, " %.2f ",st->to_input);
+		if ((st->baseline) && (st->firstadapt)) 
+			sprintf(szdata, " baseline ");
+		else sprintf(szdata, " %.2f ",st->to_input);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
 //		txtpos.top=y2+1;txtpos.bottom+=y2+1;
 
@@ -248,6 +252,7 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				CheckDlgButton(hDlg, IDC_RISING,st->rising);
 				CheckDlgButton(hDlg, IDC_FALLING,st->falling);
 				CheckDlgButton(hDlg, IDC_USE_MEDIAN,st->usemedian);
+				CheckDlgButton(hDlg, IDC_BASELINE,st->baseline);
 				init=FALSE;
 			}
 			return TRUE;
@@ -264,6 +269,7 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_RISING: st->rising=IsDlgButtonChecked(hDlg,IDC_RISING); break;
 			case IDC_FALLING: st->falling=IsDlgButtonChecked(hDlg,IDC_FALLING); break;
 			case IDC_USE_MEDIAN: st->usemedian=IsDlgButtonChecked(hDlg,IDC_USE_MEDIAN); break;
+			case IDC_BASELINE: st->baseline=IsDlgButtonChecked(hDlg,IDC_BASELINE); break;
 			case IDC_SELECTCOLOR:
 				st->color=select_color(hDlg,st->color);
 				st->redraw=1;
@@ -470,9 +476,9 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 
 		last_value=0;
 		for (accupos=0;accupos<ACCULEN;accupos++) accu[accupos]=0; 
-		accupos=0;redraw=1;
+		accupos=0;redraw=1;firstadapt=1;
 		interval_len=1; op=TRUE;
-		usemedian=1;avgsum=0;
+		usemedian=1;avgsum=0;baseline=0;
 		showmeter=1;rising=0;falling=0; bigadapt=0;smalladapt=0;adapt_interval=200;
 		input=0;gained_value=0;
 		fontsize=10; barsize=30;
@@ -501,7 +507,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 	
 	void THRESHOLDOBJ::session_reset(void)
 	{
-		accupos=0;
+		accupos=0;firstadapt=1;
 		for (int t=0;t<interval_len;t++) accu[t]=0;
 		empty_buckets();
 	}
@@ -530,6 +536,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		  load_property("only-rising",P_INT,&rising);
 		  load_property("only-falling",P_INT,&falling);
 		  load_property("usemedian",P_INT,&usemedian);
+		  load_property("baseline",P_INT,&baseline);
 		  load_property("color",P_FLOAT,&temp);
 		  color=(COLORREF)temp;
 		  load_property("bkcol",P_FLOAT,&temp);
@@ -590,6 +597,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		  save_property(hFile,"only-rising",P_INT,&rising);
 		  save_property(hFile,"only-falling",P_INT,&falling);
 		  save_property(hFile,"usemedian",P_INT,&usemedian);
+		  save_property(hFile,"baseline",P_INT,&baseline);
 		  temp=(float)color;
 		  save_property(hFile,"color",P_FLOAT,&temp);
 		  temp=(float)bkcolor;
@@ -642,8 +650,11 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		else accupos++;
 
 		accu[accupos]=x;
+		long interval=adapt_interval;
 
-        if (adapt_num >= adapt_interval)
+		if ((baseline) && (!usemedian)) interval*=PACKETSPERSECOND;
+
+        if (adapt_num >= interval)
         {
 			if (usemedian) {
         		int numtrue, i, sum;
@@ -670,15 +681,18 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 				empty_buckets();
 			}
 			else {
-        		if (bigadapt != 0)
-				{
-					from_input = avgsum/adapt_interval*bigadapt/100.0f;
-					redraw=1;
-				}
-        		if (smalladapt != 0)
-				{
-					to_input = avgsum/adapt_interval*smalladapt/100.0f;
-					redraw=1;
+				if ((!baseline) || (firstadapt)) {
+        			if (bigadapt != 0)
+					{
+						from_input = avgsum/interval*bigadapt/100.0f;
+						redraw=1;
+					}
+        			if (smalladapt != 0)
+					{
+						to_input = avgsum/interval*smalladapt/100.0f;
+						redraw=1;
+					}
+					firstadapt=0;
 				}
 			}
 			adapt_num=0;
@@ -699,6 +713,8 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		if (falling&&(l<=accu[accupos])) x=INVALID_VALUE;
 		if (op&&((gained_value<from_input)||(gained_value>to_input)))  x=INVALID_VALUE;
 		if ((!op)&&((gained_value<from_input)&&(gained_value>to_input)))  x=INVALID_VALUE;
+
+		if (baseline && firstadapt) x=INVALID_VALUE;
 		pass_values(0,x);
 		
 		if ((hDlg==ghWndToolbox)&&(!TIMING.dialog_update))

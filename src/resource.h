@@ -253,6 +253,8 @@
 #define IDC_WAVLENGTH                   1168
 #define IDC_JUMPPOS                     1168
 #define IDC_DRAWINTERVAL                1168
+#define IDC_USE_MEDIAN2                 1168
+#define IDC_BASELINE                    1168
 #define IDC_WAVREPINTERVAL              1169
 #define IDC_CONNECT                     1169
 #define IDC_SESSLEN                     1169
@@ -319,7 +321,6 @@
 #define IDC_CORRINTERVALBAR             1200
 #define IDC_FLY                         1200
 #define IDC_CORRINTERVAL                1201
-#define IDC_ENDBUTTON                   1201
 #define IDC_ENDSESSION                  1201
 #define IDC_BIGADAPT                    1204
 #define IDC_SMALLADAPT                  1205

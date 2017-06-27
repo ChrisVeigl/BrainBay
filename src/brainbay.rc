@@ -439,7 +439,8 @@ BEGIN
     LTEXT           "Font",IDC_STATIC,153,256,15,8
     PUSHBUTTON      "",IDC_FONTBKCOL,252,253,17,13,BS_FLAT,WS_EX_STATICEDGE
     LTEXT           "Font-Background",IDC_STATIC,194,255,56,8
-    CONTROL         "use median instead of average",IDC_USE_MEDIAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,170,107,10
+    CONTROL         "use median instead of average",IDC_USE_MEDIAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,164,107,10
+    CONTROL         "only once (get baseline)",IDC_BASELINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,177,107,10
 END
 
 IDD_OSCIBOX DIALOGEX 0, 0, 398, 256
