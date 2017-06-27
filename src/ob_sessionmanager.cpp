@@ -20,7 +20,7 @@
 #define TEXT_LEFTMARGIN 40
 #define TEXT_TOPMARGIN 40
 
-#define NAVI_X 750
+int NAVI_X = 750;
 #define NAVI_Y 140
 #define NAVI_WIDTH 200
 #define NAVI_HEIGHT 200
@@ -152,6 +152,7 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 			oldBitmap = SelectObject(hdcMem, hBitmap);
 			GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
+			NAVI_X = rect.right/3*2 + 30 ;
 	   		TransparentBlt(hdc, NAVI_X, NAVI_Y, NAVI_WIDTH, NAVI_HEIGHT,
                           hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, RGB(0,255,0));
 
@@ -171,8 +172,9 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 		GetObject(hBitmap, sizeof(bitmap), &bitmap);
 		// BitBlt(hdc, 0, rect.bottom/2, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
 
-		float g= st->bitmapsize/100.0f;
-		StretchBlt(hdc, 0, rect.bottom-bitmap.bmHeight*g, bitmap.bmWidth*g, bitmap.bmHeight*g,
+		//float g= st->bitmapsize/100.0f;
+		float g= (float)(rect.right-20)/(float)bitmap.bmWidth;
+		StretchBlt(hdc, 10, rect.bottom-10-(float)bitmap.bmHeight*g, (float)bitmap.bmWidth*g, (float)bitmap.bmHeight*g,
                          hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
 
 		SelectObject(hdcMem, oldBitmap);
@@ -184,7 +186,7 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 		char reportcaption[256];
 		//wsprintf(reportcaption,"Results for Session %d: %s",st->actreportitem+1, st->actreport);
 		wsprintf(reportcaption,"Results for Session %d:",st->actreportitem+1);
-		ExtTextOut(hdc, 10, rect.bottom-bitmap.bmHeight*g-25, 0, &rect,reportcaption, strlen(reportcaption), NULL );
+		ExtTextOut(hdc, 10, rect.bottom-35-(float)bitmap.bmHeight*g, 0, &rect,reportcaption, strlen(reportcaption), NULL );
 	}
  	
 	SelectObject(hdc, st->font);
@@ -429,6 +431,9 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 
 			   actx=(int)LOWORD(lParam);
 			   acty=(int)HIWORD(lParam);
+
+
+
 			   // printf("lbuttondown in wnd %ld at: %ld, %ld\n",hWnd, actx,acty);
 			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+33) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_UP,0); 
 			   if (distance (actx, acty, NAVI_X+33, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_LEFT,0); 
