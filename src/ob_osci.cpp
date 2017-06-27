@@ -501,6 +501,7 @@ LRESULT CALLBACK OsciboxDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				CheckDlgButton(hDlg,IDC_WITHIN,st->within);
 				CheckDlgButton(hDlg,IDC_GRADUAL,st->gradual);
 				CheckDlgButton(hDlg,IDC_SAVEBITMAP,st->savebitmap);
+				CheckDlgButton(hDlg,IDC_SAVEATEND,st->savebitmap);
 				CheckDlgButton(hDlg,IDC_ADD_DATE,st->add_date);
 
 				for (t=0;t<st->inports;t++)

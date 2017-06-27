@@ -1285,39 +1285,44 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session running");
 					break;
 				case IDC_STOPSESSION:
-					 if (lParam==1) {
-						char configfilename[MAX_PATH];
-						close_toolbox();
-						strcpy(configfilename,GLOBAL.resourcepath); 
-						strcat(configfilename,"CONFIGURATIONS\\");
-						strcat(configfilename,GLOBAL.nextconfigname);
-						strcat(configfilename,".con");
-						printf("trying to load configfile: %s\n",configfilename);
-						if (!load_configfile(configfilename)) 
-							report_error("Could not load Config File");
-						else sort_objects();					  
-					 }
-					 else {
 							GLOBAL.fly=0;
 							TTY.read_pause=1;
 							GLOBAL.session_sliding=-1;
 							stop_timer(); 							
 							for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
 							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session paused");
-					 }
+
+							if (lParam==1) {
+								char configfilename[MAX_PATH];
+								close_toolbox();
+								strcpy(configfilename,GLOBAL.resourcepath); 
+								strcat(configfilename,"CONFIGURATIONS\\");
+								strcat(configfilename,GLOBAL.nextconfigname);
+								strcat(configfilename,".con");
+								printf("trying to load configfile: %s\n",configfilename);
+								if (!load_configfile(configfilename)) 
+									report_error("Could not load Config File");
+								else sort_objects();					  
+							}
 					break;
 
 				case IDC_ENDSESSION:
 					{
-						char configfilename[MAX_PATH];
-						close_toolbox();
-						strcpy(configfilename,GLOBAL.resourcepath); 
-						strcat(configfilename,"CONFIGURATIONS\\");
-						strcat(configfilename,GLOBAL.startdesignpath);
-						strcat(configfilename,".con");
-						// printf("trying to load configfile: %s\n",configfilename);
-						if (load_configfile(configfilename)) 
-							sort_objects();					  
+							GLOBAL.fly=0;
+							TTY.read_pause=1;
+							GLOBAL.session_sliding=-1;
+							stop_timer(); 							
+							for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
+							Sleep(100);
+							char configfilename[MAX_PATH];
+							close_toolbox();
+							strcpy(configfilename,GLOBAL.resourcepath); 
+							strcat(configfilename,"CONFIGURATIONS\\");
+							strcat(configfilename,GLOBAL.startdesignpath);
+							strcat(configfilename,".con");
+							// printf("trying to load configfile: %s\n",configfilename);
+							if (load_configfile(configfilename)) 
+								sort_objects();					  
 					}
 					break;
 				case IDC_JUMP:

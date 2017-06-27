@@ -535,7 +535,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 load_property("tool-bottom",P_INT,&GLOBAL.tool_bottom);
 		 load_property("showdesign",P_INT,&GLOBAL.showdesign);
 		 load_property("hidestatus",P_INT,&GLOBAL.hidestatus);
-		 load_property("locksession",P_INT,&GLOBAL.locksession);
+		 // load_property("locksession",P_INT,&GLOBAL.locksession);
 		 load_property("showtoolbox",P_INT,&GLOBAL.showtoolbox);
 		 load_property("autorun",P_INT,&GLOBAL.autorun);
 		 load_property("minimized",P_INT,&GLOBAL.minimized);
@@ -725,7 +725,7 @@ BOOL save_configfile(LPCTSTR pszFileName)
 		save_property(hFile,"tool-bottom",P_INT,&GLOBAL.tool_bottom);
 		save_property(hFile,"showdesign",P_INT,&GLOBAL.showdesign);
 		save_property(hFile,"hidestatus",P_INT,&GLOBAL.hidestatus);
-		save_property(hFile,"locksession",P_INT,&GLOBAL.locksession);
+		// save_property(hFile,"locksession",P_INT,&GLOBAL.locksession);
 		save_property(hFile,"showtoolbox",P_INT,&GLOBAL.showtoolbox);
 		save_property(hFile,"autorun",P_INT,&GLOBAL.autorun);
 		save_property(hFile,"minimized",P_INT,&GLOBAL.minimized);
@@ -789,6 +789,7 @@ BOOL save_settings(void)
 	save_property(hFile,"addtime",P_INT,&GLOBAL.add_archivetime);
 	save_property(hFile,"startdesign",P_INT,&GLOBAL.startdesign);
 	save_property(hFile,"startdesignpath",P_STRING,GLOBAL.startdesignpath);
+	save_property(hFile,"locksession",P_INT,&GLOBAL.locksession);
 
 	x=0;
 	for (t=0;t<GLOBAL.midiports;t++)
@@ -833,6 +834,7 @@ BOOL load_settings(void)
 	load_property("gangliondevicename",P_STRING,GLOBAL.gangliondevicename);
 	load_property("startdesign",P_INT,&GLOBAL.startdesign);
 	load_property("startdesignpath",P_STRING,GLOBAL.startdesignpath);
+	load_property("locksession",P_INT,&GLOBAL.locksession);
 
 
 	load_property("midiports",P_INT,&x);

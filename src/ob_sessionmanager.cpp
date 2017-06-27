@@ -33,6 +33,8 @@ int find_bmpfiles(char * reportname, int select, char * targetfilename) {
 	strcat(reportpath,reportname);
 	strcat(reportpath,"*.bmp");
 	// printf("folder: %s\n",reportpath);
+	if (!reportname) return 0;
+	if (!strlen(reportname)) return 0;
 
 	HANDLE hFind;
 	WIN32_FIND_DATA data;
@@ -60,14 +62,17 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 	st->menuitems=0;
 	while (*tmp) {
 		pos=0;
+
+		// read a whole line
 		while ((*tmp!=0) && (*tmp!='\r') && (*tmp!='\n'))
 		{
 			szdata[pos++]=*tmp;
 			tmp++;
 		}
-		while ((*tmp!=0)&& (*tmp=='\r') || (*tmp=='\n')) tmp++;
+		while ((*tmp!=0) && ((*tmp=='\r') || (*tmp=='\n'))) tmp++;
 		szdata[pos]=0;
 
+		// get sessionname
 		char *tmp2=szdata;
 		int pos2=0;
 		while ((*tmp2) && (*tmp2!='#')) {
@@ -76,8 +81,10 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 		}
 		st->sessionname[st->menuitems][pos2]=0;
 
+		pos2=0;
+		// get sessionpath
 		if (*tmp2) {
-			tmp2++; pos2=0;
+			tmp2++; 
 			while ((*tmp2) && (*tmp2!='#')) {
 			   st->sessionpath[st->menuitems][pos2++]=*tmp2;
 			   tmp2++;
@@ -85,14 +92,18 @@ void parse_menuitems(SESSIONMANAGEROBJ* st)
 		}
 		st->sessionpath[st->menuitems][pos2]=0;
 
+		pos2=0;
+		// get sessionreport
 		if (*tmp2) {
-			tmp2++; pos2=0;
+			tmp2++;
 			while ((*tmp2) && (*tmp2!='#')) {
 			   st->sessionreport[st->menuitems][pos2++]=*tmp2;
 			   tmp2++;
 			}
 		}
 		st->sessionreport[st->menuitems][pos2]=0;
+
+		// get all bitmap files for the sessionreport
 		st->maxreportitems[st->menuitems] = find_bmpfiles(st->sessionreport[st->menuitems], -1, NULL);
 		st->menuitems++;
 	}
@@ -279,6 +290,7 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 			case IDC_SESSIONLIST:
 				GetDlgItemText(hDlg,IDC_SESSIONLIST,st->sessionlist,4096); 
 				parse_menuitems(st);
+				st->redraw=1;
 				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
 			case IDC_WNDCAPTION:
