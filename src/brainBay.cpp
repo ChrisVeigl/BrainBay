@@ -108,7 +108,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// conv_file();
 
-	 AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
+	// AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
 
 	init_path();
 	register_classes(hInstance);
