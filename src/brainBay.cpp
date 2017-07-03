@@ -68,13 +68,13 @@ int check_keys(void)
 	    mode=0;   else return(0);
 	}
 
-	if (GetAsyncKeyState(118))
+	if (GetAsyncKeyState(118))  // F7
 	{mode=1; SendMessage(ghWndMain,WM_COMMAND,IDM_PLAY,0);}
-	else if (GetAsyncKeyState(119))
+	else if (GetAsyncKeyState(119))  // F8
 	{mode=1;SendMessage(ghWndMain,WM_COMMAND,IDM_STOP,0);}
-	else if (GetAsyncKeyState(116))
+	else if (GetAsyncKeyState(116))  //F5
 	{mode=1;	SendMessage(ghWndStatusbox,WM_COMMAND,IDC_DESIGN,0);}
-	else if (GetAsyncKeyState(117))
+	else if (GetAsyncKeyState(117)) // F6
 	{mode=1;	SendMessage(ghWndStatusbox,WM_COMMAND,IDC_HIDE,0);}
 
 	return(0);
@@ -108,7 +108,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// conv_file();
 
-	// AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
+	 AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
 
 	init_path();
 	register_classes(hInstance);
@@ -204,6 +204,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 {
 	int wmId, wmEvent;
 	char sztemp[256];
+	static int controlKeyState=false;
     
 	switch( message ) 
 	{
@@ -578,38 +579,82 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERTGANGLION:
 					if ((!count_objects(OB_GANGLION)) && (!count_objects(OB_EEG))) create_object(OB_GANGLION);
 					break;
-
 				case IDM_COPY:
 					if (actobject)
 					{
+						HANDLE hFile;
+						SCROLLINFO si;
+						char tmpfile[256];
+						int tmpx,tmpy;
 						copy_object=actobject;
-						if ((copy_object->type!=OB_EEG)&&(copy_object->type!=OB_WAV)&&(copy_object->type!=OB_CAM)
-							&&(copy_object->type!=OB_SKINDIALOG)&&(copy_object->type!=OB_NEUROBIT))
-						{
-						    HANDLE hFile;
-							char tmpfile[256];
-							create_object(copy_object->type);
+						ZeroMemory(&si, sizeof(si));
+						si.cbSize = sizeof(si);
+						si.fMask = SIF_POS;
+						GetScrollInfo(ghWndDesign, SB_HORZ, &si);
+						tmpx=si.nPos;
+						GetScrollInfo(ghWndDesign, SB_VERT, &si);
+						tmpy=si.nPos;
+						actobject->xPos-=tmpx;
+						actobject->yPos-=tmpy;
 
-							strcpy(tmpfile,GLOBAL.resourcepath); 
-							strcat(tmpfile,"tmp_copy.con");
-							hFile = CreateFile(tmpfile, GENERIC_WRITE, 0, NULL,CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-							if(hFile != INVALID_HANDLE_VALUE)
-							{
-									copy_object->save(hFile);
-									save_property(hFile,"end Object",P_END,NULL);
-									CloseHandle(hFile);
-							}
-							hFile = CreateFile(tmpfile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-							if(hFile != INVALID_HANDLE_VALUE)
-							{
-									load_next_config_buffer(hFile);
-									actobject->load(hFile);
-									CloseHandle(hFile);
-									DeleteFile(tmpfile);
-							}
-							actobject->xPos+=10; actobject->yPos+=10;
+						strcpy(tmpfile,GLOBAL.resourcepath); 
+						strcat(tmpfile,"tmp_copy.con");
+						hFile = CreateFile(tmpfile, GENERIC_WRITE, 0, NULL,CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+						if(hFile != INVALID_HANDLE_VALUE)
+						{
+								save_property(hFile,"next Object",P_INT,&(copy_object->type));
+								copy_object->save(hFile);
+								save_property(hFile,"end Object",P_END,NULL);
+								CloseHandle(hFile);
 						}		
+						actobject->xPos+=tmpx;
+						actobject->yPos+=tmpy;
+					}
+					break;
+				case IDM_PASTE:
+					{
+						HANDLE hFile;
+						char tmpfile[256];
+						strcpy(tmpfile,GLOBAL.resourcepath); 
+						strcat(tmpfile,"tmp_copy.con");
+						hFile = CreateFile(tmpfile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+						if(hFile != INVALID_HANDLE_VALUE)
+						{
+							actobject=NULL;
+							int newobj=load_next_config_buffer(hFile);
+							close_toolbox();
+							create_object(newobj);
+							if (actobject != NULL )  {
+								SCROLLINFO si;
+								actobject->load(hFile);
+								ZeroMemory(&si, sizeof(si));
+								si.cbSize = sizeof(si);
+								si.fMask = SIF_POS;
+								GetScrollInfo(ghWndDesign, SB_HORZ, &si);
+								actobject->xPos+=si.nPos;
+								GetScrollInfo(ghWndDesign, SB_VERT, &si);
+								actobject->yPos+=si.nPos;
+								int occlude; 
+								do {
+									occlude=0;
+									for (int i=0;i<GLOBAL.objects-1;i++)
+										if ((objects[i]->xPos==actobject->xPos)&&(objects[i]->yPos==actobject->yPos))
+										{
+											actobject->xPos+=10;
+											actobject->yPos+=10;
+											occlude=1;
+										}
+								} while (occlude);
+							}
+							CloseHandle(hFile);
+							//	DeleteFile(tmpfile);
+						}
 						close_toolbox();
+						for (int i=0;i<GLOBAL.objects;i++)
+							objects[i]->update_inports();
+
+						if (actobject) actobject->make_dialog();
+						InvalidateRect(ghWndDesign,NULL,TRUE);
 					}
 					break;
 								
@@ -620,15 +665,6 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 		case WM_ACTIVATE:
 				{
-/*				 char t[50];
-
-				 static int cn=0;
-				 cn++;
-				 sprintf(t,"%d:%d,%d",cn,HIWORD(lParam),LOWORD(lParam)); //==WA_CLICKACTIVE))
-				 SendDlgItemMessage(ghWndStatusbox,IDC_LIST2, LB_ADDSTRING, 0, (LPARAM) t);
-				 SendDlgItemMessage(ghWndStatusbox,IDC_LIST2, LB_SETCURSEL, SendDlgItemMessage(ghWndStatusbox,IDC_LIST2, LB_GETCOUNT, 0, 0)-1, 0);
-				 UpdateWindow(ghWndStatusbox);
-*/
 			     if ((LOWORD(lParam)==WA_CLICKACTIVE) || (HIWORD(lParam)==WA_CLICKACTIVE))
 				 	SetWindowPos(ghWndMain,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
 				  SetFocus(ghWndMain);
@@ -639,23 +675,21 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case WM_ACTIVATEAPP: 
 
 			{
-/*				 char t[50];
-				 static int cn=0;
-				 cn++;
-				 sprintf(t,"%d:%d,%d",cn,HIWORD(lParam),LOWORD(lParam)); //==WA_CLICKACTIVE))
-				 SendDlgItemMessage(ghWndStatusbox,IDC_LIST2, LB_ADDSTRING, 0, (LPARAM) t);
-				 SendDlgItemMessage(ghWndStatusbox,IDC_LIST2, LB_SETCURSEL, SendDlgItemMessage(ghWndStatusbox,IDC_LIST2, LB_GETCOUNT, 0, 0)-1, 0);
-				 UpdateWindow(ghWndStatusbox); */
-
-//			     if ((LOWORD(lParam)==1828) || (LOWORD(lParam)==964))
-				 	//SetWindowPos(ghWndMain,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
-					SetWindowPos(ghWndMain,0,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
-//				 return DefWindowProc( hWnd, message, wParam, lParam );
+				SetWindowPos(ghWndMain,0,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
+				// return DefWindowProc( hWnd, message, wParam, lParam );
 			}
 
 			break;
+		case WM_KEYUP:
+			// printf("keyup: %ld,%ld\n",wParam, lParam);
+			if (wParam==KEY_CTRL) controlKeyState=false;
+			break;
 
 		case WM_KEYDOWN:
+			// printf("keydown: %ld,%ld\n",wParam, lParam);
+			if (wParam==KEY_CTRL) controlKeyState=true;
+			if (controlKeyState && (wParam==KEY_C)) SendMessage (ghWndMain,WM_COMMAND,IDM_COPY,0);
+			if (controlKeyState && (wParam==KEY_V)) SendMessage (ghWndMain,WM_COMMAND,IDM_PASTE,0);
 		    if (lParam==KEY_DELETE ) 
 			   SendMessage(ghWndDesign, message,wParam,lParam);
 			else {
@@ -687,13 +721,6 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				 ShowWindow(ghWndStatusbox,TRUE);
 				 GLOBAL.hidestatus=FALSE;
 				 update_status_window();
-/*
-				 if (GLOBAL.session_length==0)
-  				    SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(lParam)+15, 
-			                   LOWORD(lParam)-8,HIWORD(lParam), 0);
-				 else SetWindowPos(ghWndStatusbox, ghWndMain, 4, HIWORD(lParam)-20, 
-			                   LOWORD(lParam)-8,HIWORD(lParam), 0);
-							*/
 			 }
 			 else if (wParam== SIZE_MINIMIZED) 
 			 {
@@ -702,14 +729,6 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			 }
 			 else // if (wParam== SIZE_RESTORED) 
 			 {
-				/*
-				WINDOWPLACEMENT  wndpl;
-				GetWindowPlacement(ghWndMain, &wndpl);
-				GLOBAL.top=wndpl.rcNormalPosition.top;
-				GLOBAL.left=wndpl.rcNormalPosition.left;
-				GLOBAL.right=wndpl.rcNormalPosition.right;
-				GLOBAL.bottom=wndpl.rcNormalPosition.bottom;
-				*/
 				RECT rc;
 				GetWindowRect(ghWndMain, &rc); 
 				GLOBAL.top=rc.top;

@@ -83,14 +83,12 @@ EVALOBJ::EVALOBJ(int num) : BASE_CL()
 
 void EVALOBJ::update_inports(void)
 {
-	int i,z,m;
-	m=-1;
-	for (i=0;i<GLOBAL.objects;i++)
-	  for (z=0;objects[i]->out[z].to_port!=-1;z++)
-	    if ((objects[objects[i]->out[z].to_object]==this)&&(objects[i]->out[z].to_port>m)) m=objects[i]->out[z].to_port;
-    inports=m+2;
+	int i;
+	i=count_inports(this);
+	
+	if (i>6) i=6;
+	if (i>inports) inports=i;
 		
-	if (inports>6) inports=6;
 	height=CON_START+inports*CON_HEIGHT+5;
 	InvalidateRect(ghWndMain,NULL,TRUE);
 }

@@ -863,10 +863,12 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 
 	  void OSCIOBJ::update_inports(void)
 	  {
-		  int x; //,i;
-		  inports=count_inports(this);
-		
-		  if (inports>MAX_EEG_CHANNELS) inports=MAX_EEG_CHANNELS;
+		  int x,i;
+		  i=count_inports(this);
+	
+		  if (i>MAX_EEG_CHANNELS) i=MAX_EEG_CHANNELS;
+		  if (i>inports) inports=i;
+
 		  for(x=inports;x<MAX_EEG_CHANNELS;x++)
 			  in_ports[x].get_range=1;
 

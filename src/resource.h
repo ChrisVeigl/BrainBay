@@ -253,7 +253,6 @@
 #define IDC_WAVLENGTH                   1168
 #define IDC_JUMPPOS                     1168
 #define IDC_DRAWINTERVAL                1168
-#define IDC_USE_MEDIAN2                 1168
 #define IDC_BASELINE                    1168
 #define IDC_WAVREPINTERVAL              1169
 #define IDC_CONNECT                     1169
@@ -708,6 +707,7 @@
 #define IDC_CQ_FC6                      1513
 #define IDC_LOADNEXTCONFIG              1513
 #define IDC_CQ_F4                       1514
+#define IDC_INTERVALUNIT                1514
 #define IDC_CQ_F8                       1515
 #define IDC_CQ_AF4                      1516
 #define IDC_WIRELESS_QUALITY            1517
@@ -860,6 +860,9 @@
 #define ID_OTHERS_SESSIONMANAGER        32940
 #define IDM_INSERT_SESSIONMANAGER       32941
 #define IDM_INSERTSESSIONMANAGER        32942
+#define ID_EDIT_PASTEELEMENT            32943
+#define ID_EDIT_COPYELEMENT             32944
+#define IDM_COPYPASTE                   32945
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -867,8 +870,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32943
-#define _APS_NEXT_CONTROL_VALUE         1514
+#define _APS_NEXT_COMMAND_VALUE         32946
+#define _APS_NEXT_CONTROL_VALUE         1515
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

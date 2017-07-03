@@ -101,7 +101,7 @@ void draw_meter(THRESHOLDOBJ * st)
 		txtpos.left=5;txtpos.right=50;
 		txtpos.top=0;txtpos.bottom=0;
 		if ((st->baseline) && (st->firstadapt)) 
-			sprintf(szdata, " baseline ");
+			sprintf(szdata, "  ");
 		else sprintf(szdata, " %.2f ",st->from_input);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
 		x=txtpos.bottom;
@@ -112,7 +112,7 @@ void draw_meter(THRESHOLDOBJ * st)
 		txtpos.left=5;txtpos.right=50;
 		txtpos.top=0;txtpos.bottom=0;
 		if ((st->baseline) && (st->firstadapt)) 
-			sprintf(szdata, " baseline ");
+			sprintf(szdata, " get baseline ");
 		else sprintf(szdata, " %.2f ",st->to_input);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
 //		txtpos.top=y2+1;txtpos.bottom+=y2+1;
@@ -253,6 +253,9 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				CheckDlgButton(hDlg, IDC_FALLING,st->falling);
 				CheckDlgButton(hDlg, IDC_USE_MEDIAN,st->usemedian);
 				CheckDlgButton(hDlg, IDC_BASELINE,st->baseline);
+				if (st->baseline) SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Seconds");
+				else SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Samples");
+
 				init=FALSE;
 			}
 			return TRUE;
@@ -269,7 +272,10 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_RISING: st->rising=IsDlgButtonChecked(hDlg,IDC_RISING); break;
 			case IDC_FALLING: st->falling=IsDlgButtonChecked(hDlg,IDC_FALLING); break;
 			case IDC_USE_MEDIAN: st->usemedian=IsDlgButtonChecked(hDlg,IDC_USE_MEDIAN); break;
-			case IDC_BASELINE: st->baseline=IsDlgButtonChecked(hDlg,IDC_BASELINE); break;
+			case IDC_BASELINE: st->baseline=IsDlgButtonChecked(hDlg,IDC_BASELINE); 
+				if (st->baseline) SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Seconds");
+				else SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Samples");
+				break;
 			case IDC_SELECTCOLOR:
 				st->color=select_color(hDlg,st->color);
 				st->redraw=1;
@@ -507,14 +513,14 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 	
 	void THRESHOLDOBJ::session_reset(void)
 	{
-		accupos=0;firstadapt=1;
-		for (int t=0;t<interval_len;t++) accu[t]=0;
+		accupos=0;firstadapt=1;avgsum=0;
+		for (int t=0;t<1000;t++) accu[t]=0;
 		empty_buckets();
 	}
 	void THRESHOLDOBJ::session_pos(long pos)
 	{
-		accupos=0;
-		for (int t=0;t<interval_len;t++) accu[t]=0;
+		accupos=0;avgsum=0;
+		for (int t=0;t<1000;t++) accu[t]=0;
 		empty_buckets();
 	}
 
@@ -629,11 +635,11 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		int i;
 		input=value;
 		i = (int)size_value(in_ports[0].in_min,in_ports[0].in_max,value,-512.0f,512.0f,0);
-		if ((i >= -512) && (i <= 512))
-		{
-			buckets[i+512]++;
-			adapt_num++;
-		}
+		if (i < -512) i=-512;
+		if (i > 512) i=512;
+		// if ((i >= -512) && (i <= 512))
+		buckets[i+512]++;
+		adapt_num++;
       }
         
 
@@ -641,18 +647,28 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 	  {
 		float l,x,sum;
 		int t,i;
-		
+
 		x=(float)((input)*signal_gain/100.0);
 		l=accu[accupos];
-		avgsum+=(float)input;
+		avgsum+=x; // (float)input;
 		
 		if ((accupos>=999)||(accupos<0)) accupos=0; 
 		else accupos++;
 
 		accu[accupos]=x;
+		sum=0;
+		for (t=0;t<interval_len;t++)
+		{
+			i=accupos-t; if (i<0) i+=1000;
+			sum+=accu[i];
+		}
+		gained_value=sum/interval_len;
+
 		long interval=adapt_interval;
 
-		if ((baseline) && (!usemedian)) interval*=PACKETSPERSECOND;
+		if ((baseline) && (!usemedian)) { 
+			interval*=PACKETSPERSECOND;
+		}
 
         if (adapt_num >= interval)
         {
@@ -699,14 +715,6 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 			avgsum=0;
 		}
 		
-   		sum=0;
-		for (t=0;t<interval_len;t++)
-		{
-			i=accupos-t; if (i<0) i+=1000;
-			sum+=accu[i];
-		}
-
-		gained_value=sum/interval_len;
 	
 		x=gained_value;
 		if (rising&&(l>=accu[accupos])) x=INVALID_VALUE;

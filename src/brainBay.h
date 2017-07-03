@@ -246,6 +246,9 @@ extern "C" {
 #define KEY_LEFT 37
 #define KEY_RIGHT 39
 #define KEY_ENTER 13
+#define KEY_CTRL 17
+#define KEY_C 67
+#define KEY_V 86
 
 
 #define DEF_ZOOM    100

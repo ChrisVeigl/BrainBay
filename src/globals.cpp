@@ -124,6 +124,8 @@ char objnames[OBJECT_COUNT][20]      = { OBJNAMES };
 char dimensions[10][10]      = {"uV","mV","V","Hz","%","DegC","DegF","uS","kOhm","BPM" };
 int  fft_bin_values[10]    = { 32,64,128,256,512,0 };
 
+int singletonObjects [] = {OB_EEG,OB_WAV,OB_CAM,OB_SKINDIALOG,OB_NEUROBIT,OB_GANGLION,OB_SESSIONMANAGER,-1};
+	
 
 //
 // Create-Object- Function
@@ -134,6 +136,12 @@ void create_object(int type)
 {
 	int i;
 
+	for (i=0;singletonObjects[i]!=-1;i++) {
+		if (type==singletonObjects[i]){
+			for (int t=0; t<GLOBAL.objects;t++)
+				if (objects[t]->type==type) return;
+		}
+	}
 	close_toolbox();
 	write_logfile("creating object: %s",objnames[type]);
 

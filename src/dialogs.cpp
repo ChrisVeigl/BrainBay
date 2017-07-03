@@ -76,6 +76,7 @@ void close_toolbox( void )
 {
 	if (ghWndToolbox!=NULL) SendMessage(ghWndToolbox,WM_CLOSE,0,0);
 	ghWndToolbox=NULL;	actobject=NULL; actconnect=NULL; GLOBAL.showtoolbox=-1;
+	InvalidateRect(ghWndDesign,NULL,TRUE);
 }
 
 
@@ -1704,8 +1705,6 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 				break;
 		
 		case WM_KEYDOWN:
-			   
-
 			    if (lParam==KEY_DELETE )
 				{
 					int i,t,object_index;
@@ -1759,6 +1758,7 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 					update_dimensions();
 					TIMING.pause_timer=0;
 				}
+ 			    SetFocus(ghWndMain);
 				break;
 				
 /*
