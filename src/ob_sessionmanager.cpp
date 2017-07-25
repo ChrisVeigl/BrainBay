@@ -145,10 +145,18 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 			oldBitmap = SelectObject(hdcMem, hBitmap);
 			GetObject(hBitmap, sizeof(bitmap), &bitmap);
 			BitBlt(hdc, rect.right/3*2, 50, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+			SelectObject(hdcMem, oldBitmap);
+			DeleteDC(hdcMem);
+		}
+	}
 
-			strcpy(bitmappath,GLOBAL.resourcepath); 
-			strcat(bitmappath,"\\GRAPHICS\\navigation-buttons.bmp");
-			hBitmap = (HBITMAP)LoadImage(hInst, bitmappath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	if (st->displaynavigation) {
+		char bitmappath[256];
+		strcpy(bitmappath,GLOBAL.resourcepath); 
+		strcat(bitmappath,"\\GRAPHICS\\navigation-buttons.bmp");
+		hBitmap = (HBITMAP)LoadImage(hInst, bitmappath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		if (hBitmap) {
+			hdcMem = CreateCompatibleDC(hdc);
 			oldBitmap = SelectObject(hdcMem, hBitmap);
 			GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
@@ -160,7 +168,8 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 			DeleteDC(hdcMem);
 		}
 	}
-	if ((strlen(st->actreport)>0)&&(st->displayreports)) {
+
+	if (strlen(st->actreport)>0) {
 		char reportpath[256];
 		strcpy(reportpath,GLOBAL.resourcepath); 
 		strcat(reportpath,"REPORTS\\");
@@ -252,8 +261,9 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 				SetDlgItemInt(hDlg, IDC_BITMAPSIZE, st->bitmapsize,0);
 
 				SetDlgItemText(hDlg, IDC_WNDCAPTION, st->wndcaption);
+				SetDlgItemText(hDlg, IDC_LOGOPATH, st->logopath);
 				SetDlgItemText(hDlg, IDC_SESSIONLIST, st->sessionlist);
-				CheckDlgButton(hDlg, IDC_DISPLAYREPORTS, st->displayreports);
+				CheckDlgButton(hDlg, IDC_DISPLAYNAVIGATION, st->displaynavigation);
 
 			}
 			return TRUE;
@@ -304,8 +314,8 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 				GetDlgItemText(hDlg,IDC_LOGOPATH,st->logopath,100); 
 				InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
-			case IDC_DISPLAYREPORTS:
-				 st->displayreports=  IsDlgButtonChecked(hDlg,IDC_DISPLAYREPORTS);
+			case IDC_DISPLAYNAVIGATION:
+				 st->displaynavigation=  IsDlgButtonChecked(hDlg,IDC_DISPLAYNAVIGATION);
   				 st->redraw=1;
   				 InvalidateRect(st->displayWnd,NULL,FALSE);
 				break;
@@ -504,9 +514,10 @@ SESSIONMANAGEROBJ::SESSIONMANAGEROBJ(int num) : BASE_CL()
 	strcpy (wndcaption,"Session Manager");
 	strcpy (logopath,"");
 	strcpy (sessionlist,"Testsession1#testconfig#testgraph1\r\nTestsession2#testconfig2#testgraph2");
-	displayreports=1;
+	displaynavigation=1;
 	redraw=1;
 	fontsize=18;
+	bitmapsize=100;
 	left=10;right=550;top=20;bottom=400;
 
 	actmenuitem=0;
@@ -568,7 +579,7 @@ void SESSIONMANAGEROBJ::load(HANDLE hFile)
 	load_property("sessionlist",P_STRING,sessionlist);
 	char * tmp=sessionlist;
 	while (*tmp) { if (*tmp=='§') *tmp='\n'; if (*tmp=='~') *tmp='\r'; tmp++; } 
-	load_property("displayreports",P_INT,&displayreports);
+	load_property("displaynavigation",P_INT,&displaynavigation);
 	load_property("bitmapsize",P_INT,&bitmapsize);
 
 	parse_menuitems(this);
@@ -615,7 +626,7 @@ void SESSIONMANAGEROBJ::save(HANDLE hFile)
 	tmp=sessionlist;
 	while (*tmp) { if (*tmp=='§') *tmp='\n'; if (*tmp=='~') *tmp='\r'; tmp++; } 
 
-	save_property(hFile,"displayreports",P_INT,&displayreports);
+	save_property(hFile,"displaynavigation",P_INT,&displaynavigation);
 	save_property(hFile,"bitmapsize",P_INT,&bitmapsize);
 }
 

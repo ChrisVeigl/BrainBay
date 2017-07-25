@@ -701,6 +701,7 @@
 #define IDC_WNDCAPTION                  1510
 #define IDC_CQ_P8                       1511
 #define IDC_DISPLAYREPORTS              1511
+#define IDC_DISPLAYNAVIGATION           1511
 #define IDC_CQ_T8                       1512
 #define IDC_NEXTCONFIG                  1512
 #define IDC_LOGOPATH                    1512

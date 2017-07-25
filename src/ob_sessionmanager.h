@@ -27,7 +27,7 @@ class SESSIONMANAGEROBJ : public BASE_CL
 	DWORD dwRead,dwWritten;
 
   public: 
-	int displayreports;
+	int displaynavigation;
 	int menuitems;
 	int actmenuitem;
 	int actreportitem;
