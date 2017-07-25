@@ -87,6 +87,7 @@
 #include "ob_ganglion.h"
 #include "ob_sessiontime.h"
 #include "ob_sessionmanager.h"
+#include "ob_keycapture.h"
 
 //
 // GLOBAL VARIABLES
@@ -280,6 +281,8 @@ void create_object(int type)
 							 actobject->object_size=sizeof(SESSIONTIMEOBJ);break;
 		case OB_SESSIONMANAGER: actobject=new SESSIONMANAGEROBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(SESSIONMANAGEROBJ);break;
+		case OB_KEYCAPTURE:  actobject=new KEYCAPTUREOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(KEYCAPTUREOBJ);break;
 
 
 	}
@@ -775,6 +778,7 @@ void GlobalInitialize()
 	GLOBAL.minimized=0;
 	GLOBAL.run_exception=0;
 	GLOBAL.fly=0;
+	GLOBAL.pressed_key=0;
 
 	GLOBAL.P3ALC1=12;
 	GLOBAL.P3ALC2=12;

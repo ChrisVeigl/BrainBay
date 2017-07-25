@@ -366,6 +366,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_keycapture.cpp" />
     <ClCompile Include="ob_keystrike.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -592,6 +593,7 @@
     <ClInclude Include="ob_floatvector.h" />
     <ClInclude Include="ob_ganglion.h" />
     <ClInclude Include="ob_integrate.h" />
+    <ClInclude Include="ob_keycapture.h" />
     <ClInclude Include="ob_keystrike.h" />
     <ClInclude Include="ob_limiter.h" />
     <ClInclude Include="ob_magnitude.h" />

@@ -136,8 +136,9 @@ extern "C" {
 #define OB_GANGLION     60
 #define OB_SESSIONTIME  61
 #define OB_SESSIONMANAGER 62
+#define OB_KEYCAPTURE   63
 
-#define OBJECT_COUNT 	63
+#define OBJECT_COUNT 	64
 
 
 
@@ -154,7 +155,7 @@ extern "C" {
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
-				 "SESSIONTIME", "SESSIONMANAGER"
+				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPURE"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -334,6 +335,7 @@ typedef struct GLOBALStruct
 	int minimized;
 	int session_sliding;
 	int locksession;
+	int pressed_key;
 
 	int fly;
 	int run_exception;

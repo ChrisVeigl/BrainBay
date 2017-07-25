@@ -91,6 +91,8 @@
 #define IDD_GANGLIONBOX                 254
 #define IDD_SESSIONTIMEBOX              255
 #define IDD_SESSIONMANAGERBOX           256
+#define IDD_SAMPLE_HOLDBOX1             257
+#define IDD_KEYCAPTUREBOX               257
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -700,7 +702,6 @@
 #define IDC_START_IMPEDANCECHECK        1510
 #define IDC_WNDCAPTION                  1510
 #define IDC_CQ_P8                       1511
-#define IDC_DISPLAYREPORTS              1511
 #define IDC_DISPLAYNAVIGATION           1511
 #define IDC_CQ_T8                       1512
 #define IDC_NEXTCONFIG                  1512
@@ -710,6 +711,7 @@
 #define IDC_CQ_F4                       1514
 #define IDC_INTERVALUNIT                1514
 #define IDC_CQ_F8                       1515
+#define IDC_MODE                        1515
 #define IDC_CQ_AF4                      1516
 #define IDC_WIRELESS_QUALITY            1517
 #define IDC_BATTERY_LIFE                1518
@@ -864,6 +866,8 @@
 #define ID_EDIT_PASTEELEMENT            32943
 #define ID_EDIT_COPYELEMENT             32944
 #define IDM_COPYPASTE                   32945
+#define ID_SOURCE_KEYCAPTURE            32946
+#define IDM_INSERTKEYCAPTURE            32947
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -871,8 +875,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32946
-#define _APS_NEXT_CONTROL_VALUE         1515
+#define _APS_NEXT_COMMAND_VALUE         32948
+#define _APS_NEXT_CONTROL_VALUE         1516
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

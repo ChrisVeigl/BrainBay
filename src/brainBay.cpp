@@ -522,6 +522,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERTSESSIONMANAGER:
 					create_object(OB_SESSIONMANAGER);
 					break;
+				case IDM_INSERTKEYCAPTURE:create_object(OB_KEYCAPTURE);
+					break;
 
 				// here are the supported EED devices
 				case IDM_INSERT_EEG_GENERIC8: 
@@ -683,6 +685,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case WM_KEYUP:
 			// printf("keyup: %ld,%ld\n",wParam, lParam);
 			if (wParam==KEY_CTRL) controlKeyState=false;
+			GLOBAL.pressed_key=0;
 			break;
 
 		case WM_KEYDOWN:
@@ -711,6 +714,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 						SendMessage(((THRESHOLDOBJ *)actobject)->displayWnd, message,wParam,lParam);
 				 }
 				}
+			    GLOBAL.pressed_key=(int)wParam;
 			 }
 			 break;
 
