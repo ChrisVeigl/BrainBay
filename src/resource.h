@@ -91,7 +91,6 @@
 #define IDD_GANGLIONBOX                 254
 #define IDD_SESSIONTIMEBOX              255
 #define IDD_SESSIONMANAGERBOX           256
-#define IDD_SAMPLE_HOLDBOX1             257
 #define IDD_KEYCAPTUREBOX               257
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
@@ -711,10 +710,13 @@
 #define IDC_CQ_F4                       1514
 #define IDC_INTERVALUNIT                1514
 #define IDC_CQ_F8                       1515
-#define IDC_MODE                        1515
+#define IDC_FINDCODE                    1515
 #define IDC_CQ_AF4                      1516
+#define IDC_ACTKEY                      1516
 #define IDC_WIRELESS_QUALITY            1517
+#define IDC_REPLACECODE                 1517
 #define IDC_BATTERY_LIFE                1518
+#define IDC_MODEBOX                     1518
 #define IDC_BATTERY_CHARGE_LEVEL        1519
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
@@ -876,7 +878,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
 #define _APS_NEXT_COMMAND_VALUE         32948
-#define _APS_NEXT_CONTROL_VALUE         1516
+#define _APS_NEXT_CONTROL_VALUE         1519
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
