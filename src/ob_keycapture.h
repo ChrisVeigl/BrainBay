@@ -29,6 +29,7 @@ class KEYCAPTUREOBJ : public BASE_CL
 	public:
 
 	int mode;
+	int findcode, replacecode;
 
 	KEYCAPTUREOBJ(int num);
 
