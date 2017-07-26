@@ -155,7 +155,7 @@ extern "C" {
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
-				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPURE"
+				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)

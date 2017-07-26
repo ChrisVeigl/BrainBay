@@ -1212,6 +1212,24 @@ void update_statusinfo(void)
 }
 
 
+void stop_session() {
+	GLOBAL.fly=0;
+	TTY.read_pause=1;
+	GLOBAL.session_sliding=-1;
+	stop_timer(); 							
+	for (int t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
+	SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session paused");
+}
+
+void run_session() {
+	stop_timer();
+	update_dimensions();
+	GLOBAL.session_sliding=-1;
+	for (int t=0;t<GLOBAL.objects;t++)  objects[t]->session_start();
+	start_timer();
+	SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session running");
+}
+
 LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	WINDOWPLACEMENT  wndpl;
@@ -1243,25 +1261,20 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 
 				return TRUE;
 
-		case WM_KEYDOWN:
-			  SendMessage(ghWndDesign, message,wParam,lParam);
-			  break;
 		case WM_MOUSEACTIVATE:
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDOWN:
 		  SetFocus(ghWndMain);
 		  SetActiveWindow(ghWndMain);
-		  SendMessage(ghWndMain,WM_MOUSEACTIVATE,wParam,lParam);
+		  // SendMessage(ghWndMain,WM_MOUSEACTIVATE,wParam,lParam);
 		break;
 
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) 
 			{
 				case IDC_RESETBUTTON:
-						if (GLOBAL.running) 
-						{  
-							stop_timer(); 
-							for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
-							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session stopped");
-						}
+						stop_session();
 						TIMING.ppscounter=0;
 						TIMING.packetcounter=0;
 						SetDlgItemText(hDlg,IDC_TIME,"0.0");
@@ -1275,65 +1288,60 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						for (t=0;t<GLOBAL.objects;t++) objects[t]->session_reset();
 						GLOBAL.syncloss=0;
 						if (GLOBAL.session_length>0) set_session_pos(0);
+					    SetFocus(ghWndMain);
 					break;
 
 				case IDC_RUNSESSION:
-							stop_timer();
-							update_dimensions();
-							GLOBAL.session_sliding=-1;
-							for (t=0;t<GLOBAL.objects;t++)  objects[t]->session_start();
-							start_timer();
-							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session running");
+						run_session();
+						SetFocus(ghWndMain);
 					break;
 				case IDC_STOPSESSION:
-							GLOBAL.fly=0;
-							TTY.read_pause=1;
-							GLOBAL.session_sliding=-1;
-							stop_timer(); 							
-							for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
-							SetDlgItemText(ghWndStatusbox,IDC_STATUS,"Session paused");
+						stop_session();
 
-							if (lParam==1) {
-								char configfilename[MAX_PATH];
-								close_toolbox();
-								strcpy(configfilename,GLOBAL.resourcepath); 
-								strcat(configfilename,"CONFIGURATIONS\\");
-								strcat(configfilename,GLOBAL.nextconfigname);
-								strcat(configfilename,".con");
-								printf("trying to load configfile: %s\n",configfilename);
-								if (!load_configfile(configfilename)) 
-									report_error("Could not load Config File");
-								else sort_objects();					  
-							}
-					break;
-
-				case IDC_ENDSESSION:
-					{
-							GLOBAL.fly=0;
-							TTY.read_pause=1;
-							GLOBAL.session_sliding=-1;
-							stop_timer(); 							
-							for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
-							Sleep(100);
+						if (lParam==1) {   // sent from sessiontime, must be asynchronous ...
 							char configfilename[MAX_PATH];
 							close_toolbox();
 							strcpy(configfilename,GLOBAL.resourcepath); 
 							strcat(configfilename,"CONFIGURATIONS\\");
-							strcat(configfilename,GLOBAL.startdesignpath);
+							strcat(configfilename,GLOBAL.nextconfigname);
 							strcat(configfilename,".con");
-							// printf("trying to load configfile: %s\n",configfilename);
-							if (load_configfile(configfilename)) 
-								sort_objects();					  
-					}
+							printf("trying to load configfile: %s\n",configfilename);
+							if (!load_configfile(configfilename)) 
+								report_error("Could not load Config File");
+							else sort_objects();					  
+						}
+						SetFocus(ghWndMain);
+					break;
+
+				case IDC_ENDSESSION:
+						GLOBAL.fly=0;
+						TTY.read_pause=1;
+						GLOBAL.session_sliding=-1;
+						stop_timer(); 							
+						for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
+						Sleep(100);
+						char configfilename[MAX_PATH];
+						close_toolbox();
+						strcpy(configfilename,GLOBAL.resourcepath); 
+						strcat(configfilename,"CONFIGURATIONS\\");
+						strcat(configfilename,GLOBAL.startdesignpath);
+						strcat(configfilename,".con");
+						// printf("trying to load configfile: %s\n",configfilename);
+						if (load_configfile(configfilename)) 
+							sort_objects();					  
+					    SetFocus(ghWndMain);
 					break;
 				case IDC_JUMP:
+						stop_session();
 						GetDlgItemText(hDlg, IDC_JUMPPOS, str, 20);
 						fl = get_time(str) * (float) PACKETSPERSECOND;
 						if (GLOBAL.session_length>0) set_session_pos((long)fl);
 						SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETPOS,TRUE,get_sliderpos(TIMING.packetcounter));
+					    SetFocus(ghWndMain);
 						break;
 				case IDC_SESSIONLOOP:
 						GLOBAL.session_loop=IsDlgButtonChecked(hDlg, IDC_SESSIONLOOP);
+					    SetFocus(ghWndMain);
 						break;
 				case IDC_GOSTART:
 					{
@@ -1385,6 +1393,7 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						    SetWindowPos(ghWndDesign,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
 							SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Hide Design"); 
 						}
+					    SetFocus(ghWndMain);
 					break;
 				case IDC_HIDE:
 						if (GLOBAL.hidestatus) 
@@ -1397,6 +1406,7 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 							GLOBAL.hidestatus=TRUE;
 							ShowWindow(ghWndStatusbox,FALSE);
 						}
+					    SetFocus(ghWndMain);
 					break;
 				case IDC_SAMPLINGRATE:
 					if (HIWORD(wParam)==256)
@@ -1426,7 +1436,7 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 				int pos=SendMessage(GetDlgItem(hDlg,IDC_SESSIONPOS),TBM_GETPOS,0,0);
 				GLOBAL.session_sliding=0;
 				set_session_pos((long)((float)pos/1000.0f*(float)GLOBAL.session_length));
-
+				stop_session();
 			}
 		return(TRUE);
 
