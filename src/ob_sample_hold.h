@@ -1,3 +1,18 @@
+/* -----------------------------------------------------------------------------
+
+  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
+  
+  MODULE: OB_SAMPLE_HOLD.h:  contains the Sample-and-hold-Object
+
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  as published by the Free Software Foundation; See the
+  GNU General Public License for more details.
+
+-----------------------------------------------------------------------------*/
+
+
 #include "brainBay.h"
 
 class SAMPLE_HOLDOBJ : public BASE_CL
