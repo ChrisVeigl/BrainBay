@@ -1,5 +1,5 @@
 BrainBay Neurofeedback-Application
-Author: Chris Veigl, Copyright © 2002-2013 GPL
+Author: Chris Veigl, Copyright © 2002-2017 GPL
 
 This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software.
 
