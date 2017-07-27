@@ -11,16 +11,22 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 1.9.x.  (1.9 series began on 2013-12-27.)
+* The current release version is 2.0  (2017-07-25)
 
-* For the list of recent changes, see https://github.com/ChrisVeigl/BrainBay/releases and https://github.com/ChrisVeigl/BrainBay/commits/master
+* Recent changes:
+** Support for OpenBCI Ganglion
+** Support for Neuosky devices
+** Cursorkey integration for Oscilloscope and Threshold Windows
+** Oscilloscope features snapshots for training reporting
+** SessionManager and Sessiontime elements for menu-based selection of design
 
-* We recommend you download and run the latest installer on the 'releases' Github link above.
-In addition, the Github 'bin' folder contains an up to date executable file BrainBay.exe.
-'bin' also contains the user- and developer manual pdfs.
+* Download release: https://github.com/ChrisVeigl/BrainBay/releases
+
+* The release contains an installer for windows. In addition, the 'bin' folder of the github source repo contains an up-to-date executable file (BrainBay.exe)
+  The 'bin' folder also contains the user- and developer manuals (.pdf).
 
 * If you want to modify or extend the software, the Visual Studio 2010
-project files and all source modules are located in the src folder.
+  project files and all source modules are located in the 'src' folder.
 
 
 Credits
