@@ -1,7 +1,8 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Evaluator - Object
-	Provides an interface to the GNU LibMatheval- Library for Expression Evaluation
+  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
+   Expression-Evaluator - Object
+   Provides an interface to the GNU LibMatheval- Library for Expression Evaluation
 			   
   Authors: Jeremy Wilkerson, Chris Veigl, Aleksandar B. Samardz (libmatheval)
   Link to GNU-Libmatheval: http://www.gnu.org/software/libmatheval

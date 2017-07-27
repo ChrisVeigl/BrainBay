@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.9, GPL 2003-2014,		contact: raymonkhoa@gmail.com
+  BrainBay  -  Version 2.0, GPL 2003-2017,		contact: raymonkhoa@gmail.com
 
   MODULE:  OB_DISPLAYVECTOR.H  declarations for the DisplayVector-Object
   Author:  Raymond Khoa

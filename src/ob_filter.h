@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.9, GPL 2003-2014, GPL, contact: chris@shifz.org
+  BrainBay  Version 2.0, GPL 2003-2017, GPL, contact: chris@shifz.org
   
   OB_FILTER.H:  contains the FILTER-Object
   Authors: Jim Peters, Chris Veigl

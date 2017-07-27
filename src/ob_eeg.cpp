@@ -1,8 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
-               OpenSource Application for realtime BodySignalProcessing & HCI
-               with the OpenEEG hardware
+  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
 			   
   Author: Chris Veigl, contact: chris@shifz.org
   

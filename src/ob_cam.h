@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 1.9, GPL 2003-2014, contact: chris@shifz.org
+  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
   
   MODULE: OB_CAM.CPP:  contains functions for Webcam functions
   Author: Chris Veigl

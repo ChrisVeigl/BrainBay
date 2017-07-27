@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-  BrainBay
+  BrainBay  -  Version 2.0, GPL 2003-2017
   
   MODULE: DIALOGS.CPP: this Module provides global accessible Dialog - Functions.
 

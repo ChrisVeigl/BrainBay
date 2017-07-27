@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Pre-Release-Version, 2003/04, GPL, contact: chris@shifz.org
+  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
   
   MODULE: OB_TRANSLATE.CPP:  contains functions for the Translation-Object
   Author: Chris Veigl

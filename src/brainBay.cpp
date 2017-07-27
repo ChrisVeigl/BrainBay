@@ -1,8 +1,8 @@
  /* ----------------------------------------------------------------------------------
 
-  BrainBay  -  OpenSource Application for realtime BodySignalProcessing & HCI
-               with the OpenEEG hardware, GPL 2003-2010
-			   
+  BrainBay  -  Version 2.0, GPL 2003-2017
+  OpenSource Application for realtime BioSignalProcessing & HCI with OpenEEG hardware. 
+
   Author: Chris Veigl, contact: chris@shifz.org
   
   Co-Authors:

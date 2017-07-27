@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 1.9, GPL 2003-2014
+  BrainBay  -  Version 2.0, GPL 2003-2017
 
   MODULE:  OB_MAX.H  declarations for the Max-Object
   Author:  Chris Veigl
