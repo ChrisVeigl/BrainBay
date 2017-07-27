@@ -114,17 +114,13 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	register_classes(hInstance);
 
     if(!(ghWndMain=CreateWindow("brainBay_Class", "BrainBay", 
-     	 WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, 10, 20, 900, 520, NULL, NULL, hInstance, NULL)))
+     	 WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, 10, 20, 700, 500, NULL, NULL, hInstance, NULL)))
         critical_error("can't create main Window");
-    else {GLOBAL.left=20;GLOBAL.top=20;GLOBAL.right=900;GLOBAL.bottom=520; }
-    ShowWindow( ghWndMain, SW_SHOWNORMAL );
-    UpdateWindow( ghWndMain );
+    else {GLOBAL.left=10;GLOBAL.top=20;GLOBAL.right=700;GLOBAL.bottom=500; }
 
 	create_logfile();
 	write_logfile("BrainBay start.");
 	GlobalInitialize();
-
-	ghWndStatusbox=CreateDialog(hInst, (LPCTSTR)IDD_STATUSBOX, ghWndMain, (DLGPROC)StatusDlgHandler); 
 
 	if(!(ghWndDesign=CreateWindow("Design_Class", "Design", WS_CLIPSIBLINGS | WS_CAPTION  | WS_THICKFRAME | WS_CHILD | WS_HSCROLL | WS_VSCROLL ,GLOBAL.design_left, GLOBAL.design_top, GLOBAL.design_right-GLOBAL.design_left, GLOBAL.design_bottom-GLOBAL.design_top, ghWndMain, NULL, hInst, NULL))) 
 	    report_error("can't create Design Window");
@@ -140,8 +136,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	    GetScrollInfo(ghWndDesign, SB_VERT, &si);
 		si.nMax=5000; si.nMin=0; si.nPos=0; si.nTrackPos=0;
 		SetScrollInfo(ghWndDesign, SB_VERT, &si,TRUE);
-		ShowWindow( ghWndDesign, TRUE ); UpdateWindow( ghWndDesign ); 
 	}
+
 
 	if (GLOBAL.startdesign) {
 		if (strlen(GLOBAL.startdesignpath) > 3)
@@ -163,10 +159,16 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		//else sort_objects();
 	}
 
+    ShowWindow( ghWndMain, SW_SHOWNORMAL );
+    UpdateWindow( ghWndMain );
+	ShowWindow( ghWndDesign, TRUE ); 
+	UpdateWindow( ghWndDesign ); 
+	ghWndStatusbox=CreateDialog(hInst, (LPCTSTR)IDD_STATUSBOX, ghWndMain, (DLGPROC)StatusDlgHandler); 
 	update_status_window();
+	SetFocus(ghWndMain);
+
 	UINT timerid= timeSetEvent(30,5,AnimProc,1,TIME_PERIODIC | TIME_CALLBACK_FUNCTION);
 
-	SetFocus(ghWndMain);
 	// main message loop
 	while (TRUE)
 	{

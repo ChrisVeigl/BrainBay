@@ -1955,11 +1955,16 @@ void update_status_window(void)
 
 	if (GLOBAL.session_length==0)  {
 		lm=8;rm=16;
-		bm=48;bh=41;
+//		bm=48;bh=41;
+		bm=GLOBAL.statusWindowMargin;
+		bh=GLOBAL.statusWindowHeight;
+
 	}
 	else {
 		lm=8;rm=16;
-		bm=83;bh=76;
+//		bm=83;bh=76;
+		bm=GLOBAL.statusWindowMarginWithPlayer;
+		bh=GLOBAL.statusWindowHeightWithPlayer;
 	}
 
 //	if (!GLOBAL.main_maximized)

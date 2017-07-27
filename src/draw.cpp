@@ -54,8 +54,8 @@ void init_draw(void)
 
 
     hdc = GetDC(NULL);
-	if (GLOBAL.os_version==1)  DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 95);
-	else DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 90);
+	if (GLOBAL.os_version==1)  DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 90);
+	else DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 85);
 
     ReleaseDC(NULL, hdc);
     if (!(DRAW.scaleFont = CreateFont(DRAW.scaleFontHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))

@@ -335,6 +335,10 @@ typedef struct GLOBALStruct
 	int session_sliding;
 	int locksession;
 	int pressed_key;
+	int statusWindowHeight;
+	int statusWindowHeightWithPlayer;
+	int statusWindowMargin;
+	int statusWindowMarginWithPlayer;
 
 	int fly;
 	int run_exception;

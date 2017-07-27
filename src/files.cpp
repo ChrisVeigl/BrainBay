@@ -541,6 +541,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 load_property("minimized",P_INT,&GLOBAL.minimized);
 		 save_toolbox=GLOBAL.showtoolbox;
 
+		 /*
 		 if (GLOBAL.left >= GetSystemMetrics(SM_CXVIRTUALSCREEN))
 			 GLOBAL.left=10;
 		 if (GLOBAL.top >= GetSystemMetrics(SM_CYVIRTUALSCREEN))
@@ -549,7 +550,7 @@ BOOL load_configfile(LPCTSTR pszFileName)
 			 GLOBAL.tool_left=100;
 		 if (GLOBAL.tool_top >= GetSystemMetrics(SM_CYVIRTUALSCREEN))
 			 GLOBAL.tool_top=100;
-
+			 */
 
 		 TTY.PORT=0;try_connect=0;
 		 load_property("comport",P_INT,&TTY.PORT);		 
@@ -571,7 +572,6 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 load_property("samplingrate",P_INT,&act_samplingrate);
 		 PACKETSPERSECOND=act_samplingrate;
 
-		 MoveWindow(ghWndMain,GLOBAL.left,GLOBAL.top,GLOBAL.right-GLOBAL.left,GLOBAL.bottom-GLOBAL.top,TRUE);
 		 MoveWindow(ghWndDesign,GLOBAL.design_left,GLOBAL.design_top,GLOBAL.design_right-GLOBAL.design_left,GLOBAL.design_bottom-GLOBAL.design_top,TRUE);
 		 		 InvalidateRect(ghWndMain,NULL,TRUE);
 
@@ -643,7 +643,6 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 init_system_time();
 		 reset_oscilloscopes();
 		 PACKET.readstate=0;
-		 ShowWindow( ghWndMain, TRUE ); UpdateWindow( ghWndMain ); 
 
  		 update_samplingrate(act_samplingrate);
 		 update_devicetype();
@@ -660,13 +659,18 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELEND,TRUE,(LONG)0);
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELSTART,TRUE,(LONG)0);
 
-		 SetWindowPos(ghWndMain,0,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
-		 InvalidateRect(ghWndMain,NULL,TRUE);
- 		 InvalidateRect(ghWndDesign,NULL,TRUE);
 
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELSTART,TRUE,0);
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELEND,TRUE,1000);
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETPOS,TRUE,(LONG)(0));
+
+
+		 MoveWindow(ghWndMain,GLOBAL.left,GLOBAL.top,GLOBAL.right-GLOBAL.left,GLOBAL.bottom-GLOBAL.top,TRUE);
+		 ShowWindow( ghWndMain, TRUE ); 
+		 UpdateWindow( ghWndMain ); 
+		 // SetWindowPos(ghWndMain,0,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
+		 InvalidateRect(ghWndMain,NULL,TRUE);
+ 		 InvalidateRect(ghWndDesign,NULL,TRUE);
 		 if (GLOBAL.minimized) ShowWindow(ghWndMain, SW_MINIMIZE);
 
 		 GLOBAL.loading=0;
@@ -790,6 +794,10 @@ BOOL save_settings(void)
 	save_property(hFile,"startdesign",P_INT,&GLOBAL.startdesign);
 	save_property(hFile,"startdesignpath",P_STRING,GLOBAL.startdesignpath);
 	save_property(hFile,"locksession",P_INT,&GLOBAL.locksession);
+	save_property(hFile,"statusHeight",P_INT,&GLOBAL.statusWindowHeight);
+	save_property(hFile,"statusHeightPlayer",P_INT,&GLOBAL.statusWindowHeightWithPlayer);
+	save_property(hFile,"statusMargin",P_INT,&GLOBAL.statusWindowMargin);
+	save_property(hFile,"statusMarginPlayer",P_INT,&GLOBAL.statusWindowMarginWithPlayer);
 
 	x=0;
 	for (t=0;t<GLOBAL.midiports;t++)
@@ -835,6 +843,10 @@ BOOL load_settings(void)
 	load_property("startdesign",P_INT,&GLOBAL.startdesign);
 	load_property("startdesignpath",P_STRING,GLOBAL.startdesignpath);
 	load_property("locksession",P_INT,&GLOBAL.locksession);
+	load_property("statusHeight",P_INT,&GLOBAL.statusWindowHeight);
+	load_property("statusHeightPlayer",P_INT,&GLOBAL.statusWindowHeightWithPlayer);
+	load_property("statusMargin",P_INT,&GLOBAL.statusWindowMargin);
+	load_property("statusMarginPlayer",P_INT,&GLOBAL.statusWindowMarginWithPlayer);
 
 
 	load_property("midiports",P_INT,&x);

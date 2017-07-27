@@ -776,6 +776,11 @@ void GlobalInitialize()
 
 	GLOBAL.main_maximized=0;
 	GLOBAL.minimized=0;
+	GLOBAL.statusWindowHeight=41;
+	GLOBAL.statusWindowHeightWithPlayer=76;
+	GLOBAL.statusWindowMargin=48;
+	GLOBAL.statusWindowMarginWithPlayer=83;
+
 	GLOBAL.run_exception=0;
 	GLOBAL.fly=0;
 	GLOBAL.pressed_key=0;
