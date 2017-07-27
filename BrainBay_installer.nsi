@@ -73,8 +73,29 @@ Section "Application" SecApp
   File "bin\ARCHIVES\monolith1.arc"
   File "bin\ARCHIVES\ekg_chn1.arc"
   File "bin\ARCHIVES\2_channel_test.arc"
+  File "bin\ARCHIVES\ganglion2chn.gla"
+  
   SetOutPath $INSTDIR\CONFIGURATIONS
-  File /r "bin\CONFIGURATIONS\*.*"
+  File "bin\CONFIGURATIONS\demomenu.con"
+
+  SetOutPath $INSTDIR\CONFIGURATIONS\Assistive
+  File /r "bin\CONFIGURATIONS\Assistive\*.*"
+
+  SetOutPath $INSTDIR\CONFIGURATIONS\ECG
+  File /r "bin\CONFIGURATIONS\ECG\*.*"
+
+  SetOutPath $INSTDIR\CONFIGURATIONS\EEG
+  File /r "bin\CONFIGURATIONS\EEG\*.*"
+
+  SetOutPath $INSTDIR\CONFIGURATIONS\EMG
+  File /r "bin\CONFIGURATIONS\EMG\*.*"
+
+  SetOutPath $INSTDIR\CONFIGURATIONS\MultimediaDemos
+  File /r "bin\CONFIGURATIONS\MultimediaDemos\*.*"
+
+  SetOutPath $INSTDIR\CONFIGURATIONS\OtherDemos
+  File /r "bin\CONFIGURATIONS\OtherDemos\*.*"
+
   SetOutPath $INSTDIR\GRAPHICS
   File "bin\GRAPHICS\*.*"
   SetOutPath $INSTDIR\MOVIES
@@ -87,6 +108,8 @@ Section "Application" SecApp
   File "bin\PALETTES\*.*"
   SetOutPath $INSTDIR\PATTERNS
   File "bin\PATTERNS\*.*"
+  SetOutPath $INSTDIR\REPORTS
+  File "bin\REPORTS\*.*"
   SetOutPath $INSTDIR\SKINDIALOGS
   File "bin\SKINDIALOGS\*.*"
   SetOutPath $INSTDIR\SOUNDS
@@ -120,7 +143,7 @@ Section "Start Menu Shortcuts"
   CreateShortCut "$SMPROGRAMS\BrainBay\BrainBay.lnk" "$INSTDIR\brainbay.exe" "" "$INSTDIR\brainbay.exe" 0
   CreateShortCut "$SMPROGRAMS\BrainBay\Readme.lnk" "$INSTDIR\ReadMe_BrainBay.txt" "" "$INSTDIR\ReadMe_BrainBay.txt" 0
   CreateShortCut "$DESKTOP\BrainBay.lnk" "$INSTDIR\BrainBay.exe" ""  
-  CreateShortCut "$DESKTOP\Uninstall_BrainBay.lnk" "$INSTDIR\unistall.exe" ""  
+  CreateShortCut "$DESKTOP\Uninstall_BrainBay.lnk" "$INSTDIR\uninstall.exe" ""  
 SectionEnd
 
 ;--------------------------------
