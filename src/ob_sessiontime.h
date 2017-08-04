@@ -24,6 +24,7 @@ class SESSIONTIMEOBJ : public BASE_CL
 	int stopwhenfinish;
 	int loadnextconfig;
 	int sessiontime;
+	int countdown;
 	char nextconfigname[100];
 	long count;
 

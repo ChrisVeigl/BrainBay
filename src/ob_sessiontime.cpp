@@ -35,6 +35,7 @@ LRESULT CALLBACK SessiontimeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, 
 				SetDlgItemText(hDlg, IDC_NEXTCONFIGNAME, st->nextconfigname) ;
 				CheckDlgButton(hDlg, IDC_STOPWHENFINISH,st->stopwhenfinish);
 				CheckDlgButton(hDlg, IDC_LOADNEXTCONFIG,st->loadnextconfig);
+				CheckDlgButton(hDlg, IDC_COUNTDOWN,st->countdown);
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -57,6 +58,9 @@ LRESULT CALLBACK SessiontimeDlgHandler( HWND hDlg, UINT message, WPARAM wParam, 
 			case IDC_SESSIONTIME:
 				st->sessiontime=GetDlgItemInt(hDlg,IDC_SESSIONTIME,NULL,0);
 				break;
+			case IDC_COUNTDOWN:
+				st->countdown=IsDlgButtonChecked(hDlg,IDC_COUNTDOWN);
+				break;
 			}
 			return TRUE;
 		case WM_SIZE:
@@ -75,6 +79,7 @@ SESSIONTIMEOBJ::SESSIONTIMEOBJ(int num) : BASE_CL()
 	inports = 1;
 	width=95;
 	count=0;
+	countdown=1;
 	stopwhenfinish=true;
 	loadnextconfig=false;
 	sessiontime=120;
@@ -90,6 +95,7 @@ void SESSIONTIMEOBJ::load(HANDLE hFile)
 	load_property("stopwhenfinish",P_INT,&stopwhenfinish);
 	load_property("nextconfigname",P_STRING,nextconfigname);
 	load_property("loadnextconfig",P_INT,&loadnextconfig);
+	load_property("countdown",P_INT,&countdown);
 }
 
 void SESSIONTIMEOBJ::save(HANDLE hFile) 
@@ -99,6 +105,7 @@ void SESSIONTIMEOBJ::save(HANDLE hFile)
 	save_property(hFile,"stopwhenfinish",P_INT,&stopwhenfinish);
 	save_property(hFile,"nextconfigname",P_STRING,nextconfigname);
 	save_property(hFile,"loadnextconfig",P_INT,&loadnextconfig);
+	save_property(hFile,"countdown",P_INT,&countdown);
 }
 
 void SESSIONTIMEOBJ::make_dialog(void) 
@@ -128,7 +135,10 @@ void SESSIONTIMEOBJ::work(void)
 {
 	count++;
 	int seconds=count/PACKETSPERSECOND;
-	pass_values(0,(float)seconds);
+	if (countdown) 
+		pass_values(0,(float)(sessiontime-seconds));
+	else
+		pass_values(0,(float)seconds);
 	if ((seconds>sessiontime) && (stopwhenfinish)) {
 		SendMessage(ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 		for (int t=0;t<GLOBAL.objects;t++) objects[t]->session_end();
