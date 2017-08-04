@@ -88,6 +88,7 @@
 #include "ob_sessiontime.h"
 #include "ob_sessionmanager.h"
 #include "ob_keycapture.h"
+#include "ob_button.h"
 
 //
 // GLOBAL VARIABLES
@@ -283,6 +284,8 @@ void create_object(int type)
 							 actobject->object_size=sizeof(SESSIONMANAGEROBJ);break;
 		case OB_KEYCAPTURE:  actobject=new KEYCAPTUREOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(KEYCAPTUREOBJ);break;
+		case OB_BUTTON:		 actobject=new BUTTONOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(BUTTONOBJ);break;
 
 
 	}
@@ -616,6 +619,21 @@ void register_classes (HINSTANCE hInstance)
 	wcex.hIconSm		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
 	if(!RegisterClassEx(&wcex))
         report_error("Can't register SessionManager-Windowclass");
+
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = 0;//CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = (WNDPROC)ButtonWndHandler;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_MYEEG);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName	= NULL;
+	wcex.lpszClassName	= "Button_Class";
+	wcex.hIconSm		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
+	if(!RegisterClassEx(&wcex))
+        report_error("Can't register Button-Windowclass");
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = 0;//CS_HREDRAW | CS_VREDRAW;

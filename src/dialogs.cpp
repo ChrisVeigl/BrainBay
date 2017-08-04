@@ -1319,6 +1319,7 @@ LRESULT CALLBACK StatusDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 						GLOBAL.session_sliding=-1;
 						stop_timer(); 							
 						for (t=0;t<GLOBAL.objects;t++) objects[t]->session_stop();
+						for (t=0;t<GLOBAL.objects;t++) objects[t]->session_end();
 						Sleep(100);
 						char configfilename[MAX_PATH];
 						close_toolbox();
@@ -1715,7 +1716,7 @@ LRESULT CALLBACK DesignWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 				break;
 		
 		case WM_KEYDOWN:
-			    if (lParam==KEY_DELETE )
+			    if (wParam==KEY_DELETE )
 				{
 					int i,t,object_index;
 

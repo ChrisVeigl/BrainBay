@@ -136,8 +136,9 @@ extern "C" {
 #define OB_SESSIONTIME  61
 #define OB_SESSIONMANAGER 62
 #define OB_KEYCAPTURE   63
+#define OB_BUTTON       64
 
-#define OBJECT_COUNT 	64
+#define OBJECT_COUNT 	65
 
 
 
@@ -154,7 +155,7 @@ extern "C" {
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
-				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE"
+				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -246,10 +247,15 @@ extern "C" {
 #define KEY_LEFT 37
 #define KEY_RIGHT 39
 #define KEY_ENTER 13
+#define KEY_DELETE 46
+#define KEY_BACKSPACE 8
 #define KEY_CTRL 17
 #define KEY_C 67
 #define KEY_V 86
-
+#define KEY_F5 116
+#define KEY_F6 117
+#define KEY_F7 118
+#define KEY_F8 119
 
 #define DEF_ZOOM    100
 #define DEF_STARTBAND 1
@@ -262,7 +268,6 @@ extern "C" {
 #define CON_START    25
 #define CON_MAGNETIC 10
 
-#define  KEY_DELETE   22216705
 #define  DDC_PI       (3.14159265358979323846)
 
 //
@@ -770,6 +775,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 LRESULT CALLBACK OsciWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
+LRESULT CALLBACK ButtonWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK CounterWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK BallgameWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK MartiniWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );

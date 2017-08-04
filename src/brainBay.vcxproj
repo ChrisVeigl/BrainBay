@@ -226,6 +226,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ob_buffer.cpp" />
+    <ClCompile Include="ob_button.cpp" />
     <ClCompile Include="ob_cam.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -567,6 +568,7 @@
     <ClInclude Include="ob_avi.h" />
     <ClInclude Include="ob_ballgame.h" />
     <ClInclude Include="ob_buffer.h" />
+    <ClInclude Include="ob_button.h" />
     <ClInclude Include="ob_cam.h" />
     <ClInclude Include="ob_com_writer.h" />
     <ClInclude Include="ob_compare.h" />

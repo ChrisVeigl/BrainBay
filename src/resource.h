@@ -92,6 +92,7 @@
 #define IDD_SESSIONTIMEBOX              255
 #define IDD_SESSIONMANAGERBOX           256
 #define IDD_KEYCAPTUREBOX               257
+#define IDD_BUTTONBOX                   258
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -247,6 +248,7 @@
 #define IDC_SAMPLINGRATE                1166
 #define IDC_OPENWAVFILE                 1166
 #define IDC_FONTBKCOL                   1166
+#define IDC_BKCOL                       1166
 #define IDC_WAVFILENAME                 1167
 #define IDC_TIME                        1167
 #define IDC_DIALOGINTERVAL              1167
@@ -700,6 +702,7 @@
 #define IDC_CQ_O2                       1510
 #define IDC_START_IMPEDANCECHECK        1510
 #define IDC_WNDCAPTION                  1510
+#define IDC_COUNTDOWN                   1510
 #define IDC_CQ_P8                       1511
 #define IDC_DISPLAYNAVIGATION           1511
 #define IDC_CQ_T8                       1512
@@ -718,6 +721,14 @@
 #define IDC_BATTERY_LIFE                1518
 #define IDC_MODEBOX                     1518
 #define IDC_BATTERY_CHARGE_LEVEL        1519
+#define IDC_BUTTONPATH                  1519
+#define IDC_TRANSCOL                    1520
+#define IDC_DISPLAYBORDER               1521
+#define IDC_VALUE1                      1522
+#define IDC_VALUE2                      1523
+#define IDC_FUNCTIONCOMBO               1524
+#define IDC_BUTTONPATH2                 1525
+#define IDC_BUTTONCAPTION               1525
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -870,6 +881,8 @@
 #define IDM_COPYPASTE                   32945
 #define ID_SOURCE_KEYCAPTURE            32946
 #define IDM_INSERTKEYCAPTURE            32947
+#define ID_OTHERS_BUTTON                32948
+#define IDM_INSERTBUTTON                32949
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -877,8 +890,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32948
-#define _APS_NEXT_CONTROL_VALUE         1519
+#define _APS_NEXT_COMMAND_VALUE         32950
+#define _APS_NEXT_CONTROL_VALUE         1525
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

@@ -64,17 +64,17 @@ int check_keys(void)
     static int mode=0;
 
 	if (mode)
-	{ if (!GetAsyncKeyState(116) && !GetAsyncKeyState(117) && !GetAsyncKeyState(118) && !GetAsyncKeyState(119))
+	{ if (!GetAsyncKeyState(KEY_F5) && !GetAsyncKeyState(KEY_F6) && !GetAsyncKeyState(KEY_F7) && !GetAsyncKeyState(KEY_F8))
 	    mode=0;   else return(0);
 	}
 
-	if (GetAsyncKeyState(118))  // F7
+	if (GetAsyncKeyState(KEY_F7))  
 	{mode=1; SendMessage(ghWndMain,WM_COMMAND,IDM_PLAY,0);}
-	else if (GetAsyncKeyState(119))  // F8
+	else if (GetAsyncKeyState(KEY_F8))
 	{mode=1;SendMessage(ghWndMain,WM_COMMAND,IDM_STOP,0);}
-	else if (GetAsyncKeyState(116))  //F5
+	else if (GetAsyncKeyState(KEY_F5))
 	{mode=1;	SendMessage(ghWndStatusbox,WM_COMMAND,IDC_DESIGN,0);}
-	else if (GetAsyncKeyState(117)) // F6
+	else if (GetAsyncKeyState(KEY_F6))
 	{mode=1;	SendMessage(ghWndStatusbox,WM_COMMAND,IDC_HIDE,0);}
 
 	return(0);
@@ -526,6 +526,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTKEYCAPTURE:create_object(OB_KEYCAPTURE);
 					break;
+				case IDM_INSERTBUTTON:create_object(OB_BUTTON);
+					break;
 
 				// here are the supported EED devices
 				case IDM_INSERT_EEG_GENERIC8: 
@@ -691,11 +693,11 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			break;
 
 		case WM_KEYDOWN:
-			// printf("keydown: %ld,%ld\n",wParam, lParam);
+		    // printf("keydown: %ld,%ld\n",wParam, lParam);
 			if (wParam==KEY_CTRL) controlKeyState=true;
 			if (controlKeyState && (wParam==KEY_C)) SendMessage (ghWndMain,WM_COMMAND,IDM_COPY,0);
 			if (controlKeyState && (wParam==KEY_V)) SendMessage (ghWndMain,WM_COMMAND,IDM_PASTE,0);
-		    if (lParam==KEY_DELETE ) 
+		    if (wParam==KEY_DELETE ) 
 			   SendMessage(ghWndDesign, message,wParam,lParam);
 			else {
 				int found=0;

@@ -575,18 +575,6 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 MoveWindow(ghWndDesign,GLOBAL.design_left,GLOBAL.design_top,GLOBAL.design_right-GLOBAL.design_left,GLOBAL.design_bottom-GLOBAL.design_top,TRUE);
 		 		 InvalidateRect(ghWndMain,NULL,TRUE);
 
-		 if ((!GLOBAL.showdesign) || (GLOBAL.locksession))
-		 {  
-			 ShowWindow(ghWndDesign, FALSE); 
-			 SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Show Design"); 
-		 }
-		 else 
-		 {
-			 ShowWindow(ghWndDesign,TRUE);
-		     SetWindowPos(ghWndDesign,0,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
-			 SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Hide Design"); 
-		 }
-
 		 if (!GLOBAL.hidestatus)
 		 	 ShowWindow(ghWndStatusbox, TRUE); 
 		 else	 ShowWindow(ghWndStatusbox,FALSE);
@@ -663,6 +651,18 @@ BOOL load_configfile(LPCTSTR pszFileName)
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELSTART,TRUE,0);
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETSELEND,TRUE,1000);
 		 SendMessage(GetDlgItem(ghWndStatusbox,IDC_SESSIONPOS),TBM_SETPOS,TRUE,(LONG)(0));
+
+		 if ((!GLOBAL.showdesign) || (GLOBAL.locksession))
+		 {  
+			 ShowWindow(ghWndDesign, FALSE); 
+			 SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Show Design"); 
+		 }
+		 else 
+		 {
+			 ShowWindow(ghWndDesign,TRUE);
+		     SetWindowPos(ghWndDesign,0,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
+			 SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Hide Design"); 
+		 }
 
 
 		 MoveWindow(ghWndMain,GLOBAL.left,GLOBAL.top,GLOBAL.right-GLOBAL.left,GLOBAL.bottom-GLOBAL.top,TRUE);
