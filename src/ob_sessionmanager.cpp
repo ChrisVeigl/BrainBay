@@ -153,7 +153,11 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 	if (st->displaynavigation) {
 		char bitmappath[256];
 		strcpy(bitmappath,GLOBAL.resourcepath); 
-		strcat(bitmappath,"\\GRAPHICS\\navigation-buttons.bmp");
+		if (strlen(st->actreport)>0)
+			strcat(bitmappath,"\\GRAPHICS\\navigation-buttons_reports.bmp");
+		else
+			strcat(bitmappath,"\\GRAPHICS\\navigation-buttons.bmp");
+
 		hBitmap = (HBITMAP)LoadImage(hInst, bitmappath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		if (hBitmap) {
 			hdcMem = CreateCompatibleDC(hdc);
@@ -409,6 +413,32 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 					}
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
+				case KEY_BACKSPACE:
+ 				  if (st->actmenuitem>0) {
+					    find_bmpfiles(st->sessionreport[st->actmenuitem], st->actreportitem, st->actreport);
+  						char tmptxt[500];
+						wsprintf(tmptxt,"Do you really want to remove the report graph %s",st->actreport);
+						if (MessageBox(NULL, tmptxt, "Confirm removal", MB_YESNO) == IDYES) 
+						{
+							char reportpath[256];
+							strcpy(reportpath,GLOBAL.resourcepath); 
+							strcat(reportpath,"REPORTS\\");
+							strcat(reportpath,st->actreport);
+							printf ("remove bitmap: %s !!\n",reportpath);
+							DeleteFile(reportpath);
+						}
+						parse_menuitems(st);
+						if (st->maxreportitems[st->actmenuitem]) {
+							st->actreportitem=st->maxreportitems[st->actmenuitem]-1;
+							find_bmpfiles(st->sessionreport[st->actmenuitem], st->actreportitem, st->actreport);
+						}
+						else { st->actreportitem=0; st->actreport[0]=0;}
+						st->redraw=1;
+						InvalidateRect(st->displayWnd,NULL,FALSE);
+				  }
+				break;
+
+
 				case KEY_ENTER:
 				  if (st->actmenuitem<st->menuitems) 
 				  {
@@ -450,6 +480,7 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_DOWN,0); 
 			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_RIGHT,0); 
 			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_ENTER,0); 
+			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+33) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_BACKSPACE,0); 
 
 			}
 			break;
