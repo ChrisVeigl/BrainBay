@@ -24,6 +24,10 @@
 #define BUTTONFUNCTION_ENDSESSION 2
 #define BUTTONFUNCTION_VAL1VAL2 3
 #define BUTTONFUNCTION_VAL1INV 4
+#define BUTTONFUNCTION_TOGGLEVAL 5
+#define BUTTONFUNCTION_TOGGLE1SEC 6
+#define BUTTONFUNCTION_DEVSETTINGS 7
+#define BUTTONFUNCTION_APPSETTINGS 8
 
 
 class BUTTONOBJ : public BASE_CL
@@ -38,6 +42,7 @@ class BUTTONOBJ : public BASE_CL
 	char buttoncaption[80];
 	int bitmapsize;
 	int state;
+	int togglecount;
 
 	COLORREF transcolor, bkcolor;
 	int top,left,right,bottom;

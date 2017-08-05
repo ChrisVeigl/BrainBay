@@ -105,6 +105,10 @@ LRESULT CALLBACK ButtonDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "End Session");
 				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Output Value1 if pressed, else Value2");
 				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Output Value1 if pressed, else INVALID_VALUE");
+				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Toggle Value1 and Value2");
+				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Value2 for 1 second");
+				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Display Device Settings");
+				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Display Application Settings");
 				SendDlgItemMessage( hDlg, IDC_FUNCTIONCOMBO, CB_SETCURSEL, (WPARAM) (st->buttonfunction), 0L ) ;
 				CheckDlgButton(hDlg, IDC_DISPLAYBORDER, st->displayborder);
 
@@ -218,6 +222,19 @@ LRESULT CALLBACK ButtonWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 				   case BUTTONFUNCTION_VAL1INV:
 						st->state=STATE_PRESSED;
 					break;
+				   case BUTTONFUNCTION_TOGGLEVAL:
+						st->togglecount=!(st->togglecount);
+					break;
+				   case BUTTONFUNCTION_TOGGLE1SEC:
+						st->state=STATE_PRESSED;
+						st->togglecount=1;
+					break;
+				   case BUTTONFUNCTION_DEVSETTINGS:
+						SendMessage(ghWndMain,WM_COMMAND,IDM_DEVICESETTINGS,0);
+					break;
+				   case BUTTONFUNCTION_APPSETTINGS:
+						SendMessage(ghWndMain,WM_COMMAND,IDM_SETTINGS,0);
+					break;
 			   }
 			}
 			break;
@@ -307,6 +324,7 @@ BUTTONOBJ::BUTTONOBJ(int num) : BASE_CL()
 	value1=1; value2=0;
 	buttonfunction=0;
 	state=0;
+	togglecount=0;
 
     transcolor=RGB(0,255,0);
 	bkcolor=RGB(55,55,55);
@@ -393,6 +411,23 @@ void BUTTONOBJ::work(void)
 				pass_values(0,value1);
 				state=STATE_IDLE;
 			} else pass_values(0,INVALID_VALUE);
+		break;
+		case BUTTONFUNCTION_TOGGLEVAL:
+			if (togglecount) 
+				pass_values(0,value1);
+			else 
+  			    pass_values(0,value2);
+		break;
+		case BUTTONFUNCTION_TOGGLE1SEC:
+			if ((togglecount) && (togglecount<PACKETSPERSECOND)) { 
+				pass_values(0,value1);
+				togglecount++;
+				if (togglecount>=PACKETSPERSECOND)
+					togglecount=0;
+			}
+			else {
+  			    pass_values(0,value2);
+			}
 		break;
 	}
 }
