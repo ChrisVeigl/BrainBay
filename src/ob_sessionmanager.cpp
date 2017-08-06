@@ -480,7 +480,7 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_DOWN,0); 
 			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_RIGHT,0); 
 			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_ENTER,0); 
-			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+33) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_BACKSPACE,0); 
+			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_BACKSPACE,0); 
 
 			}
 			break;
