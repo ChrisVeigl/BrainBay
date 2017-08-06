@@ -507,6 +507,8 @@
 #define IDC_FILENAME                    1340
 #define IDC_FORMATCOMBO                 1341
 #define IDC_DEVIATIONINTERVALBAR        1342
+#define IDC_FILENAME2                   1342
+#define IDC_HEADERLINE                  1342
 #define IDC_DEVIATIONINTERVAL           1343
 #define IDC_FONTSIZEBAR                 1344
 #define IDC_BARSIZEBAR                  1345
@@ -727,7 +729,6 @@
 #define IDC_VALUE1                      1522
 #define IDC_VALUE2                      1523
 #define IDC_FUNCTIONCOMBO               1524
-#define IDC_BUTTONPATH2                 1525
 #define IDC_BUTTONCAPTION               1525
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779

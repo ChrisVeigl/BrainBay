@@ -29,6 +29,7 @@ protected:
 public: 
 	HANDLE file;
 	char filename[255];
+	char headerline[500];
 	int  state;
 	int  format;
 	int  append;

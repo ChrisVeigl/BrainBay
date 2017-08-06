@@ -60,6 +60,7 @@ void updateDialog(HWND hDlg, FILE_WRITEROBJ * st)
 	CheckDlgButton(hDlg,IDC_ADD_DATE,st->add_date);
 	SetDlgItemInt(hDlg,IDC_AVERAGING,st->averaging,0);
 	SetDlgItemText(hDlg,IDC_FILENAME,st->filename);
+	SetDlgItemText(hDlg,IDC_HEADERLINE,st->headerline);
 	InvalidateRect(ghWndDesign,NULL,TRUE);
 }
 
@@ -70,6 +71,8 @@ int openFile(FILE_WRITEROBJ * st)
     long filesize=0;
 	char * findext;
 	char filename[255];
+	char tmp[1024],tmp1[256];
+	DWORD dwWritten;
 
 	strcpy(filename,st->filename);
 	if (st->add_date)
@@ -105,11 +108,16 @@ int openFile(FILE_WRITEROBJ * st)
 		return(0);
 	}
 
-	if (st->format==4) // bioexplorer format: write header!
+	if ((strlen(st->headerline)) && (st->format != 4) && (!st->append))  // write headerline
+	{
+		WriteFile(st->file,st->headerline,strlen(st->headerline),&dwWritten,NULL);
+	    wsprintf(tmp,"\r\n");
+		WriteFile(st->file,tmp,strlen(tmp),&dwWritten,NULL);
+	}
+
+	if (st->format==4) // bioexplorer format: write bioexplorer header!
 	{ 
-		char tmp[1024],tmp1[256];
 		int i,a;
-		DWORD dwWritten;
 
 		tmp[0]=0;
 		for(i=0;i<st->inports-1;i++)
@@ -234,6 +242,9 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 
 				 break; 
 
+			case IDC_HEADERLINE:
+				GetDlgItemText(hDlg, IDC_HEADERLINE, st->headerline, 500);
+				break;
 			case IDC_APPEND:
 				st->append=IsDlgButtonChecked(hDlg,IDC_APPEND);
 				break;
@@ -318,6 +329,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 
 		file=INVALID_HANDLE_VALUE;
 		strcpy(filename,"none");
+		strcpy(headerline,"");
 	  }
 
 
@@ -348,6 +360,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  load_property("averaging",P_INT,&averaging);
 		  load_property("autocreate",P_INT,&autocreate);
 		  load_property("add_date",P_INT,&add_date);
+		  load_property("headerline",P_STRING,&headerline);
 
 		  height=CON_START+inports*CON_HEIGHT+5;
 		  
@@ -363,6 +376,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"averaging",P_INT,&averaging);
 		  save_property(hFile,"autocreate",P_INT,&autocreate);
 		  save_property(hFile,"add_date",P_INT,&add_date);
+		  save_property(hFile,"headerline",P_STRING,&headerline);
 	  }
 
 	  void FILE_WRITEROBJ::session_reset(void) 
