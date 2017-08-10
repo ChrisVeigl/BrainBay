@@ -17,11 +17,6 @@
 #include "ob_sessionmanager.h"
 #include <wingdi.h> 
 
-#define TEXT_LEFTMARGIN 40
-#define TEXT_TOPMARGIN 40
-
-int NAVI_X = 750;
-#define NAVI_Y 140
 #define NAVI_WIDTH 200
 #define NAVI_HEIGHT 200
 #define NAVI_SELECTDISTANCE 40
@@ -144,7 +139,7 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 			hdcMem = CreateCompatibleDC(hdc);
 			oldBitmap = SelectObject(hdcMem, hBitmap);
 			GetObject(hBitmap, sizeof(bitmap), &bitmap);
-			BitBlt(hdc, rect.right/3*2, 50, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
+			BitBlt(hdc, st->logo_x, st->logo_y, bitmap.bmWidth, bitmap.bmHeight, hdcMem, 0, 0, SRCCOPY);
 			SelectObject(hdcMem, oldBitmap);
 			DeleteDC(hdcMem);
 		}
@@ -164,8 +159,8 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 			oldBitmap = SelectObject(hdcMem, hBitmap);
 			GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
-			NAVI_X = rect.right/3*2 + 30 ;
-	   		TransparentBlt(hdc, NAVI_X, NAVI_Y, NAVI_WIDTH, NAVI_HEIGHT,
+			// NAVI_X = rect.right/3*2 + 30 ;
+			TransparentBlt(hdc, st->navcross_x, st->navcross_y, NAVI_WIDTH, NAVI_HEIGHT,
                           hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, RGB(0,255,0));
 
 			SelectObject(hdcMem, oldBitmap);
@@ -197,8 +192,15 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 		SetTextColor(hdc,st->selectcolor);
 		SetBkColor(hdc, st->bkcolor);
 		char reportcaption[256];
-		//wsprintf(reportcaption,"Results for Session %d: %s",st->actreportitem+1, st->actreport);
-		wsprintf(reportcaption,"Results for Session %d:",st->actreportitem+1);
+		char reportdate[50];
+		if (strlen(st->actreport)>20)
+		{
+			strncpy (reportdate,st->actreport+strlen(st->actreport)-23,10);
+			reportdate[10]=0;
+		}
+		else strcpy (reportdate,"n.a.");
+		wsprintf(reportcaption,"Results for Session %d (%s):",st->actreportitem+1, reportdate);
+		//wsprintf(reportcaption,"Results for Session %d:",st->actreportitem+1);
 		ExtTextOut(hdc, 10, rect.bottom-35-(float)bitmap.bmHeight*g, 0, &rect,reportcaption, strlen(reportcaption), NULL );
 	}
  	
@@ -221,7 +223,7 @@ void draw_sessionmanager(SESSIONMANAGEROBJ * st)
 			else
 				wsprintf(actname,"%s",st->sessionname[i]);
 		}
-		ExtTextOut(hdc, TEXT_LEFTMARGIN,TEXT_TOPMARGIN+i*2*(st->fontsize+3), 0, &rect,actname, strlen(actname), NULL );
+		ExtTextOut(hdc, st->menu_x,st->menu_y+i*2*(st->fontsize+3), 0, &rect,actname, strlen(actname), NULL );
 	}
 		
 	DeleteObject(actbrush);
@@ -264,10 +266,17 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 				SetScrollPos(GetDlgItem(hDlg,IDC_BITMAPSIZEBAR), SB_CTL,st->fontsize,TRUE);
 				SetDlgItemInt(hDlg, IDC_BITMAPSIZE, st->bitmapsize,0);
 
-				SetDlgItemText(hDlg, IDC_WNDCAPTION, st->wndcaption);
+				SetDlgItemText(hDlg, IDC_WINDOWCAPTION, st->wndcaption);
 				SetDlgItemText(hDlg, IDC_LOGOPATH, st->logopath);
 				SetDlgItemText(hDlg, IDC_SESSIONLIST, st->sessionlist);
 				CheckDlgButton(hDlg, IDC_DISPLAYNAVIGATION, st->displaynavigation);
+
+				SetDlgItemInt(hDlg, IDC_MENU_X, st->menu_x,0);
+				SetDlgItemInt(hDlg, IDC_MENU_Y, st->menu_y,0);
+				SetDlgItemInt(hDlg, IDC_NAVCROSS_X, st->navcross_x,0);
+				SetDlgItemInt(hDlg, IDC_NAVCROSS_Y, st->navcross_y,0);
+				SetDlgItemInt(hDlg, IDC_LOGO_X, st->logo_x,0);
+				SetDlgItemInt(hDlg, IDC_LOGO_Y, st->logo_y,0);
 
 			}
 			return TRUE;
@@ -307,21 +316,45 @@ LRESULT CALLBACK SessionmanagerDlgHandler( HWND hDlg, UINT message, WPARAM wPara
 				GetDlgItemText(hDlg,IDC_SESSIONLIST,st->sessionlist,4096); 
 				parse_menuitems(st);
 				st->redraw=1;
-				InvalidateRect(st->displayWnd,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
-			case IDC_WNDCAPTION:
-				GetDlgItemText(hDlg,IDC_WNDCAPTION,st->wndcaption,80); 
+			case IDC_WINDOWCAPTION:
+				GetDlgItemText(hDlg,IDC_WINDOWCAPTION,st->wndcaption,80); 
 				SetWindowText(st->displayWnd,st->wndcaption);
-				InvalidateRect(st->displayWnd,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 			case IDC_LOGOPATH:
 				GetDlgItemText(hDlg,IDC_LOGOPATH,st->logopath,100); 
-				InvalidateRect(st->displayWnd,NULL,FALSE);
+				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 			case IDC_DISPLAYNAVIGATION:
 				 st->displaynavigation=  IsDlgButtonChecked(hDlg,IDC_DISPLAYNAVIGATION);
   				 st->redraw=1;
-  				 InvalidateRect(st->displayWnd,NULL,FALSE);
+  				 InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_MENU_X:
+				st->menu_x=GetDlgItemInt(hDlg,IDC_MENU_X,NULL,0); 
+				InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_MENU_Y:
+				st->menu_y=GetDlgItemInt(hDlg,IDC_MENU_Y,NULL,0); 
+				InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_NAVCROSS_X:
+				st->navcross_x=GetDlgItemInt(hDlg,IDC_NAVCROSS_X,NULL,0); 
+				InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_NAVCROSS_Y:
+				st->navcross_y=GetDlgItemInt(hDlg,IDC_NAVCROSS_Y,NULL,0); 
+				InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_LOGO_X:
+				st->logo_x=GetDlgItemInt(hDlg,IDC_LOGO_X,NULL,0); 
+				InvalidateRect(st->displayWnd,NULL,TRUE);
+				break;
+			case IDC_LOGO_Y:
+				st->logo_y=GetDlgItemInt(hDlg,IDC_LOGO_Y,NULL,0); 
+				InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 			}
 			return TRUE;
@@ -472,19 +505,16 @@ LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT message, WPARAM wParam
 			   actx=(int)LOWORD(lParam);
 			   acty=(int)HIWORD(lParam);
 
-
-
 			   // printf("lbuttondown in wnd %ld at: %ld, %ld\n",hWnd, actx,acty);
-			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+33) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_UP,0); 
-			   if (distance (actx, acty, NAVI_X+33, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_LEFT,0); 
-			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_DOWN,0); 
-			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_RIGHT,0); 
-			   if (distance (actx, acty, NAVI_X+100, NAVI_Y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_ENTER,0); 
-			   if (distance (actx, acty, NAVI_X+170, NAVI_Y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_BACKSPACE,0); 
+			   if (distance (actx, acty, st->navcross_x+100, st->navcross_y+33)  < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_UP,0); 
+			   if (distance (actx, acty, st->navcross_x+33,  st->navcross_y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_LEFT,0); 
+			   if (distance (actx, acty, st->navcross_x+100, st->navcross_y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_DOWN,0); 
+			   if (distance (actx, acty, st->navcross_x+170, st->navcross_y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_RIGHT,0); 
+			   if (distance (actx, acty, st->navcross_x+100, st->navcross_y+100) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_ENTER,0); 
+			   if (distance (actx, acty, st->navcross_x+170, st->navcross_y+170) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_BACKSPACE,0); 
 
 			}
 			break;
-
 
 		case WM_SIZE: 
 		case WM_MOVE:
@@ -550,6 +580,9 @@ SESSIONMANAGEROBJ::SESSIONMANAGEROBJ(int num) : BASE_CL()
 	fontsize=18;
 	bitmapsize=100;
 	left=10;right=550;top=20;bottom=400;
+    menu_x=40; menu_y=40;
+	navcross_x=750;navcross_y=140;
+	logo_x=650,logo_y=50;
 
 	actmenuitem=0;
 	actreportitem=0;
@@ -612,6 +645,12 @@ void SESSIONMANAGEROBJ::load(HANDLE hFile)
 	while (*tmp) { if (*tmp=='§') *tmp='\n'; if (*tmp=='~') *tmp='\r'; tmp++; } 
 	load_property("displaynavigation",P_INT,&displaynavigation);
 	load_property("bitmapsize",P_INT,&bitmapsize);
+	load_property("menu_x",P_INT,&menu_x);
+	load_property("menu_y",P_INT,&menu_y);
+	load_property("navcross_x",P_INT,&navcross_x);
+	load_property("navcross_y",P_INT,&navcross_y);
+	load_property("logo_x",P_INT,&logo_x);
+	load_property("logo_y",P_INT,&logo_y);
 
 	parse_menuitems(this);
 	if (maxreportitems[0]>0)
@@ -659,6 +698,12 @@ void SESSIONMANAGEROBJ::save(HANDLE hFile)
 
 	save_property(hFile,"displaynavigation",P_INT,&displaynavigation);
 	save_property(hFile,"bitmapsize",P_INT,&bitmapsize);
+	save_property(hFile,"menu_x",P_INT,&menu_x);
+	save_property(hFile,"menu_y",P_INT,&menu_y);
+	save_property(hFile,"navcross_x",P_INT,&navcross_x);
+	save_property(hFile,"navcross_y",P_INT,&navcross_y);
+	save_property(hFile,"logo_x",P_INT,&logo_x);
+	save_property(hFile,"logo_y",P_INT,&logo_y);
 }
 
 void SESSIONMANAGEROBJ::incoming_data(int port, float value)

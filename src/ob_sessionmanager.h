@@ -40,6 +40,7 @@ class SESSIONMANAGEROBJ : public BASE_CL
 	int  maxreportitems[20];
 	char actreport[256];
 	int bitmapsize;
+	int menu_x,menu_y,navcross_x,navcross_y,logo_x,logo_y;
 
 	HFONT font, smallfont;
 	COLORREF selectcolor, bkcolor, fontcolor, fontbkcolor;
