@@ -1,8 +1,8 @@
-objects=33
+objects=32
 main-top=0
 main-left=-3
 main-right=1245
-main-bottom=812
+main-bottom=754
 anim-top=486
 anim-left=843
 anim-right=1035
@@ -13,8 +13,8 @@ design-right=1005
 design-bottom=593
 tool-top=401
 tool-left=470
-tool-right=1040
-tool-bottom=678
+tool-right=1200
+tool-bottom=932
 showdesign=0
 hidestatus=0
 showtoolbox=-1
@@ -45,7 +45,7 @@ outport1min=-256.000000
 outport1max=256.000000
 outport1range=-1
 resolution=1024.000000
-linkport 0-12,0
+linkport 0-11,0
 end object
 next object=8
 xpos=14
@@ -108,7 +108,7 @@ outport1dim=uV
 outport1min=-500.000000
 outport1max=500.000000
 outport1range=-1
-frequency=9.378025
+frequency=8.196254
 center=0.000000
 gain=71.000000
 phase=0.000000
@@ -169,22 +169,7 @@ outport1min=-500.000000
 outport1max=500.000000
 outport1range=0
 expression=( (A* B/100) * 1 + C) / 2
-linkport 0-12,2
-end object
-next object=20
-xpos=25
-ypos=152
-inputports=0
-outputports=1
-tag=EDF-READER
-outport1desc=Signal Generator
-outport1dim=uV  
-outport1min=-500.000000
-outport1max=500.000000
-outport1range=-1
-filename=c:\data\works\eeg\brainbayvs2010\bin\ARCHIVES\siggen.edf
-offset=0
-linkport 0-12,1
+linkport 0-11,2
 end object
 next object=8
 xpos=623
@@ -204,7 +189,7 @@ phase=0.000000
 noise=0
 type=0
 enable_in=0
-linkport 0-15,0
+linkport 0-14,0
 end object
 next object=15
 xpos=449
@@ -232,7 +217,7 @@ phase=0.000000
 noise=0
 type=2
 enable_in=0
-linkport 0-10,0
+linkport 0-9,0
 end object
 next object=16
 xpos=179
@@ -256,7 +241,7 @@ outport1min=-500.000000
 outport1max=500.000000
 outport1range=0
 expression=A/2
-linkport 0-12,3
+linkport 0-11,3
 end object
 next object=8
 xpos=625
@@ -276,7 +261,7 @@ phase=0.000000
 noise=0
 type=0
 enable_in=0
-linkport 0-22,0
+linkport 0-21,0
 end object
 next object=25
 xpos=295
@@ -314,12 +299,12 @@ chn2vol=0.000000
 chn3vol=80.099998
 chn4vol=0.000000
 invmode=1
-linkport 0-13,0
+linkport 0-12,0
+linkport 0-15,0
+linkport 0-18,0
+linkport 0-22,0
 linkport 0-16,0
-linkport 0-19,0
-linkport 0-23,0
-linkport 0-17,0
-linkport 0-21,0
+linkport 0-20,0
 end object
 next object=9
 xpos=538
@@ -342,9 +327,9 @@ order=8
 center=10.000000
 width=2.000000
 gain=200
-linkport 0-14,0
-linkport 0-23,1
-linkport 0-24,0
+linkport 0-13,0
+linkport 0-22,1
+linkport 0-23,0
 end object
 next object=3
 xpos=541
@@ -380,16 +365,16 @@ fontbkcol=16777215.000000
 top=1
 left=842
 right=1016
-bottom=371
+bottom=349
 bigadapt=0
 smalladapt=0
 adaptinterval=10
 barsize=30
 fontsize=10
 wndcaption=Alpha Mag Vp-p
-linkport 0-15,1
-linkport 0-21,1
-linkport 0-31,0
+linkport 0-14,1
+linkport 0-20,1
+linkport 0-30,0
 end object
 next object=1
 xpos=695
@@ -444,9 +429,9 @@ order=8
 center=6.000000
 width=2.000000
 gain=200
-linkport 0-20,0
-linkport 0-23,2
-linkport 0-24,1
+linkport 0-19,0
+linkport 0-22,2
+linkport 0-23,1
 end object
 next object=9
 xpos=303
@@ -469,7 +454,7 @@ order=4
 center=50.000000
 width=2.000000
 gain=200
-linkport 0-18,0
+linkport 0-17,0
 end object
 next object=3
 xpos=306
@@ -502,10 +487,10 @@ color=255.000000
 bkcol=16777215.000000
 fontcol=0.000000
 fontbkcol=16777215.000000
-top=371
-left=1072
-right=1227
-bottom=672
+top=351
+left=1071
+right=1226
+bottom=613
 bigadapt=0
 smalladapt=0
 adaptinterval=200
@@ -534,7 +519,7 @@ outport2dim=uV
 outport2min=0.000000
 outport2max=50.000000
 outport2range=-1
-interval=8
+interval=4
 scale=371
 drawinterval=10
 startband=0
@@ -543,7 +528,7 @@ align=0
 top=0
 left=-2
 right=687
-bottom=371
+bottom=349
 captions=1
 window=1
 kind=2
@@ -558,7 +543,7 @@ binselect=2
 background=12632256.000000
 palette-file=fft_J01.pal
 wndcaption=Frequency - Spectrum
-linkport 0-23,3
+linkport 0-22,3
 end object
 next object=3
 xpos=543
@@ -594,16 +579,16 @@ fontbkcol=16777215.000000
 top=1
 left=1016
 right=1226
-bottom=371
+bottom=349
 bigadapt=0
 smalladapt=0
 adaptinterval=200
 barsize=30
 fontsize=10
 wndcaption=Theta Mag Vp-p
-linkport 0-22,1
-linkport 0-21,2
-linkport 0-29,0
+linkport 0-21,1
+linkport 0-20,2
+linkport 0-28,0
 end object
 next object=21
 xpos=424
@@ -632,7 +617,7 @@ inport4min=-1.000000
 inport4max=1.000000
 inport4range=1
 filename=E:\Dokumente und Einstellungen\Admin.LEM-7299207B373\Desktop\brainbay\bbayexe\bbayexe\ARCHIVES\j05-Alpha-Theta.edf
-edfinfos=0       standard EEG                                                                    Modular EEG  Unit                                                                7.07.1708.03.491024                                                -1      1       3   none            none            none            Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               uV      uV      uV      500     500     500     500     500     500     0       0       0       1024    1024    1024    Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               256     256     256                                                                                                     
+edfinfos=0       standard EEG                                                                    Modular EEG  Unit                                                                0.08.1721.50.531024                                                -1      1       3   none            none            none            Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               uV      uV      uV      500     500     500     500     500     500     0       0       0       1024    1024    1024    Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               Ag/AgCl Electrode                                                               256     256     256                                                                                                     
 end object
 next object=1
 xpos=698
@@ -701,10 +686,10 @@ grid=1
 line=1
 gain=100
 seconds=1
-top=371
+top=350
 left=0
 right=1066
-bottom=672
+bottom=613
 drawinterval=4
 within=0
 group=0
@@ -756,7 +741,7 @@ outport1min=0.000000
 outport1max=100.000000
 outport1range=0
 expression=B/A*100
-linkport 0-25,0
+linkport 0-24,0
 end object
 next object=3
 xpos=752
@@ -792,14 +777,14 @@ fontbkcol=16777215.000000
 top=0
 left=686
 right=842
-bottom=371
+bottom=349
 bigadapt=0
 smalladapt=0
 adaptinterval=200
 barsize=30
 fontsize=10
 wndcaption=Theta/Alpha ratio
-linkport 0-27,0
+linkport 0-26,0
 end object
 next object=8
 xpos=759
@@ -819,7 +804,7 @@ phase=0.000000
 noise=0
 type=0
 enable_in=0
-linkport 0-27,1
+linkport 0-26,1
 end object
 next object=23
 xpos=850
@@ -845,8 +830,8 @@ outport1range=0
 method=0
 output_inv=1
 output_value=0.000000
-linkport 0-29,1
-linkport 0-28,0
+linkport 0-28,1
+linkport 0-27,0
 end object
 next object=13
 xpos=804
@@ -866,7 +851,7 @@ outport1max=100.000000
 outport1range=0
 binary=0
 bits=127
-linkport 0-31,1
+linkport 0-30,1
 end object
 next object=10
 xpos=805
@@ -891,7 +876,7 @@ outport1max=100.000000
 outport1range=0
 binary=0
 one=0
-linkport 0-30,0
+linkport 0-29,0
 end object
 next object=1
 xpos=914
@@ -948,7 +933,7 @@ outport1max=100.000000
 outport1range=0
 binary=0
 one=0
-linkport 0-32,0
+linkport 0-31,0
 end object
 next object=1
 xpos=916
