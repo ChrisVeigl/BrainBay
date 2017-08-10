@@ -40,7 +40,7 @@ void LIMITEROBJ::make_dialog(void)
 void LIMITEROBJ::load(HANDLE hFile) 
 {
    load_object_basics(this);
-   load_property("uppper",P_FLOAT,&upper);
+   load_property("upper",P_FLOAT,&upper);
    load_property("lower",P_FLOAT,&lower);
 }
 
