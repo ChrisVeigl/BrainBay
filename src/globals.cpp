@@ -730,7 +730,7 @@ void GlobalInitialize()
 */
 		
 	if(SDL_Init(SDL_INIT_EVERYTHING)<0) 
-        report_error("Couldn't init SDL");
+        printf("Couldn't init SDL");
 	
    if (!Sound_Init()) report_error("Couldn't init SDL_Sound");
 
