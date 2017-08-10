@@ -507,7 +507,6 @@
 #define IDC_FILENAME                    1340
 #define IDC_FORMATCOMBO                 1341
 #define IDC_DEVIATIONINTERVALBAR        1342
-#define IDC_FILENAME2                   1342
 #define IDC_HEADERLINE                  1342
 #define IDC_DEVIATIONINTERVAL           1343
 #define IDC_FONTSIZEBAR                 1344
@@ -522,6 +521,8 @@
 #define IDC_INTEGER                     1348
 #define IDC_DIGITS                      1349
 #define IDC_TAG                         1350
+#define IDC_INTEGER2                    1350
+#define IDC_TIMEFORMAT                  1350
 #define IDC_TYPE                        1351
 #define IDC_SIZEBAR                     1353
 #define IDC_MCIFILE                     1354
