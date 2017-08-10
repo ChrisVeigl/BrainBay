@@ -296,7 +296,7 @@ void draw_osci(OSCIOBJ * st)
 				for (t=1;t<st->signal_pos-st->drawstart;t++)
 				{
 					d=st->mempos-t;
-					while (d<0) d+=1024;
+					while (d<0) d+=PIXELMEMSIZE;
 
 					if (act) {
 						if (st->group) 
@@ -319,7 +319,7 @@ void draw_osci(OSCIOBJ * st)
 				for (t=1;t<st->drawend-st->drawstart;t++)
 				{
 					d=st->mempos-t;
-					while (d<0) d+=1024;
+					while (d<0) d+=PIXELMEMSIZE;
 
 					if (act)
 					y=channel_mid-(int)size_value (act->in_min,act->in_max,st->pixelmem[i][d]*st->gain/100.0f,(float)-half_chn_height,(float)half_chn_height,0);
@@ -443,7 +443,7 @@ void draw_osci(OSCIOBJ * st)
 		  st->mysec+=st->showseconds;
 		  st->mysec_total+=st->showseconds;
 	  }
-	  st->mempos+=np; if (st->mempos>=1024) st->mempos=0;
+	  st->mempos+=np; if (st->mempos>=PIXELMEMSIZE) st->mempos=0;
 	  
 	}
 	st->signal_pos+=np;
@@ -1037,6 +1037,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 			laststamp=0;
 			mysec=0; mysec_total=0;
 			inc_mysec=0;
+			redraw=1;
 			for (t=0;t<MAX_EEG_CHANNELS;t++)
 			{input[t]=0.0f; inputcount[t]=0;}
 			InvalidateRect(displayWnd,NULL,TRUE);

@@ -12,6 +12,7 @@
 
 #include "brainBay.h"
 
+#define PIXELMEMSIZE 3000
 
 class OSCIOBJ : public BASE_CL
 {
@@ -28,7 +29,7 @@ class OSCIOBJ : public BASE_CL
 
 	float    pixelbuffer[MAX_EEG_CHANNELS][LEN_PIXELBUFFER];
 	int	     prev_pixel[MAX_EEG_CHANNELS];
-	float    pixelmem[MAX_EEG_CHANNELS][1024];
+	float    pixelmem[MAX_EEG_CHANNELS][PIXELMEMSIZE];
 	WORD	 newpixels;
 	WORD	 signal_pos;
 
