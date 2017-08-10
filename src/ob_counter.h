@@ -37,6 +37,7 @@ class COUNTEROBJ : public BASE_CL
 	int  showcounter;
 	int  fontsize;
 	int  digits;
+	int  timeformat;
 	int  mode, integer;
 	int  top,left,bottom,right;
 	char wndcaption[50];

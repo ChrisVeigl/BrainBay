@@ -24,7 +24,7 @@ void draw_counter(COUNTEROBJ * st)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
-	char szdata[20];
+	char szdata[30];
 	RECT rect;
 //	int  act,width,height,bottom,y1,y2;
     HBRUSH actbrush;	
@@ -51,6 +51,19 @@ void draw_counter(COUNTEROBJ * st)
 			case 3: sprintf(szdata, "%.3f",st->countervalue); break;
 			case 4: sprintf(szdata, "%.4f",st->countervalue); break;
 		}		
+	}
+
+	if (st->timeformat) {
+		int hours,minutes,seconds;
+		seconds=((int)st->countervalue);
+		hours=(int)(seconds/3600);
+		minutes=(int)(seconds/60) % 60;
+		seconds=seconds%60;
+		if (hours)
+			wsprintf(szdata,"%d:%d:%d",hours,minutes,seconds);
+		else
+			wsprintf(szdata,"%d:%d",minutes,seconds);
+
 	}
 	DrawText(hdc, szdata, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 	DeleteObject(actbrush);
@@ -101,6 +114,7 @@ LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 				}
 				CheckDlgButton(hDlg, IDC_SHOWCOUNTER,st->showcounter);
 				CheckDlgButton(hDlg, IDC_INTEGER,st->integer);
+				CheckDlgButton(hDlg, IDC_TIMEFORMAT,st->timeformat);
 				
 			return TRUE;
 	
@@ -137,6 +151,11 @@ LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPAR
 			
 			case IDC_INTEGER:
 				  st->integer=IsDlgButtonChecked(hDlg,IDC_INTEGER);
+				  InvalidateRect(st->displayWnd,NULL,TRUE);
+				  break;
+
+			case IDC_TIMEFORMAT:
+				  st->timeformat=IsDlgButtonChecked(hDlg,IDC_TIMEFORMAT);
 				  InvalidateRect(st->displayWnd,NULL,TRUE);
 				  break;
 
@@ -276,6 +295,7 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		mode=0;
 		digits=2;
 		resetvalue=0;
+		timeformat=0;
 		scount=0;
 		showcounter=TRUE;
 
@@ -326,6 +346,7 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		  load_property("integer",P_INT,&integer);
 		  load_property("wndcaption",P_STRING,wndcaption);
 		  load_property("digits",P_INT,&digits);
+		  load_property("timeformat",P_INT,&timeformat);
 
 		if (!showcounter)
 		{
@@ -366,6 +387,7 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"integer",P_INT,&integer);
 		  save_property(hFile,"wndcaption",P_STRING,wndcaption);
 		  save_property(hFile,"digits",P_INT,&digits);	  
+		  save_property(hFile,"timeformat",P_INT,&timeformat);
 	  }
 
 
