@@ -884,7 +884,7 @@ FFTOBJ::FFTOBJ(int num) : BASE_CL()
 	  {
 
 	    inports  = 1;
-		outports = 2;
+		outports = 3;
 
 		strcpy(in_ports[0].in_name,"in");
 
@@ -901,6 +901,13 @@ FFTOBJ::FFTOBJ(int num) : BASE_CL()
 		strcpy(out_ports[1].out_desc,"Power in Bands");
 		out_ports[1].out_max=50.0f;
         out_ports[1].out_min=0.0f;
+
+	    out_ports[2].get_range=-1;
+		strcpy(out_ports[2].out_name,"peak");
+		strcpy(out_ports[2].out_dim,"uV");
+		strcpy(out_ports[2].out_desc,"Peak Frequency");
+		out_ports[2].out_max=50.0f;
+        out_ports[2].out_min=0.0f;
 
 		strcpy (wndcaption,"Frequency - Spectrum");
 		left=50;right=300;top=330;bottom=580;captions=TRUE;
@@ -1045,8 +1052,9 @@ FFTOBJ::FFTOBJ(int num) : BASE_CL()
 
 	  void FFTOBJ::work(void) 
 	  {
-		int i,bins,startbin,endbin; 
+		int i,bins,startbin,endbin,maxindex; 
 		float powaccu,avgaccu,avgstep;
+		float max;
 
 	    chnBufPos++;  if (chnBufPos>=FFT_BUFFERLEN) chnBufPos=0;
 	    buffer[chnBufPos]=input/100.0f*scale;
@@ -1063,16 +1071,22 @@ FFTOBJ::FFTOBJ(int num) : BASE_CL()
 
 		  bins=endbin-startbin;
 		  avgstep=(endband-startband)/(float)bins;
+		  max=0;maxindex=0;
 
   		  for (i=0;i<=bins ;i++)
 		  {
 			powaccu+=fftbands[startbin+i];
 			avgaccu+=(startband+i*avgstep)*fftbands[startbin+i];
+			if (max<fftbands[startbin+i]) {
+				max=fftbands[startbin+i];
+				maxindex=i;
+			}
 		  }
 		  if (powaccu==0) avgaccu=0.0f; else avgaccu/=powaccu;
-		  powaccu=powaccu/i;
+		  // powaccu=powaccu/i;
           pass_values(0,avgaccu); 
           pass_values(1,powaccu); 
+          pass_values(2,startband+(float)maxindex*avgstep); 
 
 		  fft_interval=0;
 		}

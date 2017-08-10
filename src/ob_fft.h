@@ -45,7 +45,7 @@
   void WINAPI	fft_float (int chnBufPos, float * buffer, int window, float * fftbands, int bins);  
   LRESULT CALLBACK FFTDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-#define FFT_BUFFERLEN    1024
+#define FFT_BUFFERLEN    8192
 
 class FFTOBJ : public BASE_CL
 {

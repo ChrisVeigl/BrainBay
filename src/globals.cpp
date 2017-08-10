@@ -124,7 +124,7 @@ struct TIMINGStruct         TIMING;
 
 char objnames[OBJECT_COUNT][20]      = { OBJNAMES };
 char dimensions[10][10]      = {"uV","mV","V","Hz","%","DegC","DegF","uS","kOhm","BPM" };
-int  fft_bin_values[10]    = { 32,64,128,256,512,0 };
+int  fft_bin_values[10]    = { 32,64,128,256,512,1024,2048,4096,0 };
 
 int singletonObjects [] = {OB_EEG,OB_WAV,OB_CAM,OB_SKINDIALOG,OB_NEUROBIT,OB_GANGLION,OB_SESSIONMANAGER,-1};
 	
