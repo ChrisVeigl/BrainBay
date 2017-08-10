@@ -41,14 +41,15 @@ AVERAGEOBJ::AVERAGEOBJ(int num) : BASE_CL()
 	
 void AVERAGEOBJ::session_start(void)
 {
-	added = 0;
-	accumulator = 0;
+  //	added = 0;
+  //	accumulator = 0;
 }
 void AVERAGEOBJ::session_reset(void)
 {
 	added = 0;
 	accumulator = 0;
 }
+
 void AVERAGEOBJ::session_pos(long pos)
 {
 	added = 0;
