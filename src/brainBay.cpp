@@ -108,8 +108,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	// conv_file();
 
-	// AllocConsole();	freopen("CONOUT$", "w", stdout);  // console for debugging 
+	if ((strstr(lpCmdLine,"-d")) || (strstr(lpCmdLine,"--debug")))
+	{ AllocConsole();	freopen("CONOUT$", "w", stdout); } // open console window for debugging 
 
+	printf("commandline:%s\n",lpCmdLine);
 	init_path();
 	register_classes(hInstance);
 

@@ -17,15 +17,17 @@
 #include "ob_ganglion.h"
 
 #define MAX_SIGNALS 4
-#define MAX_DEVICES 5
+#define MAX_DEVICES 25
+
 
 #define defaulthost "localhost"
 #define GANGLIONHUB_PORT 10996
 #define sockettimeout 50
 
 #define STATE_IDLE 0
-#define STATE_READY 1
-#define STATE_WRITING 2
+#define STATE_SCANNING 1
+#define STATE_CONNECTED 2
+#define STATE_READING 3
 
 GANGLIONOBJ * GANGLION_OBJ=NULL;
 
@@ -186,36 +188,48 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 				if ((len = SDLNet_TCP_Recv(sock, readbuf, sizeof(readbuf))) > 0)
 				{
 				   readbuf[len] = '\0';
-				   // printf("received:%s",readbuf);
+				   // printf("TCP received:%s\n",readbuf);
 				   actline=readbuf;
 				   while ((actline!=NULL) && (strlen(actline)>5)) {
-   					   if (strstr(actline,"q,501,")==actline) {
-						   printf("received: %s\n",actline);
-						   printf("ganglion connection error - is the CSR BT-dongle connected ?\n");
+					   if (strstr(actline,"t,204,")==actline) {
+						    // we received a packet with new channel values !
+						    c=actline+6;
+						    cnt=get_integers(intbuffer,c);
+						    state=STATE_CONNECTED;
+							process_packets();  // this triggers all signal processing !
+					   }
+					   else if (strstr(actline,"q,501,")==actline) {
+						   //printf("received: %s\n",actline);
+						   printf("q,501: ganglion connection error - is the CSR BT-dongle connected ?\n");
+						   state=STATE_IDLE;
 						   // MessageBox(NULL,"Is the CSR BT-dongle connected ?", "ganglion connection error", MB_OK|MB_TOPMOST);
 					   }
 					   else if ((strstr(actline,"k,400,")==actline)||(strstr(actline,"c,413,")==actline)) {
-						   printf("received: %s\n",actline);
-						   printf("ganglion connection error - is the Ganglion board switched on ?\n");
+						   // printf("received: %s\n",actline);
+						   printf("k,400: ganglion connection error - is the Ganglion board switched on ?\n");
+						   // state=STATE_IDLE;
 						   // MessageBox(NULL,"Is the Ganglion board switched on ?", "ganglion connection error", MB_OK|MB_TOPMOST); 
 					   }
 					   else if (strstr(actline,"s,201,")==actline) {
 						   strcpy (tmpstr,actline+6);
 						   if ((c=strstr(tmpstr,","))) *c=0;
-	   					   printf("found device %d:%s",num_ganglions+1,tmpstr);
-						   if (dlgWindow==ghWndToolbox) {
-  	   						   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) tmpstr ) ;
-			  				   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_SETCURSEL, 0, 0 ) ;
-						   	   InvalidateRect(dlgWindow,NULL,FALSE);
+   						   state=STATE_SCANNING;
+	   					   printf("s,201: found device:%s\n",tmpstr);
+						   int found=0;
+						   for (int t=0;t<num_ganglions;t++)
+							   if (!strcmp(GanglionNames[t],tmpstr)) found=1; 
+
+						   if (!found) {
+							   printf(".. adding device to list!\n");
+							   if (dlgWindow==ghWndToolbox) {
+  	   							   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) tmpstr ) ;
+			  					   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_SETCURSEL, 0, 0 ) ;
+						   		   InvalidateRect(dlgWindow,NULL,FALSE);
+							   }
+							   strcpy(GanglionNames[num_ganglions],tmpstr);
+							   num_ganglions++;
 						   }
-						   strcpy(GanglionNames[num_ganglions],tmpstr);
-						   num_ganglions++;
-					   }
-					   else if (strstr(actline,"t,204,")==actline) {
-						    // we received a packet with new channel values !
-						    c=actline+6;
-						    cnt=get_integers(intbuffer,c);
-							process_packets();  // this triggers all signal processing !
+   	   					   printf("active devices:%d\n",num_ganglions);
 					   }
 					   else if (strstr(actline,"i,203,")==actline) {
 						   c=actline+6;
@@ -223,7 +237,12 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 						   if ((intbuffer[0]>0) && (intbuffer[0]<5)) {
 							   update_impedances(intbuffer[0]-1,intbuffer[1]/2);
 						   }
-					   } else   printf("received: %s",readbuf);
+					   } 
+					   else if (strstr(actline,"c,200,")==actline) {
+						   state=STATE_CONNECTED;
+   	   					   printf("connected state detected!\n");
+					   } 
+					   // else   printf("received: %s",readbuf);
 					   actline=strstr(actline,";"); 
 					   if ((actline!=NULL) && (strlen(actline)>5)) actline+=2;  // skip semicolon and newline, go to next line
  				   }
@@ -284,24 +303,46 @@ void close_tcp(void)
 int sendstring_tcp(char * buf)
 {
 	if (!sock) return(0);
-  	printf("send:%s",buf);
+  	printf("TCP send:%s",buf);
 	SDLNet_TCP_Send(sock, buf, strlen(buf));
 	return(1);
 }
 
 void ganglion_connect(char * device) {
 	char tmpstr[256];
-	strcpy(tmpstr,"c,"); strcat(tmpstr,device);strcat(tmpstr,",;\n");
-	sendstring_tcp(tmpstr);
-	Sleep(500);   // dirty! wait a bit until ganglion is connected ... 
+	static int first=1;
+
+	if (state==STATE_SCANNING)
+	{
+	   sendstring_tcp("s,stop,;\n");
+	   Sleep(400);
+	   state=STATE_IDLE;
+	}
+
+	if (state!=STATE_CONNECTED) {
+		strcpy(tmpstr,"p,start,ble,;\n"); 
+		sendstring_tcp(tmpstr);
+		Sleep(100);   // dirty! wait a bit until ganglion is connected ... 
+
+		strcpy(tmpstr,"c,"); strcat(tmpstr,device);strcat(tmpstr,",;\n");
+		sendstring_tcp(tmpstr);
+		Sleep(1500);   // dirty! wait a bit until ganglion is connected ... 
+	}
 }
 
 void ganglion_disconnect() {
 	sendstring_tcp("d,;\n");
+	Sleep(100);
+	state=STATE_IDLE;
 }
 
 void ganglion_scan() {
-	sendstring_tcp("s,start,;\n");
+	if (state!=STATE_SCANNING) {
+		state=STATE_SCANNING;
+		num_ganglions=0;
+		sendstring_tcp("s,start,;\n");
+		Sleep(100);
+	}
 }
 
 void ganglion_startData() {
@@ -333,31 +374,30 @@ void establish_ganglionconnection() {
 	if (connect_tcp()) GLOBAL.ganglion_available=1;
 	else { 
 		// report_error("could not connect to GanglionHub");
-		printf("\nCould not connect to GanglionHub ...\n",sock);
+		printf("\nCould not connect to OpenBCIHub ...\n",sock);
 		printf("\nTrying to start %s\n",GLOBAL.ganglionhubpath);
 		if ((int)ShellExecute(NULL, "open", GLOBAL.ganglionhubpath, NULL, NULL, SW_SHOWNORMAL) < 32)
-			report_error ("Could not start GanglionHub.exe - please check path in Application Settings or install GanglionHub !");
+			report_error ("Could not start OpenBCIHub.exe - please check path in Application Settings or install OpenBCIHub !");
 		else {
 			printf("\nTrying to reconnect ...\n");
 			Sleep(2000);
 			if (!connect_tcp()) { 
 				printf("\nConnection failed!...\n");
-				report_error ("Could not connect to GanglionHub !");
+				report_error ("Could not connect to OpenBCIHub !");
 			}
 			else GLOBAL.ganglion_available=1;
 		}
 	}
 
 	if (GLOBAL.ganglion_available) {
-		printf("\nConnected to GanglionHub, socket=%d\n",sock);
+		printf("\nConnected to OpenBCIHub, socket=%d\n",sock);
+		printf("\nStarting Reader Thread!\n");
 		CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) TcpReaderProc, 0, 0, &tcpReadStatId);
 		//printf("\nSending disconnect command\n");
 		//ganglion_disconnect();
-	
+	    Sleep(100);
 		printf("\nTrying to connect to Device: %s\n",GLOBAL.gangliondevicename);
 		ganglion_connect(GLOBAL.gangliondevicename);
-
-
 	}
 }
 
@@ -441,6 +481,8 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				break;
 
 			case IDC_SCAN_GANGLION:
+				SendDlgItemMessage( hDlg, IDC_GANGLION_DEVICECOMBO, CB_RESETCONTENT, 0,0) ;
+				ganglion_disconnect();
 				ganglion_scan();
 				break;
 
@@ -554,6 +596,7 @@ GANGLIONOBJ::GANGLIONOBJ(int num) : BASE_CL()
 		width=135;
 
 		device[0]=0;
+		state=STATE_IDLE;
 
 		strcpy(out_ports[0].out_name,"chn1");
 	    strcpy(out_ports[0].out_dim,"uV");
@@ -648,10 +691,8 @@ void GANGLIONOBJ::update_channelinfo(void)
   		if ((filehandle==INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
 		{  
 			update_channelinfo();
-			ganglion_connect(device);  // TBD: keep track of connection state
+			ganglion_connect(GLOBAL.gangliondevicename);
 			GLOBAL.ganglion_available=1;
-
-			Sleep(1000);               // only do this when needed 
 			ganglion_startData();
 			//else { report_error("Cannot connect with the Device"); 
 			//SendMessage(ghWndStatusbox,WM_COMMAND, IDC_STOPSESSION,0);}
@@ -723,7 +764,7 @@ GANGLIONOBJ::~GANGLIONOBJ()
 	tcpReaderThreadDone=1;
 	close_tcp();
 	dlgWindow=0;
-//	killProcess("GanglionHub.exe");
+//	killProcess("OpenBCIHub.exe");
 //	Sleep(200);
 }  
 
