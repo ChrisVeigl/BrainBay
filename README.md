@@ -14,30 +14,30 @@ Version Info
 * The current release version is 2.1  (2017-09-23)
 
 * Recent changes:
-** Support for OpenBCI Ganglion and the new OpenBCIHub
-** Support for Neurosky devices
-** Cursorkey integration for Oscilloscope and Threshold Windows
-** Oscilloscope features snapshots for training reporting
-** SessionManager and Sessiontime elements for menu-based selection of design
+  * Support for OpenBCI Ganglion and the new OpenBCIHub
+  * Support for Neurosky devices
+  * Cursorkey integration for Oscilloscope and Threshold Windows
+  * Oscilloscope features snapshots for training reporting
+  * SessionManager and Sessiontime elements for menu-based selection of design
 
 Link to Release and other Infos
 -------------------------------
 
-* Download release: https://github.com/ChrisVeigl/BrainBay/releases
+* Download latest release: https://github.com/ChrisVeigl/BrainBay/releases
 
 * The release contains an installer for windows. In addition, the 'bin' folder of the github source repo contains an up-to-date executable file (BrainBay.exe)
   The 'bin' folder also contains the user- and developer manuals (.pdf).
 
 * If you want to use BrainBay with the OpenBCI Ganglion, install the OpenBCIHub fist - have a look at:
-  http://docs.openbci.com/OpenBCI%20Software/01-OpenBCI_GUI#the-openbci-gui-installing-the-openbci-gui-as-a-standalone-application-install-openbci_gui-on-windows
+  - http://docs.openbci.com/OpenBCI%20Software/01-OpenBCI_GUI#the-openbci-gui-installing-the-openbci-gui-as-a-standalone-application-install-openbci_gui-on-windows
   
 * Useful info if you want to run BrainBay under Linux:
-  http://www.autodidacts.io/use-openbci-with-brainbay-on-ubuntu-linux-and-wine/
+  - http://www.autodidacts.io/use-openbci-with-brainbay-on-ubuntu-linux-and-wine/
 
 * Other related infos:
-  https://sites.google.com/site/biofeedbackpages/brainbay-openbci
-  http://openbci.com/forum/index.php?p=/discussion/90/brainbay-install-neurofeedback-tutorial
-  http://eeghacker.blogspot.co.at/2013/11/brainbay-eeg-visualization-software.html
+  - https://sites.google.com/site/biofeedbackpages/brainbay-openbci
+  - http://openbci.com/forum/index.php?p=/discussion/90/brainbay-install-neurofeedback-tutorial
+  - http://eeghacker.blogspot.co.at/2013/11/brainbay-eeg-visualization-software.html
 
 * If you want to modify or extend the software, the Visual Studio 2010
   project files and all source modules are located in the 'src' folder.
