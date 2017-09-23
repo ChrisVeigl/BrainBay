@@ -11,11 +11,11 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 2.0  (2017-07-25)
+* The current release version is 2.1  (2017-09-23)
 
 * Recent changes:
-** Support for OpenBCI Ganglion
-** Support for Neuosky devices
+** Support for OpenBCI Ganglion and the new OpenBCIHub
+** Support for Neurosky devices
 ** Cursorkey integration for Oscilloscope and Threshold Windows
 ** Oscilloscope features snapshots for training reporting
 ** SessionManager and Sessiontime elements for menu-based selection of design
@@ -24,6 +24,10 @@ Version Info
 
 * The release contains an installer for windows. In addition, the 'bin' folder of the github source repo contains an up-to-date executable file (BrainBay.exe)
   The 'bin' folder also contains the user- and developer manuals (.pdf).
+
+* If you want to use BrainBay with the OpenBCI Ganglion, install the OpenBCIHub fist - have a look at:
+  http://docs.openbci.com/OpenBCI%20Software/01-OpenBCI_GUI#the-openbci-gui-installing-the-openbci-gui-as-a-standalone-application-install-openbci_gui-on-windows
+  
 
 * If you want to modify or extend the software, the Visual Studio 2010
   project files and all source modules are located in the 'src' folder.
