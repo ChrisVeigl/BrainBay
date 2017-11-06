@@ -432,6 +432,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
                 case IDM_INSERTEVAL:create_object(OB_EVAL);
 					break;
+				case IDM_INSERTEVAL_EXPRTK:create_object(OB_EVAL_EXPRTK);
+					break;
 				case IDM_INSERTAVI:create_object(OB_AVI);
 					break;
 				case IDM_INSERTAVERAGE:create_object(OB_AVERAGE);

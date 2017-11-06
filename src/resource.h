@@ -93,6 +93,7 @@
 #define IDD_SESSIONMANAGERBOX           256
 #define IDD_KEYCAPTUREBOX               257
 #define IDD_BUTTONBOX                   258
+#define IDD_EVALBOX_ML                  259
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -892,6 +893,7 @@
 #define IDM_INSERTKEYCAPTURE            32947
 #define ID_OTHERS_BUTTON                32948
 #define IDM_INSERTBUTTON                32949
+#define IDM_INSERTEVAL_EXPRTK           32950
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
