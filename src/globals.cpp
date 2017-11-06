@@ -23,6 +23,7 @@
 #include <tlhelp32.h>
 
 #include "ob_evaluator.h"
+#include "ob_evaluator_exprtk.h"
 #include "ob_fft.h"
 #include "ob_midi.h"
 #include "ob_osci.h"
@@ -185,6 +186,8 @@ void create_object(int type)
 							 actobject->object_size=sizeof(DOKUOBJ);break;
 		case OB_EVAL:		 actobject=new EVALOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(EVALOBJ);break;
+		case OB_EVAL_EXPRTK: createEvaluatorExprtk(GLOBAL.objects, &actobject); break;
+
 		case OB_AVI:		 actobject=new AVIOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(AVIOBJ);break;
 		case OB_AVERAGE:	 actobject=new AVERAGEOBJ(GLOBAL.objects); 

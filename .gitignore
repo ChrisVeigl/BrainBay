@@ -1,0 +1,9 @@
+/src/Debug
+/src/brainBay.vcxproj.user
+/src/*.sdf
+/src/*.opensdf
+*.ipch
+*.suo
+/src/Release
+/src/.vs/
+/src/*.aps

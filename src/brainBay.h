@@ -137,8 +137,9 @@ extern "C" {
 #define OB_SESSIONMANAGER 62
 #define OB_KEYCAPTURE   63
 #define OB_BUTTON       64
+#define OB_EVAL_EXPRTK  65
 
-#define OBJECT_COUNT 	65
+#define OBJECT_COUNT 	66
 
 
 
@@ -155,7 +156,7 @@ extern "C" {
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
-				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON"
+				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
