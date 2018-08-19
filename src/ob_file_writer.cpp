@@ -58,6 +58,7 @@ void updateDialog(HWND hDlg, FILE_WRITEROBJ * st)
 	CheckDlgButton(hDlg,IDC_APPEND,st->append);
 	CheckDlgButton(hDlg,IDC_AUTOCREATE,st->autocreate);
 	CheckDlgButton(hDlg,IDC_ADD_DATE,st->add_date);
+	CheckDlgButton(hDlg,IDC_SEMICOLON,st->semicolon);
 	SetDlgItemInt(hDlg,IDC_AVERAGING,st->averaging,0);
 	SetDlgItemText(hDlg,IDC_FILENAME,st->filename);
 	SetDlgItemText(hDlg,IDC_HEADERLINE,st->headerline);
@@ -254,6 +255,9 @@ LRESULT CALLBACK FileWriterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 			case IDC_ADD_DATE:
 				st->add_date=IsDlgButtonChecked(hDlg,IDC_ADD_DATE);
 				break;
+			case IDC_SEMICOLON:
+				st->semicolon=IsDlgButtonChecked(hDlg,IDC_SEMICOLON);
+				break;
 			case IDC_AVERAGING:
 				st->averaging=GetDlgItemInt(hDlg,IDC_AVERAGING,NULL,0);
 				break;
@@ -322,6 +326,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		append=FALSE;
 		autocreate=FALSE;
 		add_date=FALSE;
+		semicolon=FALSE;
 		averaging=1;
 		avg_count=0;
 		for (int i=0;i<MAX_PORTS;i++)
@@ -360,6 +365,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  load_property("averaging",P_INT,&averaging);
 		  load_property("autocreate",P_INT,&autocreate);
 		  load_property("add_date",P_INT,&add_date);
+		  load_property("semicolon",P_INT,&semicolon);
 		  load_property("headerline",P_STRING,&headerline);
 
 		  height=CON_START+inports*CON_HEIGHT+5;
@@ -376,6 +382,7 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"averaging",P_INT,&averaging);
 		  save_property(hFile,"autocreate",P_INT,&autocreate);
 		  save_property(hFile,"add_date",P_INT,&add_date);
+		  save_property(hFile,"semicolon",P_INT,&semicolon);
 		  save_property(hFile,"headerline",P_STRING,&headerline);
 	  }
 
@@ -443,8 +450,14 @@ FILE_WRITEROBJ::FILE_WRITEROBJ(int num) : BASE_CL()
 					if (x<inports-2)
 					{
 					  if ((format==0) || (format==2)) strcat(sztemp,"\t");
-					  else if ((format==1) || (format==3)) strcat(sztemp,", ");
-					  else if (format==4) strcat(sztemp,",");
+					  else if ((format==1) || (format==3)) {
+						  if (semicolon) strcat(sztemp,"; ");
+						  else strcat(sztemp,", ");
+					  }
+					  else if (format==4) {
+						  if (semicolon) strcat(sztemp,";");
+						  else strcat(sztemp,",");
+					  }
 					}
 					WriteFile(file,sztemp,strlen(sztemp),&dwWritten,NULL);
 				}

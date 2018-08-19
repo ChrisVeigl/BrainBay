@@ -35,6 +35,7 @@ public:
 	int  append;
 	int  autocreate;
 	int  add_date;
+	int  semicolon;
 	int  averaging;
 	float averaging_buffers[MAX_PORTS];
 	int  avg_count;

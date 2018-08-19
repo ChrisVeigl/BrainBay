@@ -668,6 +668,8 @@
 #define IDC_AUTOCREATE                  1495
 #define IDC_AUTOSTART                   1496
 #define IDC_DEVICETYPE                  1496
+#define IDC_ADD_DATE2                   1496
+#define IDC_SEMICOLON                   1496
 #define IDC_EMOTIV_ARCHIVE_NAME         1497
 #define IDC_SBT2STATUS                  1497
 #define IDC_OPEN_EMOTIV_ARCHIVE         1498
