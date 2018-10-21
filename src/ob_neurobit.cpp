@@ -592,6 +592,13 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 	    out_ports[3].out_min=-500.0f;
 	    out_ports[3].out_max=500.0f;
 
+		strcpy(out_ports[4].out_name,"chn5");
+	    strcpy(out_ports[4].out_dim,"uV");
+	    out_ports[4].get_range=-1;
+	    strcpy(out_ports[4].out_desc,"channel5");
+	    out_ports[4].out_min=-500.0f;
+	    out_ports[4].out_max=500.0f;
+
 		/* Init protocol driver library */
 		strcpy(DrvLibName,GLOBAL.resourcepath);
 		strcat(DrvLibName,NEUROBIT_DLL);
@@ -635,6 +642,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		  max_sr=0;
 		  chans = gv.val.i;
 		  outports = chans;
+		  height=CON_START+outports*CON_HEIGHT+5;
 
 		  strcpy(out_ports[0].out_dim,"uV");
 		  chncol[0]=CI_GREEN;
@@ -652,6 +660,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 			}
 
 			strcpy(out_ports[i].out_dim,NdParamInfo(ND_PAR_CH_RANGE_MAX, i)->unit);
+
 /*
 			if (!NdGetParam(ND_PAR_CH_FUNC, i, &gv)) {
 				if (!strcmp(gv.val.t,"Voltage")) strcpy(out_ports[i].out_dim,"uV");
@@ -822,8 +831,8 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 
 			if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
 			{
-				ReadFile(filehandle,current_chn,sizeof(float)*4, &dwRead, NULL);
-				if (dwRead != sizeof(float)*4) SendMessage (ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
+				ReadFile(filehandle,current_chn,sizeof(float)*outports, &dwRead, NULL);
+				if (dwRead != sizeof(float)*outports) SendMessage (ghWndStatusbox,WM_COMMAND,IDC_STOPSESSION,0);
 				else 
 				{
 					DWORD x= SetFilePointer(filehandle,0,NULL,FILE_CURRENT);
@@ -832,13 +841,12 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 				}
 			}
 			
-			pass_values(0, current_chn[0]);
-			pass_values(1, current_chn[1]);
-    		pass_values(2, current_chn[2]); 
-    		pass_values(3, current_chn[3]);  
+			for (int i=0; i<outports; i++) {
+				pass_values(i, current_chn[i]);
+			}
 
 			if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING)) 
-					WriteFile(filehandle,current_chn,sizeof(float)*4, &dwWritten, NULL);
+					WriteFile(filehandle,current_chn,sizeof(float)*outports, &dwWritten, NULL);
 
 			if ((!TIMING.dialog_update) && (hDlg==ghWndToolbox)) 
 			{

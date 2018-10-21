@@ -63,7 +63,7 @@ BEGIN
                 MENUITEM "Emotiv Epoc (14 Channels, raw EEG data)", IDM_INSERTEMOTIV
                 MENUITEM "IBVA (2 Channel EEG)",        IDM_INSERT_EEG_IBVA
                 MENUITEM "MonolithEEG (P21 Packetformat)", IDM_INSERT_EEG_P21
-                MENUITEM "Neurobit Biosignal Amplifier (Lite, Optima-2 or Optima-4)", IDM_INSERTOPTIMA
+                MENUITEM "Neurobit Biosignal Amplifier (Lite, Optima and Optima+)", IDM_INSERTOPTIMA
                 MENUITEM "Neurosky (MindWave, Mindset or compatible)", IDM_INSERT_EEG_NEUROSKY
                 MENUITEM "OCZ NIA (2 Channel EEG)",     IDM_INSERT_EEG_NIA
                 MENUITEM "OpenBCI (8 Channel EEG)",     IDM_INSERT_EEG_OPENBCI8
