@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.0, GPL 2003-2017,		contact: raymonkhoa@gmail.com
+  BrainBay  -  Version 2.3 (04/2019),		contact: raymonkhoa@gmail.com
 
   MODULE:  OB_BUFFER.CPP  declarations for the Buffer-Object
   Author:  Raymond Khoa

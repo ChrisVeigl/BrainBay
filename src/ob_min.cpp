@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.0, GPL 2003-2017
+  BrainBay  -  Version 2.3 (04/2019)
 
   MODULE:  OB_MIN.CPP
   Author:  Chris Veigl

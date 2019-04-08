@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
+  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
   
   MODULE: OB_ERPDETECT.H:  declarations for the ERP-Detector-Object
   Author: Chris Veigl

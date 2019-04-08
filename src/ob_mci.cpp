@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
+  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
   
   MODULE: OB_MCI.CPP:  definitions for the Multimedia-Player-Object
   Author: Chris Veigl

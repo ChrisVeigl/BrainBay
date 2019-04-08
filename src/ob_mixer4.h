@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
+  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
   
   OB_MIXER4.H:  contains the 4 Channel Mixer-Object
   Author: Chris Veigl

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.0, GPL 2003-2017, contact: chris@shifz.org
+  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
   
   MODULE: OB_TCP_SENDER.CPP:  contains functions for the Neuro Server data transmission
   Based on SDL_net-Code by Jeremy Wilkerson

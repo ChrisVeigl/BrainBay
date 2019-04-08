@@ -192,7 +192,7 @@ CAPTION "Info"
 FONT 8, "System", 0, 0, 0x0
 BEGIN
     ICON            107,IDC_MYICON,14,9,20,20
-    LTEXT           "BrainBay  --  Version 2.2  (Oct. 2018)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
+    LTEXT           "BrainBay  --  Version 2.3  (04/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
     LTEXT           "The OpenEEG-Project:                                     http://www.openeeg.sf.net",IDC_STATIC,52,40,118,19
     LTEXT           "Christoph Veigl, Jeremy Wilkerson, Lester John               Jim Peters, Rudi Cilibrasi, Joerg Hansmann, Stephan Gerhard, Robert Anessi, Raymond Nguyen, Franz Strobl",IDC_STATIC,67,75,195,29
     LTEXT           " BrainBay-Contributors:",IDC_STATIC,53,65,77,8
