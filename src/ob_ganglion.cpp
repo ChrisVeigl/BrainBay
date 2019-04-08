@@ -28,6 +28,7 @@
 #define STATE_SCANNING 1
 #define STATE_CONNECTED 2
 #define STATE_READING 3
+#define STATE_GETIMPEDANCE 4
 
 GANGLIONOBJ * GANGLION_OBJ=NULL;
 
@@ -138,6 +139,11 @@ int get_integers(int * buf, char* str)
 	      // printf("integer %d received: %d\n",i,buf[i]);
 		  i++; actval=0; sign=1;
 	  }
+	  else if (*str==']') {
+		  buf[i]=actval*sign;
+	      // printf("integer %d received: %d\n",i,buf[i]);
+		  i++; break;
+	  }
 	  else if (*str=='-') sign=-1;
 	  str++;
 	}
@@ -147,6 +153,7 @@ int get_integers(int * buf, char* str)
 
 void update_impedances(int chn, int adjustedImpedance)
 {
+	 if (chn>3) return;
 //     printf("got impedance for channel %d:%d\n",chn,adjustedImpedance);
      ganglionImpedance[chn]=adjustedImpedance;
 
@@ -191,35 +198,36 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 				   // printf("TCP received:%s\n",readbuf);
 				   actline=readbuf;
 				   while ((actline!=NULL) && (strlen(actline)>5)) {
-					   if (strstr(actline,"t,204,")==actline) {
+					   //if (strstr(actline,"t,204,")==actline) {
+					   if (strstr(actline,"{\"startByte")==actline) {
 						    // we received a packet with new channel values !
-						    c=actline+6;
+						    c=actline+56;
 						    cnt=get_integers(intbuffer,c);
-						    state=STATE_CONNECTED;
+						    state=STATE_READING;
 							process_packets();  // this triggers all signal processing !
 					   }
-					   else if (strstr(actline,"q,501,")==actline) {
+					   else if (strstr(actline,"\"code\":412") || strstr(actline,"\"code\":501")) {
 						   //printf("received: %s\n",actline);
-						   printf("q,501: ganglion connection error - is the CSR BT-dongle connected ?\n");
+						   printf("Ganglion connection error - is the correct BT-dongle connected ?\n");
 						   state=STATE_IDLE;
-						   // MessageBox(NULL,"Is the CSR BT-dongle connected ?", "ganglion connection error", MB_OK|MB_TOPMOST);
+						   MessageBox(NULL,"Is the correct BT-dongle connected ?", "ganglion connection error", MB_OK|MB_TOPMOST);
 					   }
-					   else if ((strstr(actline,"k,400,")==actline)||(strstr(actline,"c,413,")==actline)) {
+					   else if (strstr(actline,"\"code\":400") || strstr(actline,"\"code\":401") || strstr(actline,"\"code\":413")) {
 						   // printf("received: %s\n",actline);
-						   printf("k,400: ganglion connection error - is the Ganglion board switched on ?\n");
-						   // state=STATE_IDLE;
-						   // MessageBox(NULL,"Is the Ganglion board switched on ?", "ganglion connection error", MB_OK|MB_TOPMOST); 
+						   printf("Ganglion connection error - is the Ganglion board switched on and connected ?\n");
+						   state=STATE_IDLE;
+						   MessageBox(NULL,"Is the Ganglion board switched on and connected?", "ganglion connection error", MB_OK|MB_TOPMOST); 
 					   }
-					   else if (strstr(actline,"s,201,")==actline) {
-						   strcpy (tmpstr,actline+6);
-						   if ((c=strstr(tmpstr,","))) *c=0;
+					   else if (strstr(actline,"{\"name\":\"Ganglion-")==actline) {
+						   strcpy (tmpstr,actline+9); 
+						   if ((c=strstr(tmpstr,"\""))) *c=0;
    						   state=STATE_SCANNING;
-	   					   printf("s,201: found device:%s\n",tmpstr);
 						   int found=0;
 						   for (int t=0;t<num_ganglions;t++)
-							   if (!strcmp(GanglionNames[t],tmpstr)) found=1; 
+							   if (!strcmp(GanglionNames[t],tmpstr)) found=1;
 
 						   if (!found) {
+  	   					       printf("found ganglion device name:%s\n",tmpstr); 
 							   printf(".. adding device to list!\n");
 							   if (dlgWindow==ghWndToolbox) {
   	   							   SendDlgItemMessage(dlgWindow, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) tmpstr ) ;
@@ -228,28 +236,31 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 							   }
 							   strcpy(GanglionNames[num_ganglions],tmpstr);
 							   num_ganglions++;
+   	   					       printf("active devices:%d\n",num_ganglions);
 						   }
-   	   					   printf("active devices:%d\n",num_ganglions);
 					   }
-					   else if (strstr(actline,"i,203,")==actline) {
-						   c=actline+6;
+					   else if ((strstr(actline,"{\"channelNumber\"")==actline) && (strlen(actline)>50)) {
+						   state=STATE_GETIMPEDANCE;
+						   c=actline+17;
 						   cnt=get_integers(intbuffer,c);
-						   if ((intbuffer[0]>0) && (intbuffer[0]<5)) {
-							   update_impedances(intbuffer[0]-1,intbuffer[1]/2);
+						   if (intbuffer[0]>0)  { 
+						      printf("Found impedance channel %d: %d\n",intbuffer[0],intbuffer[1]);
+	  					      update_impedances(intbuffer[0]-1,intbuffer[1]/2);
 						   }
 					   } 
-					   else if (strstr(actline,"c,200,")==actline) {
+					   else if (strstr(actline,"{\"code\":200,\"type\":\"connect\"}")==actline) {
 						   state=STATE_CONNECTED;
-   	   					   printf("connected state detected!\n");
+   	   					   printf("Connected state detected!\n");
 					   } 
-					   // else   printf("received: %s",readbuf);
-					   actline=strstr(actline,";"); 
-					   if ((actline!=NULL) && (strlen(actline)>5)) actline+=2;  // skip semicolon and newline, go to next line
+					   else   printf("received: %s",readbuf);
+
+					   actline=strstr(actline,"\n"); 
+					   if ((actline!=NULL) && (strlen(actline)>5)) actline+=1;  // skip newline, go to next line
  				   }
 				} else  { printf ("read returned zero, closing reader thread\n"); return(-1); }
 			}
 			else Sleep(5);
-		} else Sleep(100);
+		} else Sleep(5);
 	}
     printf("Ganglion Reader Thread closed\n");
 	write_logfile("Ganglion Reader Thread closed");    
@@ -259,6 +270,7 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 	  
 int connect_tcp()
 {
+	if (sock) close_tcp();
 	sock=0;
 	if(SDLNet_ResolveHost(&ip, "localhost", GANGLIONHUB_PORT) == -1)
 	{
@@ -302,75 +314,110 @@ void close_tcp(void)
 	
 int sendstring_tcp(char * buf)
 {
+	char tmp[1024];
+	strcpy(tmp,buf);
+	strcat(tmp,"\r\n");
 	if (!sock) return(0);
-  	printf("TCP send:%s",buf);
-	SDLNet_TCP_Send(sock, buf, strlen(buf));
+  	printf("TCP send:%s",tmp);
+	SDLNet_TCP_Send(sock, tmp, strlen(tmp));
 	return(1);
 }
 
-void ganglion_connect(char * device) {
-	char tmpstr[256];
-	static int first=1;
-
-	if (state==STATE_SCANNING)
-	{
-	   sendstring_tcp("s,stop,;\n");
-	   Sleep(400);
-	   state=STATE_IDLE;
-	}
-
-	if (state!=STATE_CONNECTED) {
-		strcpy(tmpstr,"p,start,ble,;\n"); 
-		sendstring_tcp(tmpstr);
-		Sleep(100);   // dirty! wait a bit until ganglion is connected ... 
-
-		strcpy(tmpstr,"c,"); strcat(tmpstr,device);strcat(tmpstr,",;\n");
-		sendstring_tcp(tmpstr);
-		Sleep(1500);   // dirty! wait a bit until ganglion is connected ... 
-	}
-}
-
 void ganglion_disconnect() {
-	sendstring_tcp("d,;\n");
+	//sendstring_tcp("d,;\n");
+	sendstring_tcp("{\"type\":\"disconnect\"}");
 	Sleep(100);
 	state=STATE_IDLE;
 }
 
 void ganglion_scan() {
-	if (state!=STATE_SCANNING) {
-		state=STATE_SCANNING;
-		num_ganglions=0;
-		sendstring_tcp("s,start,;\n");
-		Sleep(100);
-	}
+	//sendstring_tcp("s,start,;\n");
+    sendstring_tcp("{\"type\":\"scan\", \"action\": \"start\"}");
+	Sleep(100);
 }
 
 void ganglion_startData() {
-	sendstring_tcp("k,b,;\n");
+	//sendstring_tcp("k,b,;\n");
+	sendstring_tcp("{\"type\":\"command\", \"command\": \"b\"}");
 }
 
 void ganglion_stopData() {
-	sendstring_tcp("k,s,;\n");				
+	//sendstring_tcp("k,s,;\n");				
+	sendstring_tcp("{\"type\":\"command\", \"command\": \"s\"}");
 }
 
 void ganglion_startImpedance() {
-	sendstring_tcp("i,start,;\n");
+	//sendstring_tcp("i,start,;\n");
+	sendstring_tcp("{\"type\":\"impedance\", \"action\": \"start\"}");
 }
 
 void ganglion_stopImpedance() {
-	sendstring_tcp("i,stop,;\n");				
+	//sendstring_tcp("i,stop,;\n");				
+	sendstring_tcp("{\"type\":\"impedance\", \"action\": \"stop\"}");
 }
 
 void ganglion_startAccel() {
-	sendstring_tcp("a,start,;\n");
+	//sendstring_tcp("a,start,;\n");
+	sendstring_tcp("{\"type\":\"accelerometer\", \"action\": \"start\"}");
 }
 
 void ganglion_stopAccel() {
-	sendstring_tcp("a,stop,;\n");				
+	//sendstring_tcp("a,stop,;\n");				
+	sendstring_tcp("{\"type\":\"accelerometer\", \"action\": \"stop\"}");
+}
+
+void ganglion_initBLE() {
+	char tmpstr[256];
+	if (GLOBAL.ganglion_bledongle==1) {
+		strcpy(tmpstr,"{\"type\":\"protocol\", \"action\": \"start\", \"protocol\": \"bled112\"}");
+	}
+	else {
+		//strcpy(tmpstr,"p,start,ble,;\n");
+		strcpy(tmpstr,"{\"type\":\"protocol\", \"action\": \"start\", \"protocol\": \"ble\"}");
+	}
+	sendstring_tcp(tmpstr);
+	Sleep(1000);   // dirty! wait a bit until ganglion is ready ... 
 }
 
 
+
+void ganglion_connect() {
+	char tmpstr[256];
+	static int first=1;
+
+	if (state==STATE_SCANNING)
+	{
+	   //sendstring_tcp("s,stop,;\n");
+   	   sendstring_tcp("{\"type\":\"scan\", \"action\": \"stop\"}");	   
+	   Sleep(100);
+	   state=STATE_IDLE;
+	}
+
+	if (state==STATE_READING)
+	{
+	   ganglion_stopData();
+	   Sleep(100);
+	   state=STATE_IDLE;
+	}
+	if (state==STATE_CONNECTED)
+	{
+	   ganglion_disconnect();
+	}
+
+
+	//strcpy(tmpstr,"c,"); strcat(tmpstr,device);strcat(tmpstr,",;\n");
+	strcpy(tmpstr,"{\"type\": \"connect\", \"name\": \"");
+	strcat(tmpstr,GLOBAL.gangliondevicename);
+	strcat(tmpstr,"\"}");
+
+	sendstring_tcp(tmpstr);
+	Sleep(1500);   // dirty! wait a bit until ganglion is connected ... 
+}
+
 void establish_ganglionconnection() {
+	GLOBAL.ganglion_available=0;
+    tcpReaderThreadDone=1;
+
 	if (connect_tcp()) GLOBAL.ganglion_available=1;
 	else { 
 		// report_error("could not connect to GanglionHub");
@@ -388,6 +435,9 @@ void establish_ganglionconnection() {
 			else GLOBAL.ganglion_available=1;
 		}
 	}
+	Sleep(100);
+    tcpReaderThreadDone=0;
+
 
 	if (GLOBAL.ganglion_available) {
 		printf("\nConnected to OpenBCIHub, socket=%d\n",sock);
@@ -395,9 +445,12 @@ void establish_ganglionconnection() {
 		CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) TcpReaderProc, 0, 0, &tcpReadStatId);
 		//printf("\nSending disconnect command\n");
 		//ganglion_disconnect();
-	    Sleep(100);
-		printf("\nTrying to connect to Device: %s\n",GLOBAL.gangliondevicename);
-		ganglion_connect(GLOBAL.gangliondevicename);
+	    //Sleep(100);
+		//printf("\nTrying to connect to Device: %s\n",GLOBAL.gangliondevicename);
+		//ganglion_connect(GLOBAL.gangliondevicename);
+
+		ganglion_initBLE();
+		ganglion_connect();
 	}
 }
 
@@ -448,6 +501,9 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 				SendDlgItemMessage( hDlg, IDC_GANGLION_DEVICECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) GanglionNames[t] ) ;
 
 			   // SetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,st->device);
+			   SendDlgItemMessage( hDlg, IDC_GANGLION_BLEDONGLECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "CSR" ) ;
+			   SendDlgItemMessage( hDlg, IDC_GANGLION_BLEDONGLECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "BLED112" ) ;
+			   SendDlgItemMessage( hDlg, IDC_GANGLION_BLEDONGLECOMBO, CB_SETCURSEL,GLOBAL.ganglion_bledongle ,0 ) ;
 			   SetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,GLOBAL.gangliondevicename);
 			   SetDlgItemText(hDlg,IDC_GANGLION_ARCHIVE_NAME,st->archivefile);
 			   st->update_channelinfo();
@@ -473,15 +529,26 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 					}
 					break;
 
+			case IDC_GANGLION_BLEDONGLECOMBO:
+					if (HIWORD(wParam)==CBN_SELCHANGE)
+					{   
+					    GLOBAL.ganglion_bledongle=SendDlgItemMessage(hDlg, IDC_GANGLION_BLEDONGLECOMBO, CB_GETCURSEL, 0, 0 ) ;
+	 			        if (!save_settings())  report_error("Could not save Settings");
+						//ganglion_initBLE();
+						establish_ganglionconnection();
+					}
+					break;
+
 			case IDC_CONNECT_GANGLION:
 				GetDlgItemText(hDlg,IDC_GANGLION_DEVICECOMBO,st->device,100);
-				ganglion_connect(st->device);
 				strcpy (GLOBAL.gangliondevicename,st->device);
  			    if (!save_settings())  report_error("Could not save Settings");
+				ganglion_connect();
 				break;
 
 			case IDC_SCAN_GANGLION:
 				SendDlgItemMessage( hDlg, IDC_GANGLION_DEVICECOMBO, CB_RESETCONTENT, 0,0) ;
+				num_ganglions=0;
 				ganglion_disconnect();
 				ganglion_scan();
 				break;
@@ -504,7 +571,6 @@ LRESULT CALLBACK GANGLIONDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPA
 
 			case IDC_DISCONNECT_GANGLION:
 				ganglion_disconnect();
-				GLOBAL.ganglion_available=0;
 				break;
 			
 			case IDC_OPEN_GANGLION_ARCHIVE:
@@ -632,7 +698,6 @@ GANGLIONOBJ::GANGLIONOBJ(int num) : BASE_CL()
 		sock=0;
         tcpReaderThreadDone=0;
 
-	    GLOBAL.ganglion_available=0;
 		establish_ganglionconnection();
 }
 
@@ -691,8 +756,6 @@ void GANGLIONOBJ::update_channelinfo(void)
   		if ((filehandle==INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
 		{  
 			update_channelinfo();
-			ganglion_connect(GLOBAL.gangliondevicename);
-			GLOBAL.ganglion_available=1;
 			ganglion_startData();
 			//else { report_error("Cannot connect with the Device"); 
 			//SendMessage(ghWndStatusbox,WM_COMMAND, IDC_STOPSESSION,0);}
@@ -738,10 +801,10 @@ void GANGLIONOBJ::update_channelinfo(void)
 			}
 		}
 
-		pass_values(0, (float)intbuffer[1] * scale_fac_uVolts_per_count);
-		pass_values(1, (float)intbuffer[2] * scale_fac_uVolts_per_count);
-    	pass_values(2, (float)intbuffer[3] * scale_fac_uVolts_per_count); 
-    	pass_values(3, (float)intbuffer[4] * scale_fac_uVolts_per_count);  
+		pass_values(0, (float)intbuffer[0] * scale_fac_uVolts_per_count);
+		pass_values(1, (float)intbuffer[1] * scale_fac_uVolts_per_count);
+    	pass_values(2, (float)intbuffer[2] * scale_fac_uVolts_per_count); 
+    	pass_values(3, (float)intbuffer[3] * scale_fac_uVolts_per_count);  
 
 		if ((filehandle!=INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING)) 
 				WriteFile(filehandle,intbuffer,sizeof(int)*5, &dwWritten, NULL);

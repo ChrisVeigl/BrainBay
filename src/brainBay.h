@@ -361,6 +361,7 @@ typedef struct GLOBALStruct
 	int neurobit_available;
 	int emotiv_available;
 	int ganglion_available;
+	int ganglion_bledongle;
 
 	int P3ALC1;
 	int P3ALC2;

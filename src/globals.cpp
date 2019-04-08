@@ -776,6 +776,7 @@ void GlobalInitialize()
 	GLOBAL.neurobit_available=0;
 	GLOBAL.emotiv_available=0;
 	GLOBAL.ganglion_available=0;
+	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;
 	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");
 	strcpy(GLOBAL.ganglionhubpath,"C:\\Program Files\\OpenBCIHub\\OpenBCIHub.exe");
