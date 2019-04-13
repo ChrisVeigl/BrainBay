@@ -124,28 +124,31 @@ int prepare_fileWrite(GANGLIONOBJ * st) {
 }
 
 
-int get_integers(int * buf, char* str)
+int get_integers(int * buf, char* str, int max)
 {
-	int i=0,actval=0,sign=1;
+	int i=0,actval=0,sign=1,valid=0;
 
-	while((*str) && (*str!=';') && (i<10)) {
+	while((*str)&&(i<max)) {
 	  if ((*str>='0') && (*str<='9'))
 	  {
 		 actval=actval*10;
 		 actval=actval+(*str-'0');
+		 valid=1;
 	  }
-	  else if (*str==',') {
+	  else if ((*str=='-') && (*(str+1)>='0') && (*(str+1)<='9')) {
+		  sign=-1;
+		  valid=1;
+	  }
+	  else if (valid) {
 		  buf[i]=actval*sign;
+		  i++; actval=0; sign=1; valid=0;
 	      // printf("integer %d received: %d\n",i,buf[i]);
-		  i++; actval=0; sign=1;
 	  }
-	  else if (*str==']') {
-		  buf[i]=actval*sign;
-	      // printf("integer %d received: %d\n",i,buf[i]);
-		  i++; break;
-	  }
-	  else if (*str=='-') sign=-1;
 	  str++;
+	}
+	if (valid && (i<max)) {
+		  buf[i]=actval*sign;
+		  i++;
 	}
 	return(i);
 }
@@ -178,7 +181,7 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 {
 	int len=0,cnt;
 	char tmpstr[500];
-	char *c, *actline;
+	char *c, *actline, *t;
 	bool reading=true;	
     printf("Ganglion Reader Thread running!\n");
 	
@@ -195,31 +198,32 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 				if ((len = SDLNet_TCP_Recv(sock, readbuf, sizeof(readbuf))) > 0)
 				{
 				   readbuf[len] = '\0';
-				   // printf("TCP received:%s\n",readbuf);
+				   // printf("Received:%s\n",readbuf);
 				   actline=readbuf;
-				   while ((actline!=NULL) && (strlen(actline)>5)) {
+				   while ((actline) && (strlen(actline))) {
 					   //if (strstr(actline,"t,204,")==actline) {
-					   if (strstr(actline,"{\"startByte")==actline) {
-						    // we received a packet with new channel values !
-						    c=actline+56;
-						    cnt=get_integers(intbuffer,c);
+					   if (t=strstr(actline,"{\"startByte")) {
+						    // we received a packet with channel values!
+						    c=strstr(t,"["); // beginning of channel values
+						    cnt=get_integers(intbuffer,c,4);
+							//printf("Extract:");
+							//for (int z=0;z<4;z++) printf ("%d, ",intbuffer[z]);
+							//printf("\n");
 						    state=STATE_READING;
 							process_packets();  // this triggers all signal processing !
 					   }
 					   else if (strstr(actline,"\"code\":412") || strstr(actline,"\"code\":501")) {
-						   //printf("received: %s\n",actline);
 						   printf("Ganglion connection error - is the correct BT-dongle connected ?\n");
 						   state=STATE_IDLE;
 						   MessageBox(NULL,"Is the correct BT-dongle connected ?", "ganglion connection error", MB_OK|MB_TOPMOST);
 					   }
 					   else if (strstr(actline,"\"code\":400") || strstr(actline,"\"code\":401") || strstr(actline,"\"code\":413")) {
-						   // printf("received: %s\n",actline);
 						   printf("Ganglion connection error - is the Ganglion board switched on and connected ?\n");
 						   state=STATE_IDLE;
 						   MessageBox(NULL,"Is the Ganglion board switched on and connected?", "ganglion connection error", MB_OK|MB_TOPMOST); 
 					   }
-					   else if (strstr(actline,"{\"name\":\"Ganglion-")==actline) {
-						   strcpy (tmpstr,actline+9); 
+					   else if (t=strstr(actline,"{\"name\":\"Ganglion-")) {
+						   strcpy (tmpstr,t+9); 
 						   if ((c=strstr(tmpstr,"\""))) *c=0;
    						   state=STATE_SCANNING;
 						   int found=0;
@@ -239,23 +243,22 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
    	   					       printf("active devices:%d\n",num_ganglions);
 						   }
 					   }
-					   else if ((strstr(actline,"{\"channelNumber\"")==actline) && (strlen(actline)>50)) {
+					   else if (t=strstr(actline,"{\"channelNumber\"")) {
 						   state=STATE_GETIMPEDANCE;
-						   c=actline+17;
-						   cnt=get_integers(intbuffer,c);
+						   cnt=get_integers(intbuffer,t+17,2);
 						   if (intbuffer[0]>0)  { 
 						      printf("Found impedance channel %d: %d\n",intbuffer[0],intbuffer[1]);
 	  					      update_impedances(intbuffer[0]-1,intbuffer[1]/2);
 						   }
 					   } 
-					   else if (strstr(actline,"{\"code\":200,\"type\":\"connect\"}")==actline) {
+					   else if (t=strstr(actline,"{\"code\":200,\"type\":\"connect\"}")) {
 						   state=STATE_CONNECTED;
    	   					   printf("Connected state detected!\n");
 					   } 
-					   else   printf("received: %s",readbuf);
+					   else if (strlen(actline) > 5)  printf("Unprocessed Hub message:%s",readbuf);
 
-					   actline=strstr(actline,"\n"); 
-					   if ((actline!=NULL) && (strlen(actline)>5)) actline+=1;  // skip newline, go to next line
+					   actline=strstr(actline,"}"); 
+					   if (actline) actline++;  // continue parsing
  				   }
 				} else  { printf ("read returned zero, closing reader thread\n"); return(-1); }
 			}
