@@ -4,6 +4,10 @@
   
   MODULE: OB_OSC_SENDER.H:  contains functions for sending OSC messages via UDP
 
+  special thanks to 
+  http://headerphile.com/sdl2/sdl2-part-12-multiplayer/
+  for the SDL-net UDP example
+
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
   as published by the Free Software Foundation; See the

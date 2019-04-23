@@ -4,6 +4,10 @@
   
   MODULE: OB_OSC_SENDER.CPP:  contains functions for sending OSC messages via UDP
 
+  special thanks to 
+  http://headerphile.com/sdl2/sdl2-part-12-multiplayer/
+  for the SDL-net UDP example
+
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
   as published by the Free Software Foundation; See the
@@ -13,7 +17,6 @@
 
 #include "brainBay.h"
 #include "ob_osc_sender.h"
-
 
 
 LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
@@ -52,9 +55,7 @@ LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				}
 
 				SendDlgItemMessage(hDlg,IDC_LIST, LB_ADDSTRING, 0, (LPARAM) "Socket connection successful.");
-				
 				break; 
-
 
 			case IDC_START:
 				if ((st->inports>0))
