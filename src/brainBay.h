@@ -138,8 +138,11 @@ extern "C" {
 #define OB_KEYCAPTURE   63
 #define OB_BUTTON       64
 #define OB_EVAL_EXPRTK  65
+#define OB_SHADOW       66
+#define OB_VOLUME       67
+#define OB_OSC_SENDER   68
 
-#define OBJECT_COUNT 	66
+#define OBJECT_COUNT 	69
 
 
 
@@ -156,7 +159,8 @@ extern "C" {
 				 "ARRAY-3600", "COMREADER", "NEUROBIT", "MIN", "MAX", "ROUND", \
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
-				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK"
+				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK", \
+				 "SHADOW", "VOLUME", "OSC-SENDER"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -779,6 +783,7 @@ LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK SessionManagerWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK ButtonWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK CounterWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
+LRESULT CALLBACK ShadowWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK BallgameWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK MartiniWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );
 LRESULT CALLBACK SpellerWndHandler(HWND hWnd, UINT , WPARAM , LPARAM );

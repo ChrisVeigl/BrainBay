@@ -452,6 +452,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_osc_sender.cpp" />
     <ClCompile Include="ob_particle.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -482,6 +483,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ob_sessionmanager.cpp" />
+    <ClCompile Include="ob_shadow.cpp" />
     <ClCompile Include="ob_signal.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -533,6 +535,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ob_vectorfloat.cpp" />
+    <ClCompile Include="ob_volume.cpp" />
     <ClCompile Include="ob_wav.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -614,12 +617,14 @@
     <ClInclude Include="ob_not.h" />
     <ClInclude Include="ob_or.h" />
     <ClInclude Include="ob_osci.h" />
+    <ClInclude Include="ob_osc_sender.h" />
     <ClInclude Include="ob_particle.h" />
     <ClInclude Include="ob_peakdetect.h" />
     <ClInclude Include="ob_port_io.h" />
     <ClInclude Include="ob_round.h" />
     <ClInclude Include="ob_sample_hold.h" />
     <ClInclude Include="ob_sessionmanager.h" />
+    <ClInclude Include="ob_shadow.h" />
     <ClInclude Include="ob_signal.h" />
     <ClInclude Include="ob_skindialog.h" />
     <ClInclude Include="ob_speller.h" />
@@ -629,6 +634,7 @@
     <ClInclude Include="ob_threshold.h" />
     <ClInclude Include="ob_translate.h" />
     <ClInclude Include="ob_vectorfloat.h" />
+    <ClInclude Include="ob_volume.h" />
     <ClInclude Include="ob_wav.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SDL_sound.h" />

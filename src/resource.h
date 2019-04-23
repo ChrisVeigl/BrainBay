@@ -94,6 +94,8 @@
 #define IDD_KEYCAPTUREBOX               257
 #define IDD_BUTTONBOX                   258
 #define IDD_EVALBOX_ML                  259
+#define IDD_SHADOWBOX                   260
+#define IDD_OSC_SENDERBOX               261
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -710,7 +712,6 @@
 #define IDC_MENU_X                      1510
 #define IDC_CQ_P8                       1511
 #define IDC_DISPLAYNAVIGATION           1511
-#define IDC_GANGLION_BLEDONLGECOMBO     1511
 #define IDC_GANGLION_BLEDONGLECOMBO     1511
 #define IDC_CQ_T8                       1512
 #define IDC_NEXTCONFIG                  1512
@@ -742,6 +743,9 @@
 #define IDC_VALUE2                      1523
 #define IDC_FUNCTIONCOMBO               1524
 #define IDC_BUTTONCAPTION               1525
+#define IDC_EDIT_WINDOW                 1525
+#define IDC_EDIT_WINDOW2                1526
+#define IDC_LOCK_WINDOW                 1526
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -897,6 +901,12 @@
 #define ID_OTHERS_BUTTON                32948
 #define IDM_INSERTBUTTON                32949
 #define IDM_INSERTEVAL_EXPRTK           32950
+#define IDM_INSERTSHADOW                32951
+#define ID_TARGET_VOLUME                32952
+#define IDM_INSETVOLUME                 32953
+#define ID_TARGET_OSC                   32954
+#define IDM_INSERTOSCSENDER             32955
+#define IDM_INSERTVOLUME                32956
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -904,8 +914,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32950
-#define _APS_NEXT_CONTROL_VALUE         1525
+#define _APS_NEXT_COMMAND_VALUE         32957
+#define _APS_NEXT_CONTROL_VALUE         1527
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

@@ -532,6 +532,12 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTBUTTON:create_object(OB_BUTTON);
 					break;
+				case IDM_INSERTSHADOW:create_object(OB_SHADOW);
+					break;
+				case IDM_INSERTVOLUME:create_object(OB_VOLUME);
+					break;
+				case IDM_INSERTOSCSENDER:create_object(OB_OSC_SENDER);
+					break;
 
 				// here are the supported EED devices
 				case IDM_INSERT_EEG_GENERIC8: 

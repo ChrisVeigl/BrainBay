@@ -90,6 +90,9 @@
 #include "ob_sessionmanager.h"
 #include "ob_keycapture.h"
 #include "ob_button.h"
+#include "ob_shadow.h"
+#include "ob_volume.h"
+#include "ob_osc_sender.h"
 
 //
 // GLOBAL VARIABLES
@@ -289,6 +292,12 @@ void create_object(int type)
 							 actobject->object_size=sizeof(KEYCAPTUREOBJ);break;
 		case OB_BUTTON:		 actobject=new BUTTONOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(BUTTONOBJ);break;
+		case OB_SHADOW:		 actobject=new SHADOWOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(SHADOWOBJ);break;
+		case OB_VOLUME:		 actobject=new VOLUMEOBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(VOLUMEOBJ);break;
+		case OB_OSC_SENDER:  actobject=new OSC_SENDEROBJ(GLOBAL.objects); 
+							 actobject->object_size=sizeof(OSC_SENDEROBJ);break;
 
 
 	}
@@ -653,6 +662,20 @@ void register_classes (HINSTANCE hInstance)
 	if(!RegisterClassEx(&wcex))
         report_error("Can't register Counter-Windowclass");
 
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = 0;//CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = (WNDPROC)ShadowWndHandler;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = hInstance;
+	wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_MYEEG);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.lpszMenuName	= NULL;
+	wcex.lpszClassName	= "Shadow_Class";
+	wcex.hIconSm		= LoadIcon(hInstance, (LPCTSTR)IDI_SMALL);
+	if(!RegisterClassEx(&wcex))
+        report_error("Can't register Shadow-Windowclass");
 	
 }    
 
@@ -779,7 +802,7 @@ void GlobalInitialize()
 	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;
 	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");
-	strcpy(GLOBAL.ganglionhubpath,"C:\\Program Files\\OpenBCIHub\\OpenBCIHub.exe");
+	strcpy(GLOBAL.ganglionhubpath,"C:\\Program Files\\OpenBCI_GUI\\data\\OpenBCIHub\\OpenBCIHub.exe");
 	strcpy(GLOBAL.gangliondevicename,"idle");
 	strcpy(GLOBAL.startdesignpath,"");
 

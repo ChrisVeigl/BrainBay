@@ -132,14 +132,17 @@ BEGIN
             MENUITEM "FFT (Spectrum-Analyser)",     IDM_INSERTSPECTRUM
             MENUITEM "File-Writer",                 IDM_INSERTFILE_WRITER
             MENUITEM "Oscilloscope",                IDM_INSERTOSCI
+            MENUITEM "OSC-Sender",                  IDM_INSERTOSCSENDER
             MENUITEM "Keystrike",                   IDM_INSERTKEYSTRIKE
             MENUITEM "Parallel Port",               IDM_INSERTPORT_IO
             MENUITEM "Particle Generator",          IDM_INSERTPARTICLE
             MENUITEM "Midi-Player",                 IDM_INSERTMIDI
             MENUITEM "Media-Player",                IDM_INSERTMCIPLAYER
             MENUITEM "Mouse-Controller",            IDM_INSERTMOUSE
+            MENUITEM "Shadow",                      IDM_INSERTSHADOW
             MENUITEM "Sound-Player",                IDM_INSERTWAV
             MENUITEM "TCP-Sender",                  IDM_INSERTTCPSENDER
+            MENUITEM "Volume",                      IDM_INSERTVOLUME
         END
         POPUP "Others"
         BEGIN
@@ -1422,6 +1425,24 @@ BEGIN
     LTEXT           "Bluetooth-Dongle:",IDC_STATIC,227,24,59,8
 END
 
+IDD_OSC_SENDERBOX DIALOGEX 0, 0, 365, 102
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "OSC Sender"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Connect",IDC_CONNECT,272,13,63,14,BS_FLAT
+    LTEXT           "Neuroserver",-1,13,15,40,8
+    EDITTEXT        IDC_HOST,58,13,208,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Close",IDC_CLOSE,150,64,42,14,BS_FLAT
+    LISTBOX         IDC_LIST,49,41,296,18,NOT WS_BORDER | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
+    LTEXT           "Status",-1,15,44,21,8
+    PUSHBUTTON      "Start Sending",IDC_START,50,64,58,14,BS_FLAT
+    PUSHBUTTON      "Stop",IDC_STOP,113,64,32,14,BS_FLAT
+    EDITTEXT        IDC_CMD,208,66,59,12,ES_AUTOHSCROLL | NOT WS_BORDER
+    PUSHBUTTON      "Send to neuroserver",IDC_SENDCMD,269,65,74,14,BS_FLAT
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -1761,6 +1782,14 @@ BEGIN
         RIGHTMARGIN, 368
         TOPMARGIN, 7
         BOTTOMMARGIN, 212
+    END
+
+    IDD_OSC_SENDERBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 358
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 95
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -2523,6 +2552,18 @@ BEGIN
     EDITTEXT        IDC_BUTTONCAPTION,111,72,125,12,ES_AUTOHSCROLL
 END
 
+IDD_SHADOWBOX DIALOGEX 0, 0, 285, 85
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "Shadow"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Shadow - Color:",-1,64,52,47,8
+    PUSHBUTTON      "",IDC_BKCOLOR,119,48,41,17,BS_FLAT,WS_EX_STATICEDGE
+    PUSHBUTTON      "Edit Window Position",IDC_EDIT_WINDOW,40,17,92,14,BS_FLAT
+    PUSHBUTTON      "Lock Window Position",IDC_LOCK_WINDOW,144,17,92,14,BS_FLAT
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2778,6 +2819,14 @@ BEGIN
         RIGHTMARGIN, 334
         TOPMARGIN, 7
         BOTTOMMARGIN, 107
+    END
+
+    IDD_SHADOWBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 278
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 78
     END
 END
 #endif    // APSTUDIO_INVOKED
