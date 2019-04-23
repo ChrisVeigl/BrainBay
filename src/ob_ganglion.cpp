@@ -63,6 +63,8 @@ int tcpReaderThreadDone=0;
 DWORD tcpReadStatId=0;
 HWND dlgWindow=0;
 
+SHELLEXECUTEINFO shellExInfo;
+
 
 /* Indexes of indicator colors */
 enum {
@@ -470,6 +472,17 @@ DWORD WINAPI TcpReaderProc(LPVOID lpv)
 
 
 void establish_ganglionconnection() {
+
+	shellExInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	shellExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+	shellExInfo.hwnd = NULL;
+	shellExInfo.lpVerb = "open";
+	shellExInfo.lpFile = GLOBAL.ganglionhubpath;
+	shellExInfo.lpParameters = NULL;
+	shellExInfo.lpDirectory = NULL;
+	shellExInfo.nShow = SW_SHOW;
+	shellExInfo.hInstApp = NULL;
+
 	GLOBAL.ganglion_available=0;
     tcpReaderThreadDone=1;
 
@@ -478,8 +491,12 @@ void establish_ganglionconnection() {
 		// report_error("could not connect to GanglionHub");
 		printf("\nCould not connect to OpenBCIHub ...\n",sock);
 		printf("\nTrying to start %s\n",GLOBAL.ganglionhubpath);
-		if ((int)ShellExecute(NULL, "open", GLOBAL.ganglionhubpath, NULL, NULL, SW_SHOWNORMAL) < 32)
+		//if ((int)ShellExecute(NULL, "open", GLOBAL.ganglionhubpath, NULL, NULL, SW_SHOWNORMAL) < 32)
+		int ret=ShellExecuteEx(&shellExInfo);
+		if (!ret) {
 			report_error ("Could not start OpenBCIHub.exe - please check path in Application Settings or install OpenBCIHub !");
+			shellExInfo.hProcess=0;
+		}
 		else {
 			printf("\nTrying to reconnect ...\n");
 			Sleep(2000);
@@ -710,6 +727,7 @@ GANGLIONOBJ::GANGLIONOBJ(int num) : BASE_CL()
 
 		device[0]=0;
 		state=STATE_IDLE;
+		shellExInfo.hProcess=0;
 
 		strcpy(out_ports[0].out_name,"chn1");
 	    strcpy(out_ports[0].out_dim,"uV");
@@ -874,6 +892,8 @@ GANGLIONOBJ::~GANGLIONOBJ()
 	tcpReaderThreadDone=1;
 	close_tcp();
 	dlgWindow=0;
+	if (shellExInfo.hProcess)
+       TerminateProcess(shellExInfo.hProcess, 1);
 //	killProcess("OpenBCIHub.exe");
 //	Sleep(200);
 }  
