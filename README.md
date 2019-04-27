@@ -11,10 +11,12 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 2.1  (2017-09-23)
+* The current release version is 2.4  (2019-04-27)
 
 * Recent changes:
-  * Support for OpenBCI Ganglion and the new OpenBCIHub
+  * New elements Shadow and Volume allow control of volume and desktop transparency
+  * New element OSC-Sender for transfer of live values to other applications via UDP
+  * Support for OpenBCI Ganglion and the new OpenBCIHub improved
   * Support for Neurosky devices
   * Cursorkey integration for Oscilloscope and Threshold Windows
   * Oscilloscope features snapshots for training reporting
@@ -56,7 +58,7 @@ Credits
 * Raymond Nguyen for the vector port additions
 * Franz Strobl for the OCZ NIA support
 * Stephan Gerhard for the QDS parser
-* William Croft (OpenBCI) for various 2014 fixes, enhancements and blog posts
+* William Croft (OpenBCI) for various fixes, enhancements and blog posts
 
 
 Further Information
