@@ -28,9 +28,10 @@
 
 using namespace std;
 
-#define defaulthost "localhost"
-#define OSCPORT 8000
-#define LOCALPORT 9000
+#define DEFAULT_HOST "127.0.0.1"
+#define DEFAULT_OSCPORT 8000
+#define DEFAULT_LOCALPORT 9000
+#define DEFAULT_ROUTE "/channel/"
 #define s_writebuflength 8192
 #define s_readbuflength 128
 
@@ -59,6 +60,8 @@ public:
     UDPConnection()
     {
         quit = false;
+		packet=nullptr;
+		ourSocket=nullptr;
     }
     ~UDPConnection()
     {
@@ -66,14 +69,14 @@ public:
         SDLNet_Quit();
     }
 
-	bool Init(const std::string &ip, int32_t remotePort, int32_t localPort)
+	bool Init(char *ip, int32_t remotePort, int32_t localPort)
     {
         std::cout << "Connecting to \n\tIP : " << ip << "\n\tPort : " << remotePort << std::endl;
         std::cout << "Local port : " << localPort << "\n\n";
 
         // Initialize SDL_net
-//        if (!InitSDL_Net())
-//            return false;
+        if (!InitSDL_Net())
+            return false;
 
         if (!OpenPort(localPort))
             return false;
@@ -132,6 +135,7 @@ public:
         std::cout << "Creating packet with size " << packetSize << "...\n";
 
         // Allocate memory for the packet
+		if (packet) SDLNet_FreePacket(packet);
         packet = SDLNet_AllocPacket(packetSize);
 
         if (packet == nullptr)
@@ -153,6 +157,10 @@ public:
         std::cout << "Opening port " << port << "...\n";
 
         // Sets our sovket with our local port
+		if (ourSocket != nullptr) {
+		    SDLNet_UDP_Unbind(ourSocket,0);
+			SDLNet_UDP_Close(ourSocket);
+		}
         ourSocket = SDLNet_UDP_Open(port);
 
         if (ourSocket == nullptr)
@@ -164,12 +172,17 @@ public:
         std::cout << "\tSuccess!\n\n";
         return true;
     }
-    bool SetIPAndPort(const std::string &ip, uint16_t port)
+    bool ClosePort()
+    {
+	  SDLNet_UDP_Close(ourSocket);
+	}
+
+    bool SetIPAndPort(char * ip, uint16_t port)
     {
         std::cout << "Setting IP ( " << ip << " ) " << "and port ( " << port << " )\n";
 
         // Set IP and port number with correct endianess
-        if (SDLNet_ResolveHost(&serverIP, ip.c_str(), port) == -1)
+        if (SDLNet_ResolveHost(&serverIP, ip, port) == -1)
         {
             std::cout << "\tSDLNet_ResolveHost failed : " << SDLNet_GetError() << std::endl;
             return false;
@@ -192,7 +205,9 @@ public:
         std::cout << "\tSuccess!\n\n";
         return true;
     }
-    // Send data. 
+
+	
+	// Send data. 
     bool Send(const std::string &str)
     {
         // Set the data
@@ -201,8 +216,6 @@ public:
         //
         // std::stringstreams let us add any data to it using << ( like std::cout ) 
         // We can extract any data from a std::stringstream using >> ( like std::cin )
-        //
-        //str
 
         memcpy(packet->data, str.c_str(), str.length());
         packet->len = str.length();
@@ -217,11 +230,45 @@ public:
             //msg.resize(0);
             return false;
         }
-        std::cout << "sent to: " << packet->address.host << "\n";
-        std::cout << "length is: " << packet->len << "\n";
+        // std::cout << "sent to: " << packet->address.host << "\n";
+        // std::cout << "length is: " << packet->len << "\n";
+    }
+
+    bool OscSendFloat(char* address, float f) 
+    {
+		int l;
+		char *s=(char*)&f, *t;
+
+		strcpy((char *)packet->data, address);
+
+		// padding zeros for address string
+		if (strlen(address)%4 == 0) l=4; else l=4-(strlen(address)%4);
+		packet->len = strlen(address)+l+8;  // total packet length
+		t=(char *)packet->data + strlen(address);
+		while (l) {*t++=0; l--;}
+
+		// type tag for float
+		memcpy(t,",f\0\0",4);
+
+		// fill in float, changing endianness
+		t+=7;
+		for (int i=0;i<4;i++) *t-- = *s++;
+
+        // Send
+        // SDLNet_UDP_Send returns number of packets sent. 0 means error
+        //packet->channel = -1;
+        if (SDLNet_UDP_Send(ourSocket, -1, packet) == 0)
+        {
+            std::cout << "\tSDLNet_UDP_Send failed : " << SDLNet_GetError() << "\n"
+                << "==========================================================================================================\n";
+            //msg.resize(0);
+            return false;
+        }
+        // std::cout << "sent to: " << packet->address.host << "\n";
+        // std::cout << "length is: " << packet->len << "\n";
     }
     inline UDPpacket* recievedData(){
-        // Check to see if there is a packet wauting for us...
+        // Check to see if there is a packet waiting for us...
         if (SDLNet_UDP_Recv(ourSocket, packet))
         {
             /*for (int i = packet->len; i < 512; i++) {
@@ -252,17 +299,18 @@ public:
 
 	char readbuf[s_readbuflength];
 	char writebuf[s_writebuflength];
-	char   host[101];
+	char host[255];
+	int  port;
+	char route[255];
 	LONGLONG timestamp;
+	int sending;
 
-	int  connect();
 	void get_captions(void);
 
     OSC_SENDEROBJ(int num);
 	void update_inports(void);
 	void incoming_data(int, float);
 	void work(void);
-	void close_tcp(void);
 	void make_dialog(void);
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);

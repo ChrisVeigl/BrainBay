@@ -34,9 +34,13 @@ LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 	{
 		case WM_INITDIALOG:
 				SetDlgItemText(hDlg, IDC_HOST, st->host);
+				SetDlgItemText(hDlg, IDC_ROUTE, st->route);
+				SetDlgItemInt(hDlg, IDC_PORT, st->port,0);
+				if (st->sending)
+					add_to_listbox(hDlg,IDC_LIST, "Sending is activated."); 
+				else
+					add_to_listbox(hDlg,IDC_LIST, "Sending is deactivated."); 
 
-
-				actchn=0;
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -46,33 +50,33 @@ LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 		case WM_COMMAND:
 			switch (LOWORD(wParam)) 
 			{ 
-			case IDC_CONNECT:
+			case IDC_HOST:
 				GetDlgItemText(hDlg, IDC_HOST, st->host, sizeof(st->host));
-				if ((strlen(st->host)<8)||(!st->connect())) 
+				break;
+			case IDC_ROUTE:
+				GetDlgItemText(hDlg, IDC_ROUTE, st->route, sizeof(st->route));
+				break;
+			case IDC_PORT:
+				st->port=GetDlgItemInt(hDlg, IDC_PORT, 0, 0);
+				break;
+			case IDC_CONNECT:
+				if (!st->udpConnection->Init(st->host,st->port,DEFAULT_LOCALPORT)) 
 				{ 
 					add_to_listbox(hDlg,IDC_LIST, "Could not connect to Server"); 
 					break;
+				} else 	add_to_listbox(hDlg,IDC_LIST, "Updated connection"); 
+				break; 
+
+			case IDC_STARTSTOP:
+				if (st->sending) {
+					add_to_listbox(hDlg,IDC_LIST, "Stopped sending packages.");
+					st->sending = 0;
+				} else {
+					add_to_listbox(hDlg,IDC_LIST, "Started sending packages.");
+					st->sending = 1;
 				}
 
-				SendDlgItemMessage(hDlg,IDC_LIST, LB_ADDSTRING, 0, (LPARAM) "Socket connection successful.");
 				break; 
-
-			case IDC_START:
-				if ((st->inports>0))
-				{
-					st->udpConnection->Send("hallo");
-					add_to_listbox(hDlg,IDC_LIST, "Starting sending packages.");
-				} else add_to_listbox(hDlg,IDC_LIST, "No Channels available.");
-				break; 
-			case IDC_STOP:
-					add_to_listbox(hDlg,IDC_LIST, "Stop sending.");
-					break; 
-
-			case IDC_CLOSE: 
-					add_to_listbox(hDlg,IDC_LIST, "Closing connection");
-					st->close_tcp();
- 				    InvalidateRect(ghWndDesign,NULL,TRUE);
-					break;
 
 			}
 			return TRUE;
@@ -83,7 +87,6 @@ LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 	}
     return FALSE;
 } 
-
 
 
 //
@@ -98,17 +101,18 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 		inports = 1;
 		width=80;
 		height=50;
+		sending=1;
 
 		for (i=0;i<MAX_PORTS;i++)
 		  out_ports[i].get_range=-1;
 
 		timestamp=0;
-		strcpy(host,defaulthost);
+		strcpy(host,DEFAULT_HOST);
+		strcpy(route,DEFAULT_ROUTE);
+		port=DEFAULT_OSCPORT;
 
-		std::string IP = "127.0.0.1";
 		udpConnection = new UDPConnection();
-		udpConnection->Init(IP, OSCPORT, LOCALPORT);
-
+		udpConnection->Init(host, port, DEFAULT_LOCALPORT);
 	  }
 
 	  void OSC_SENDEROBJ::get_captions(void)
@@ -123,20 +127,15 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 				channel[x].physmax=(int)in_ports[x].in_max;
 				*/
 		}
-		//header.channels=inports-1;
 
 	  }
 
 
   	  void OSC_SENDEROBJ::update_inports(void)
 	  {
-		//if (state!=STATE_WRITING)
-		{
 			inports=count_inports(this);
-			//header.channels=inports-1;
 			height=CON_START+inports*CON_HEIGHT+5;
 			InvalidateRect(ghWndDesign,NULL,TRUE);
-		}
 	  }
 
 
@@ -144,19 +143,6 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 	  {	
 		in_ports[port].value=value;
 	  }
-
-
-	  int OSC_SENDEROBJ::connect()
-	  {
-		cout<<"connected.";
-		return(TRUE);
-	  }
-
-
-	  void OSC_SENDEROBJ::close_tcp(void)
-	  {
-	  }
-
 
 	  void OSC_SENDEROBJ::make_dialog(void) 
 	  {  
@@ -168,48 +154,47 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 
 		  load_object_basics(this);
 		  load_property("host",P_STRING,&host);
+		  load_property("route",P_STRING,&route);
+		  load_property("port",P_INT,&port);
 		  height=CON_START+inports*CON_HEIGHT+5;
+
+		  udpConnection->Init(host,port,DEFAULT_LOCALPORT);
 	  }
 		
 	  void OSC_SENDEROBJ::save(HANDLE hFile) 
 	  {
 		  save_object_basics(hFile, this);
 		  save_property(hFile,"host",P_STRING,&host);
-//		  save_property(hFile,"header",P_STRING,&edfheader);
-//		  save_property(hFile,"edfinfos",P_STRING,&edfinfos);	  
+		  save_property(hFile,"route",P_STRING,&route);
+		  save_property(hFile,"port",P_INT,&port);	  
 	  }
 
 	  
 	  void OSC_SENDEROBJ::work(void) 
 	  {
+		static int packetcount=0;
 		int x;
-		float act,fact;
-		char tmp[20];
+		float act;
 		
-	/*
-		packetcount++;
-		sprintf(writebuf,"! %d %d",packetcount,header.channels);
-		for (x=0;x<header.channels;x++)
-		{
-			fact=((float)(channel[x].digmax-channel[x].digmin))/((float)(channel[x].physmax-channel[x].physmin));
-			act=in_ports[x].value-(float)channel[x].physmin;
-			sprintf(tmp," %d",(int)(act+(float)channel[x].digmin));
-			strcat(writebuf,tmp);
+		if (sending) {
+			packetcount++;
+			for (x=0;x<inports-1;x++)
+			{
+				sprintf(szdata,"%s%d",route,x+1);
+				udpConnection->OscSendFloat(szdata,in_ports[x].value);
+			}
+
+			if (((int)(packetcount/1000))*1000==packetcount)
+			{	
+				sprintf(szdata,"%d Packets sent",packetcount);
+				if (hDlg==ghWndToolbox) 
+					add_to_listbox(hDlg,IDC_LIST, szdata); 
+			}	
 		}
-		*/
-		/*
-		if (((int)(packetcount/1000))*1000==packetcount)
-		{		
-			sprintf(szdata,"%d Packets sent",packetcount);
-			if (hDlg==ghWndToolbox) 
-				add_to_listbox(hDlg,IDC_LIST, szdata); 
-		}
-		*/
-		
 	  }
 
 
 OSC_SENDEROBJ::~OSC_SENDEROBJ()
 	  {
-		// free object
+		  delete (udpConnection);
 	  }  
