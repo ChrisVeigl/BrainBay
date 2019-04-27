@@ -287,9 +287,11 @@
 #define IDC_HOST                        1176
 #define IDC_WAVMUTE                     1177
 #define IDC_CHANNELCOMBO                1177
+#define IDC_PORT                        1177
 #define IDC_WAVTIMESREPEAT              1178
 #define IDC_PHYSMIN                     1178
 #define IDC_WAVBUFSIZE                  1178
+#define IDC_ROUTE                       1178
 #define IDC_WAVSPEEDCENTER              1179
 #define IDC_DIGMIN                      1179
 #define IDC_WAVSPEEDFACTOR              1180
@@ -744,8 +746,8 @@
 #define IDC_FUNCTIONCOMBO               1524
 #define IDC_BUTTONCAPTION               1525
 #define IDC_EDIT_WINDOW                 1525
-#define IDC_EDIT_WINDOW2                1526
 #define IDC_LOCK_WINDOW                 1526
+#define IDC_STARTSTOP                   1527
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -915,7 +917,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
 #define _APS_NEXT_COMMAND_VALUE         32957
-#define _APS_NEXT_CONTROL_VALUE         1527
+#define _APS_NEXT_CONTROL_VALUE         1528
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

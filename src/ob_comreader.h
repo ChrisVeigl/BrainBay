@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   MODULE: OB_COMREADER.H:  declarations for the ComPort Reader Element
   Authors: Chris Veigl

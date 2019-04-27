@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.3 (04/2019)
+   BrainBay  -  OpenSource Biofeedback Software
 
   MODULE:  OB_DIFFERENTIATE.H  declarations for the Differentiate-Object
   Author:  Chris Veigl

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   OB_KEYSTRIKE.H:  contains the Keystrike-Object
   Author: Chris Veigl

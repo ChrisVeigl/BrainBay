@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   MODULE: OB_MAGNITUDE.CPP:  contains assisting functions for the Magnitude-Object
   Authors: Jim Peters,Chris Veigl

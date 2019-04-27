@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   MODULE: OB_OSC_SENDER.H:  contains functions for sending OSC messages via UDP
 
@@ -266,8 +266,10 @@ public:
         }
         // std::cout << "sent to: " << packet->address.host << "\n";
         // std::cout << "length is: " << packet->len << "\n";
+		return true;
     }
-    inline UDPpacket* recievedData(){
+
+	inline UDPpacket* receivedData(){
         // Check to see if there is a packet waiting for us...
         if (SDLNet_UDP_Recv(ourSocket, packet))
         {

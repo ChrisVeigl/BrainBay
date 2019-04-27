@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.3 (04/2019)
+   BrainBay  -  OpenSource Biofeedback Software
 
   MODULE:  OB_PEAKDETECT.H    detects tops and/or valleys of a signal
   Author:  Chris Veigl

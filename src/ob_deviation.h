@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   MODULE: OB_DEVIATION.H:  declarations for the Deviation-Object
   Author: Chris Veigl

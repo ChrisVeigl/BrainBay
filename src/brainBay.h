@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.3 (04/2019)
+   BrainBay  -  OpenSource Biofeedback Software
   OpenSource Application for realtime BioSignalProcessing & HCI with OpenEEG hardware. 
 			   
   Author: Chris Veigl, contact: chris@shifz.org

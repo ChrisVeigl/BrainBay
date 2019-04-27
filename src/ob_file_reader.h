@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
     
   MODULE: OB_FILE_READER.H:  contains the FILE - Reader-Object
   Author: Chris Veigl

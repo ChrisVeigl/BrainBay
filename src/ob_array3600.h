@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   MODULE: OB_ARRAY3600.H:  declarations for the ARRAY Power Supply Controller
   Authors: Chris Veigl, Gerhard Nussbaum

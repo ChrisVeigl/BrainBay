@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.3 (04/2019),		contact: raymonkhoa@gmail.com
+   BrainBay  -  OpenSource Biofeedback Software,		contact: raymonkhoa@gmail.com
 
   MODULE:  OB_VECTORFLOAT.CPP  declarations for the VectorFloat-Object
   Author:  Raymond Khoa

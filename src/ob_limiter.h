@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.3 (04/2019)
+   BrainBay  -  OpenSource Biofeedback Software
 
   MODULE:  OB_LIMITER.H  declarations for the Limiter-Object
   Author:  Chris Veigl

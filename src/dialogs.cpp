@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
-  BrainBay  -  Version 2.3 (04/2019)
+   BrainBay  -  OpenSource Biofeedback Software
   
   MODULE: DIALOGS.CPP: this Module provides global accessible Dialog - Functions.
 

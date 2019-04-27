@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  -  Version 2.3 (04/2019)
+   BrainBay  -  OpenSource Biofeedback Software
 
   MODULE:  OB_MAX.H  declarations for the Max-Object
   Author:  Chris Veigl

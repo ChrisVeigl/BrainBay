@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), GPL, contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, GPL, contact: chris@shifz.org
   
   MODULE: OB_EDF_READER.CPP:  contains functions for EDF - File import
   Author: Chris Veigl

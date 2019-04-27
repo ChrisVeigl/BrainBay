@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
   
   MODULE: OB_TCP_RECEIVE.CPP:  contains functions for the Neuro Server data reception
   Based on SDL_net-Code by Jeremy Wilkerson

@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
 
-  BrainBay  Version 2.3 (04/2019), GPL, contact: chris@shifz.org
+    BrainBay  -  OpenSource Biofeedback Software, GPL, contact: chris@shifz.org
   
   OB_FILTER.H:  contains the FILTER-Object
   Authors: Jim Peters, Chris Veigl
