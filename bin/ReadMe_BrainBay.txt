@@ -1,5 +1,5 @@
 
-BrainBay release version 1.9, 27-12-2013 
+BrainBay release version 2.4, 27-04-2019 
 written by Chris Veigl under GPL, contact: chris@shifz.org
 
 Please read the Copyright information (GNU GENERAL PUBLIC LICENSE) in the file ReadMe_License.txt
@@ -14,10 +14,12 @@ BIG CREDITS go to:
    Don Cross for a well working fft-routine (http://www.intersrv.com/~dcross/fft.html)
    AllenD for showing how to do a thread-oriented Com-Handler in Win32
    Craig Peacock for the outstandig site http://www.beyondlogic.org and his PortTalk I/O-driver
+   http://headerphile.com/sdl2/sdl2-part-12-multiplayer/ for their SDL-net tutorial
    Marcin Kocikowski for the Neurobit Optima-4 Device and support
    Raymond Nguyen for the vector port additions
    Franz Strobl for the OCZ NIA support
    Stephan Gerhard for the QDS parser
+   Dominik Koller for Emotiv Epoc integration
 
 
   
