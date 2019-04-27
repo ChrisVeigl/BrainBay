@@ -16,6 +16,10 @@
 #include "emotiv\\my_edk.h"
 #include "emotiv\\my_EmoStateDLL.h"
 #include "emotiv\\my_edkErrorCode.h"
+#include <cstring>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 void process_emotiv(void);
 

@@ -76,6 +76,9 @@ COLORREF COLORS_Q[CI_NUM]=
 	RGB(150,150, 150)
 };
 
+
+EMOTIVOBJ * gEMOTIV = NULL;
+
 COLORREF chncolor[MAX_CHANNELS]={CI_GRAY,CI_GRAY,CI_GRAY,CI_GRAY,CI_GRAY, CI_GRAY, CI_GRAY,CI_GRAY,CI_GRAY,CI_GRAY,CI_GRAY, CI_GRAY, CI_GRAY, CI_GRAY};
 COLORREF wirelesscol = CI_GRAY;
 int BatteryLevel = 0;
@@ -87,9 +90,6 @@ bool readytocollect = false;
 unsigned int userID = 100, userID_selected;
 unsigned int nSamplesTaken;
 std::vector<float> buffer[14];
-bool samples_processed = true;
-bool samples_buffered = false;
-int sample = 0;
 
 /*Driver library file name*/
 static char DrvLibNameEDK[256];
@@ -173,27 +173,40 @@ static HMODULE InitEmotivEDKLib(const char * drvLibName)
 	strcpy(actfile,drvLibName);
 	strcat(actfile,"\\edk_utils.dll");
 
-	write_logfile ("now trying to open %s", actfile);
     FILE * testfile = fopen (actfile, "r");
 	if (testfile != NULL)
 	{ 
-			write_logfile ("open was successful");
+		    std::cout << "Emotiv .dll found at path:"  << actfile << std::endl;
+			write_logfile ("Emotiv ed.dll file found");
 			fclose (testfile);
+
+			drv_lib = LoadLibrary(actfile);
+			if (!drv_lib) { 
+			    std::cout << "Error loading EDK_UTILS.DLL\n";
+				write_logfile ("Error loading EDK_UTILS.DLL");
+				return NULL;
+			}
+		    std::cout << "LOADING EDK_UTILS.DLL succeeded.\n";
+			write_logfile ("LOADING EDK_UTILS.DLL succeeded.");
 	}
-	else
-			write_logfile ("open did not work !");
+	else {
+		    std::cout << "Error: Emotiv .dll not found at path:"  << actfile << std::endl;
+			write_logfile ("Error: Emotiv .dll file not found");
+			return NULL;
+	}
 
-
-	drv_lib = LoadLibrary(actfile);
-	if (!drv_lib) return NULL;
-	write_logfile ("LOADING EDK_UTILS.DLL succeeded.");
 
 	strcpy(actfile,drvLibName);
 	strcat(actfile,"\\edk.dll");
 	drv_lib = LoadLibrary(actfile);
-	if (!drv_lib) return NULL;
-	write_logfile ("LOADING EDK.DLL succeeded.");
 
+	if (!drv_lib) { 
+		std::cout << "Error loading edk.DLL from path:" << actfile << "\n";
+		write_logfile ("Error loading EDK_UTILS.DLL");
+		return NULL;
+	}
+	std::cout << "loading " << actfile <<" succeeded.\n";
+	write_logfile ("LOADING EDK_UTILS.DLL succeeded.");
 
 	if (!(EE_DataGet = (TEE_DataGet) GetProcAddress(drv_lib, "EE_DataGet"))  ||
 		!(EE_EngineConnect = (TEE_EngineConnect) GetProcAddress(drv_lib, "EE_EngineConnect")) ||
@@ -215,10 +228,13 @@ static HMODULE InitEmotivEDKLib(const char * drvLibName)
 		!(ES_GetBatteryChargeLevel = (TES_GetBatteryChargeLevel) GetProcAddress(drv_lib, "ES_GetBatteryChargeLevel")) ||
 		!(EE_DataAcquisitionEnable = (TEE_DataAcquisitionEnable) GetProcAddress(drv_lib, "EE_DataAcquisitionEnable"))) 
 		{
+			std::cout << "Error getting Function entry points from EDK.dll !\n";
+			write_logfile("Error getting Function entry points from EDK.dll");
 			return NULL;
 		}
-	write_logfile("INFO: Sucessfully loaded Emotiv EDK dll from %s",drvLibName);
-	return drv_lib;
+		std::cout << "INFO: Sucessfully loaded Emotiv EDK dll from " << drvLibName << "\n";
+		write_logfile("INFO: Sucessfully loaded Emotiv EDK dll from %s",drvLibName);
+		return drv_lib;
 }
 
 
@@ -248,12 +264,14 @@ EMOTIVOBJ::EMOTIVOBJ(int num) : BASE_CL()	//constructor
 	/* Init protocol driver library */
 	if ((drv_lib=InitEmotivEDKLib(GLOBAL.emotivpath))==NULL)
 	{
+		std::cout << "trying to load Emotiv EDK dlls from " << GLOBAL.emotivpath << "\n";
 		write_logfile("trying to load Emotiv EDK dlls from %s", GLOBAL.emotivpath);
 		report_error("could not load Emotiv EDK dlls\n Emotiv EPOC cannot be used. Please check Path to Emotiv SDK in Application Settings...");
 	}
 
 	filehandle = INVALID_HANDLE_VALUE;
 	filemode = 0;
+	gEMOTIV=this;
 }
 
 void EMOTIVOBJ::make_dialog(void)
@@ -271,9 +289,11 @@ void EMOTIVOBJ::updateHeadsetStatus(void)
 	int chargeLevel, maxChargeLevel;
 	EE_EEG_ContactQuality_t SignalQuality[MAX_CHANNELS+3];
 
+	std::cout << "UpdateHeadsetStatus started.\n";
 	if (drv_lib==NULL) return;
 	///*BATTERY CHARGE LEVEL*/
 
+	std::cout << "calling GetBatteryChargeLevel\n";
 	ES_GetBatteryChargeLevel(eState, &chargeLevel, &maxChargeLevel);	//references current charge level and maximum charge level
 	BatteryLevel = (chargeLevel/maxChargeLevel)*100;
 
@@ -284,6 +304,8 @@ void EMOTIVOBJ::updateHeadsetStatus(void)
 		/*BAD_SIGNAL*/			CI_RED,
 		/*GOOD_SIGNAL*/			CI_GREEN
 	};
+
+	std::cout << "calling GetWirelessSignalStatus\n";
 	wirelesscol = WirelessInd[ES_GetWirelessSignalStatus(eState)];
 
 	///*ELECTRODE SIGNAL QUALITY*/
@@ -295,6 +317,8 @@ void EMOTIVOBJ::updateHeadsetStatus(void)
 		/*EEG_CQ_FAIR*/			CI_YELLOW,
 		/*EEG_CQ_GOOD*/			CI_GREEN,
 	};
+
+	std::cout << "calling GetContactQualityFromAllChannels\n";
 	int numofCQ = ES_GetContactQualityFromAllChannels(eState, SignalQuality, MAX_CHANNELS+3);
 	for(int i=0; i < MAX_CHANNELS; i++)
 	{
@@ -314,58 +338,56 @@ void process_emotiv(void)	//calls process_packets() function
 
 		if (eventType == EE_UserAdded && !readytocollect) 
 		{
+			std::cout << "User added event detected\n";
+
 			EE_EmoEngineEventGetUserId(eEvent, &userID);
 			if (userID == userID_selected)
 			{
+				std::cout << "User acquisition enabled for user " << userID <<"\n";
+
 				EE_DataAcquisitionEnable(userID,true);
 				readytocollect = true;
 			}
+			std::cout << "User ID does not match - acquisition not enabled\n";
+
 		}
 	}
 
-
-
 	if(readytocollect && (userID == userID_selected))
 	{
-		if(samples_processed)
-		{
-			samples_processed = false;
-			nSamplesTaken = 0;
-			EE_DataUpdateHandle(userID, hData);
-			EE_DataGetNumberOfSample(hData, &nSamplesTaken);
-		}
-
+		std::cout << "calling DataUpdateHandle\n";
+		EE_DataUpdateHandle(userID, hData);
+		EE_DataGetNumberOfSample(hData, &nSamplesTaken);
+	
 		if(nSamplesTaken != 0)
 		{
-			if(!samples_buffered)
-			{
-				sample = 0;
-				for (int i = 0; i < MAX_CHANNELS; i++)
-				{
+			for (int i = 0; i < MAX_CHANNELS; i++)
 				buffer[i].clear();
-				}
 
-				double* data = new double[nSamplesTaken];
+			double* data = new double[nSamplesTaken];
 
-				for (int channel = 0 ; channel < MAX_CHANNELS; channel++)
+			for (int channel = 0 ; channel < MAX_CHANNELS; channel++)
+			{
+				EE_DataGet(hData, targetChannelList[channel+1], data, nSamplesTaken);
+				std::cout << " DataGet for channel " << channel << " returned :";
+
+				for (unsigned int j = 0; j < nSamplesTaken; j++)
 				{
-					EE_DataGet(hData, targetChannelList[channel+1], data, nSamplesTaken);
-
-					for (unsigned int j = 0; j < nSamplesTaken; j++)
-					{
-						buffer[channel].push_back((const float)data[j]);
-					}
+					buffer[channel].push_back((const float)data[j]);
+					std::cout << data[j] << ", ";
 				}
-				delete[] data;
-				samples_buffered = true;
+ 				std::cout << "\n";
 			}
+			delete[] data;
 
-			process_packets();
-		}
-		else
-		{
-			samples_processed = true;
-			samples_buffered = false;
+			for (unsigned int j = 0; j < nSamplesTaken; j++)
+			{
+				for (int channel = 0 ; channel < MAX_CHANNELS; channel++) {
+					std::cout << "now sending sample " << j+1 << " to output port " << channel  <<": " << buffer[channel].at(j) << "\n";
+					gEMOTIV->pass_values(channel, buffer[channel].at(j));
+				}
+				process_packets();
+			}
 		}
 	}
 }
@@ -381,18 +403,24 @@ void EMOTIVOBJ::session_start(void)
 	if (drv_lib==NULL) return;
 	if((filehandle == INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
 	{
-		GLOBAL.emotiv_available = 1;
-
+		std::cout << "calling EmoEngineEventCreate\n";
 		eEvent = EE_EmoEngineEventCreate();
+		std::cout << "calling EmoStateCreate\n";
 		eState = EE_EmoStateCreate();
 
+		std::cout << "calling EngineConnect\n";
 		if (EE_EngineConnect("Emotiv Systems-5") == EDK_OK)
 		{
+			std::cout << "calling DataCreate\n";
 			hData = EE_DataCreate();
+			std::cout << "calling DataSetBufferSize\n";
 			EE_DataSetBufferSizeInSec((float)BUFFER_SECS);
+			std::cout << "Connected - Emotiv Interface available.\n";
+			GLOBAL.emotiv_available = 1;
 		}
 		else
 		{
+			GLOBAL.emotiv_available = 0;
 			report_error("Emotiv Engine start up failed");
 			SendMessage(ghWndStatusbox,WM_COMMAND, IDC_STOPSESSION,0);
 		}
@@ -402,15 +430,10 @@ void EMOTIVOBJ::session_start(void)
 
 void EMOTIVOBJ::work(void)
 {
+	static int updateCounter=0;
 	if (drv_lib==NULL) return;
-	for (int channel = 0; channel < MAX_CHANNELS; channel++)
-	{
-		pass_values(channel, buffer[channel].at(sample));
-	}
-	sample++;
-	nSamplesTaken--;
 
-	updateHeadsetStatus();
+	if (!((updateCounter++)%200)) updateHeadsetStatus();
 }
 
 
@@ -419,19 +442,19 @@ void EMOTIVOBJ::session_stop(void)
 	if (drv_lib==NULL) return;
 	if(GLOBAL.emotiv_available == 1)
 	{
-	EE_DataFree(hData);
 
-	EE_EngineDisconnect();
-	EE_EmoStateFree(eState);
-	EE_EmoEngineEventFree(eEvent);
-
-	GLOBAL.emotiv_available = 0;
+		std::cout << "Free Emotiv Resources\n";
+		EE_DataFree(hData);
+		EE_EngineDisconnect();
+		EE_EmoStateFree(eState);
+		EE_EmoEngineEventFree(eEvent);
+		GLOBAL.emotiv_available = 0;
 	}
 }
 
 void EMOTIVOBJ::session_reset(void)
 {
-	GLOBAL.emotiv_available = 0;
+	// GLOBAL.emotiv_available = 0;
 }
 
 
