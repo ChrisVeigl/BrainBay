@@ -303,9 +303,15 @@ public:
 	char writebuf[s_writebuflength];
 	char host[255];
 	int  port;
+	int  onlyChanging;
+	int  blockInvalidValue;
+	int  sendInterval;
 	char route[255];
 	LONGLONG timestamp;
 	int sending;
+	int firstSend;
+	int intervalCount;
+	float lastValue[MAX_PORTS];
 
 	void get_captions(void);
 
@@ -313,6 +319,7 @@ public:
 	void update_inports(void);
 	void incoming_data(int, float);
 	void work(void);
+	void session_start (void);
 	void make_dialog(void);
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);

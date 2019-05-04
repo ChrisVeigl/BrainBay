@@ -40,7 +40,9 @@ LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 					add_to_listbox(hDlg,IDC_LIST, "Sending is activated."); 
 				else
 					add_to_listbox(hDlg,IDC_LIST, "Sending is deactivated."); 
-
+				SetDlgItemInt(hDlg, IDC_SENDINTERVAL, st->sendInterval,0);
+				CheckDlgButton(hDlg, IDC_BLOCK_INVALID_VALUE, st->blockInvalidValue);
+				CheckDlgButton(hDlg, IDC_ONLY_CHANGING, st->onlyChanging);
 				return TRUE;
 	
 		case WM_CLOSE: 
@@ -59,6 +61,16 @@ LRESULT CALLBACK OscSenderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_PORT:
 				st->port=GetDlgItemInt(hDlg, IDC_PORT, 0, 0);
 				break;
+			case IDC_SENDINTERVAL:
+				st->sendInterval=GetDlgItemInt(hDlg, IDC_SENDINTERVAL, 0, 0);
+				break;
+			case IDC_BLOCK_INVALID_VALUE:
+					st->blockInvalidValue=IsDlgButtonChecked(hDlg,IDC_BLOCK_INVALID_VALUE);
+                break;
+			case IDC_ONLY_CHANGING:
+					st->onlyChanging=IsDlgButtonChecked(hDlg,IDC_ONLY_CHANGING);
+                break;
+
 			case IDC_CONNECT:
 				if (!st->udpConnection->Init(st->host,st->port,DEFAULT_LOCALPORT)) 
 				{ 
@@ -102,6 +114,11 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 		width=80;
 		height=50;
 		sending=1;
+		sendInterval=1;
+		blockInvalidValue=1;
+		onlyChanging=0;
+	    firstSend=1;
+	    intervalCount=0;
 
 		for (i=0;i<MAX_PORTS;i++)
 		  out_ports[i].get_range=-1;
@@ -115,21 +132,12 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 		udpConnection->Init(host, port, DEFAULT_LOCALPORT);
 	  }
 
-	  void OSC_SENDEROBJ::get_captions(void)
+
+  	  void OSC_SENDEROBJ::session_start(void)
 	  {
-		int x; 
-		for (x=0;x<inports;x++) 
-		{
-			/*
-				strcpy(channel[x].label,in_ports[x].in_desc);
-				strcpy(channel[x].physdim,in_ports[x].in_dim);
-				channel[x].physmin=(int)in_ports[x].in_min;
-				channel[x].physmax=(int)in_ports[x].in_max;
-				*/
-		}
-
+		  firstSend=1;
+		  intervalCount=0;
 	  }
-
 
   	  void OSC_SENDEROBJ::update_inports(void)
 	  {
@@ -156,6 +164,9 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 		  load_property("host",P_STRING,&host);
 		  load_property("route",P_STRING,&route);
 		  load_property("port",P_INT,&port);
+		  load_property("sendInterval",P_INT,&sendInterval);
+		  load_property("blockInvalidValue",P_INT,&blockInvalidValue);
+		  load_property("onlyChanging",P_INT,&onlyChanging);
 		  height=CON_START+inports*CON_HEIGHT+5;
 
 		  udpConnection->Init(host,port,DEFAULT_LOCALPORT);
@@ -167,6 +178,9 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 		  save_property(hFile,"host",P_STRING,&host);
 		  save_property(hFile,"route",P_STRING,&route);
 		  save_property(hFile,"port",P_INT,&port);	  
+		  save_property(hFile,"sendInterval",P_INT,&sendInterval);
+		  save_property(hFile,"blockInvalidValue",P_INT,&blockInvalidValue);
+		  save_property(hFile,"onlyChanging",P_INT,&onlyChanging);
 	  }
 
 	  
@@ -175,21 +189,42 @@ OSC_SENDEROBJ::OSC_SENDEROBJ(int num) : BASE_CL()
 		static int packetcount=0;
 		int x;
 		float act;
+		int doSend;
 		
 		if (sending) {
-			packetcount++;
+
+			intervalCount++;
 			for (x=0;x<inports-1;x++)
 			{
-				sprintf(szdata,"%s%d",route,x+1);
-				udpConnection->OscSendFloat(szdata,in_ports[x].value);
-			}
+				doSend=1;
+				if ((blockInvalidValue) && (in_ports[x].value==INVALID_VALUE))
+					doSend=0;
 
-			if (((int)(packetcount/1000))*1000==packetcount)
-			{	
-				sprintf(szdata,"%d Packets sent",packetcount);
-				if (hDlg==ghWndToolbox) 
-					add_to_listbox(hDlg,IDC_LIST, szdata); 
-			}	
+				if (intervalCount<sendInterval)
+					doSend=0;
+
+				if(doSend) {
+					if ((firstSend)||(!onlyChanging)||(in_ports[x].value!=lastValue[x]))  {
+						sprintf(szdata,"%s%d",route,x+1);
+						udpConnection->OscSendFloat(szdata,in_ports[x].value);
+						packetcount++;
+						if (!(packetcount%1000))
+						{	
+							sprintf(szdata,"%d Packets sent",packetcount);
+							if (hDlg==ghWndToolbox) 
+								add_to_listbox(hDlg,IDC_LIST, szdata); 
+						}	
+					}
+					lastValue[x]=in_ports[x].value;
+				}
+			}
+			if (intervalCount>=sendInterval) intervalCount=0;
+			if (firstSend) firstSend=0;
+		} 
+		else
+		{
+		  firstSend=1;
+		  intervalCount=0;
 		}
 	  }
 
