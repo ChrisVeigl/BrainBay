@@ -325,7 +325,8 @@ void create_object(int type)
 			actobject->make_dialog();
 //			InvalidateRect(ghWndMain,NULL,TRUE);
 			InvalidateRect(ghWndDesign,NULL,TRUE);
-
+			if (actobject->displayWnd) 
+				SetWindowPos(actobject->displayWnd,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
 		}
 		if (actobject->displayWnd)   SetForegroundWindow(actobject->displayWnd);
 

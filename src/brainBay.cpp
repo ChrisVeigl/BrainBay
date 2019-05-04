@@ -249,7 +249,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					deviceobject=NULL;
 					GLOBAL.showdesign=TRUE;
 					ShowWindow(ghWndDesign,TRUE);
-				    SetWindowPos(ghWndDesign,HWND_TOP,0,0,0,0,SWP_DRAWFRAME|SWP_NOMOVE|SWP_NOSIZE);
+				    SetWindowPos(ghWndDesign,HWND_BOTTOM,0,0,800,400,SWP_DRAWFRAME);
 					SetDlgItemText(ghWndStatusbox,IDC_DESIGN,"Hide Design"); 
 					GLOBAL.hidestatus=FALSE;
 					ShowWindow(ghWndStatusbox,TRUE);
