@@ -405,7 +405,7 @@ EDF_READEROBJ::EDF_READEROBJ(int num) : BASE_CL()
 			}
 			sampos++; 
 			packetcount++;
-			if (((int)(packetcount/1000))*1000==packetcount)
+			if (!(packetcount%1000))
 			{
 				sprintf(szdata,"%d Packets read\n",packetcount);
 				if (hDlg==ghWndToolbox) 

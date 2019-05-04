@@ -496,7 +496,7 @@ TCP_RECEIVEOBJ::TCP_RECEIVEOBJ(int num) : BASE_CL()
 						
 						
 	
-						if (((int)(packetcount/1000))*1000==packetcount)
+						if (!(packetcount%1000))
 						{
 							int buflen;
 							if (bufstart<=bufend) buflen=bufend-bufstart; else buflen=bufend-bufstart+watchbuflength;

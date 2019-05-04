@@ -493,7 +493,7 @@ TCP_SENDEROBJ::TCP_SENDEROBJ(int num) : BASE_CL()
 		if (SDLNet_SocketReady(sock))
 			SDLNet_TCP_Recv(sock, readbuf, 100);
 		
-		if (((int)(packetcount/1000))*1000==packetcount)
+		if (!(packetcount%1000))
 		{		
 			sprintf(szdata,"%d Packets sent",packetcount);
 			if (hDlg==ghWndToolbox) 
