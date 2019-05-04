@@ -26,6 +26,7 @@ LRESULT CALLBACK OrDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 {
 	
 	OROBJ * st;
+	char temp[200];
 	
 	st = (OROBJ *) actobject;
     if ((st==NULL)||(st->type!=OB_OR)) return(FALSE);	
@@ -34,7 +35,15 @@ LRESULT CALLBACK OrDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_INITDIALOG:
 				CheckDlgButton(hDlg, IDC_BINARY, st->binary);
+				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->trueValue,1);
+				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->falseValue,1);
+
+				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send True-Value for true and False-Value for false" ) ;
+				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and False-Value for false" ) ;
+				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and nothing for false" ) ;
+				SendDlgItemMessage( hDlg, IDC_MODECOMBO, CB_SETCURSEL, (WPARAM) (st->mode), 0L ) ;
 				break;		
+
 		case WM_CLOSE:
 			    EndDialog(hDlg, LOWORD(wParam));
 				return TRUE;
@@ -44,6 +53,17 @@ LRESULT CALLBACK OrDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			{
 				case IDC_BINARY:
 					st->binary=IsDlgButtonChecked(hDlg,IDC_BINARY);
+                    break;
+
+				case IDC_MODECOMBO:
+					st->mode=SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				case IDC_TRUE_VALUE:
+					GetDlgItemText(hDlg, IDC_TRUE_VALUE, temp,sizeof(temp));
+					st->trueValue=(float)atoi(temp);
+                    break;
+				case IDC_FALSE_VALUE:
+					GetDlgItemText(hDlg, IDC_FALSE_VALUE, temp,sizeof(temp));
+					st->falseValue=(float)atoi(temp);
                     break;
 
 			}
@@ -69,6 +89,9 @@ OROBJ::OROBJ(int num) : BASE_CL()
 	input1 = INVALID_VALUE;
 	input2 = INVALID_VALUE;
 	binary=0;
+	trueValue=512.0;
+	falseValue=INVALID_VALUE;
+	mode=0;
 }
 	
 void OROBJ::make_dialog(void) 
@@ -79,14 +102,26 @@ void OROBJ::make_dialog(void)
 
 void OROBJ::load(HANDLE hFile) 
 {
+	int tmp;
 	load_object_basics(this);
 	load_property("binary",P_INT,&binary);
+	load_property("mode",P_INT,&mode);
+	load_property("trueValue",P_INT,&tmp);
+	trueValue=tmp;
+	load_property("falseValue",P_INT,&tmp);
+	falseValue=tmp;
 }
 
 void OROBJ::save(HANDLE hFile) 
 {
+	int tmp;
 	save_object_basics(hFile, this);
 	save_property(hFile,"binary",P_INT,&binary);
+	save_property(hFile,"mode",P_INT,&mode);
+	tmp=trueValue;
+	save_property(hFile,"trueValue",P_INT,&tmp);
+	tmp=falseValue;
+	save_property(hFile,"falseValue",P_INT,&tmp);
 }
 	
 void OROBJ::incoming_data(int port, float value)
@@ -99,18 +134,32 @@ void OROBJ::incoming_data(int port, float value)
 	
 void OROBJ::work(void)
 {
-	float value = TRUE_VALUE;
+	float value;
 	
 	if (!binary)
 	{
-		if ((input1 == INVALID_VALUE) && (input2 == INVALID_VALUE))
-			value = INVALID_VALUE;
+		switch (mode) {
+			case 0:
+				if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE))
+					pass_values(0, trueValue);
+				else pass_values(0, falseValue);
+				break;
+			case 1:
+				if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE))
+					pass_values(0, input1);
+				else pass_values(0, falseValue);
+				break;
+			case 2:
+				if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE)) 
+					pass_values(0, input1);
+				break;
+		}
 	}
 	else
 	{
 		value=(float) ( ((int)input1) | ((int) input2) );
+		pass_values(0, value);
 	}
-	pass_values(0, value);
 }
 	
 OROBJ::~OROBJ() {}

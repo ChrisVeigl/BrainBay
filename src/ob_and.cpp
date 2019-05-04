@@ -27,6 +27,7 @@ LRESULT CALLBACK AndDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 {
 	
 	ANDOBJ * st;
+	char temp[200];
 	
 	st = (ANDOBJ *) actobject;
     if ((st==NULL)||(st->type!=OB_AND)) return(FALSE);	
@@ -36,6 +37,12 @@ LRESULT CALLBACK AndDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		case WM_INITDIALOG:
 				CheckDlgButton(hDlg, IDC_BINARY, st->binary);
 				CheckDlgButton(hDlg, IDC_ONE, st->output_one);
+				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->trueValue,1);
+				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->falseValue,1);
+				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send True-Value for true and False-Value for false" ) ;
+				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and False-Value for false" ) ;
+				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and nothing for false" ) ;
+				SendDlgItemMessage( hDlg, IDC_MODECOMBO, CB_SETCURSEL, (WPARAM) (st->mode), 0L ) ;
 				break;		
 		case WM_CLOSE:
 			    EndDialog(hDlg, LOWORD(wParam));
@@ -51,6 +58,16 @@ LRESULT CALLBACK AndDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 					st->output_one=IsDlgButtonChecked(hDlg,IDC_ONE);
                     break;
 
+				case IDC_MODECOMBO:
+					st->mode=SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				case IDC_TRUE_VALUE:
+					GetDlgItemText(hDlg, IDC_TRUE_VALUE, temp,sizeof(temp));
+					st->trueValue=(float)atoi(temp);
+                    break;
+				case IDC_FALSE_VALUE:
+					GetDlgItemText(hDlg, IDC_FALSE_VALUE, temp,sizeof(temp));
+					st->falseValue=(float)atoi(temp);
+                    break;
 			}
 			return TRUE;
 			break;
@@ -73,6 +90,9 @@ ANDOBJ::ANDOBJ(int num) : BASE_CL()
 	input2 = INVALID_VALUE;
 	binary=0;
 	output_one=0;
+	trueValue=512.0;
+	falseValue=INVALID_VALUE;
+	mode=0;
 }
 
 	
@@ -83,16 +103,28 @@ void ANDOBJ::make_dialog(void)
 
 void ANDOBJ::load(HANDLE hFile) 
 {
+	int tmp;
 	load_object_basics(this);
 	load_property("binary",P_INT,&binary);
 	load_property("one",P_INT,&output_one);
+	load_property("mode",P_INT,&mode);
+	load_property("trueValue",P_INT,&tmp);
+	trueValue=tmp;
+	load_property("falseValue",P_INT,&tmp);
+	falseValue=tmp;
 }
 
 void ANDOBJ::save(HANDLE hFile) 
 {
+	int tmp;
 	save_object_basics(hFile, this);
 	save_property(hFile,"binary",P_INT,&binary);
 	save_property(hFile,"one",P_INT,&output_one);
+	save_property(hFile,"mode",P_INT,&mode);
+	tmp=trueValue;
+	save_property(hFile,"trueValue",P_INT,&tmp);
+	tmp=falseValue;
+	save_property(hFile,"falseValue",P_INT,&tmp);
 }
 	
 void ANDOBJ::incoming_data(int port, float value)
@@ -108,15 +140,29 @@ void ANDOBJ::work(void)
 	float value = TRUE_VALUE;
 	if (!binary)
 	{
-		if ((input1 == INVALID_VALUE) || (input2 == INVALID_VALUE))
-			value = INVALID_VALUE;
+		switch (mode) {
+			case 0:
+				if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE))
+					pass_values(0, trueValue);
+				else pass_values(0, falseValue);
+				break;
+			case 1:
+				if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE))
+					pass_values(0, input1);
+				else pass_values(0, falseValue);
+				break;
+			case 2:
+				if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE)) 
+					pass_values(0, input1);
+				break;
+		}
 	}
 	else
 	{
 		value=(float) ( ((int)input1) & ((int) input2) );
 		if ((output_one) && (value!=0)) value=1;
+		pass_values(0, value);
 	}
-	pass_values(0, value);
 }
 	
 ANDOBJ::~ANDOBJ() {}

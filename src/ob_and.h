@@ -29,7 +29,9 @@ class ANDOBJ : public BASE_CL
 	public:
 		int binary;
 		int output_one;
-	
+		float trueValue, falseValue;
+		int mode;
+
 	ANDOBJ(int num);
 	
 	void make_dialog(void);
