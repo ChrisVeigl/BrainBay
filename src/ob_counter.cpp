@@ -41,19 +41,8 @@ void draw_counter(COUNTEROBJ * st)
 	SelectObject (hdc, actbrush);		
 	FillRect(hdc, &rect, actbrush);
 
-    if (st->integer) wsprintf(szdata, "%d",(int)(st->countervalue+0.5f));
-	else
-	{
-		switch(st->digits) {
-			case 0: sprintf(szdata, "%.0f",st->countervalue); break;
-			case 1: sprintf(szdata, "%.1f",st->countervalue); break;
-			case 2: sprintf(szdata, "%.2f",st->countervalue); break;
-			case 3: sprintf(szdata, "%.3f",st->countervalue); break;
-			case 4: sprintf(szdata, "%.4f",st->countervalue); break;
-		}		
-	}
-
-	if (st->timeformat) {
+	if (st->countervalue == INVALID_VALUE) sprintf(szdata, "INV");
+	else if (st->timeformat) {
 		int hours,minutes,seconds;
 		seconds=((int)st->countervalue);
 		hours=(int)(seconds/3600);
@@ -65,6 +54,22 @@ void draw_counter(COUNTEROBJ * st)
 			wsprintf(szdata,"%d:%d",minutes,seconds);
 
 	}
+	else if (st->integer) {
+		if (st->countervalue>0)
+			wsprintf(szdata, "%d",(int)(st->countervalue+0.5f));
+		else
+			wsprintf(szdata, "%d",(int)(st->countervalue-0.5f));
+	}
+	else {
+		switch(st->digits) {
+			case 0: sprintf(szdata, "%.0f",st->countervalue); break;
+			case 1: sprintf(szdata, "%.1f",st->countervalue); break;
+			case 2: sprintf(szdata, "%.2f",st->countervalue); break;
+			case 3: sprintf(szdata, "%.3f",st->countervalue); break;
+			case 4: sprintf(szdata, "%.4f",st->countervalue); break;
+		}		
+	}
+
 	DrawText(hdc, szdata, -1, &rect, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
 	DeleteObject(actbrush);
 	EndPaint( st->displayWnd, &ps );
