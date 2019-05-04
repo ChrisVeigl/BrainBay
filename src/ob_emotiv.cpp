@@ -323,8 +323,10 @@ void EMOTIVOBJ::updateHeadsetStatus(void)
 	for(int i=0; i < MAX_CHANNELS; i++)
 	{
 		//SetDlgItemInt(ghWndStatusbox,IDC_STATUS, SignalQuality[i+3],0);
-		//chncolor[i] = SigInd[SignalQuality[i+3]];		//The ordering of the array is consistent with the ordering of the logical input channels in EE_InputChannels_enum.
-											//is only returning the active electrodes. NOT DRL or CMS
+		std::cout << "Signal Quality Indicator for channel " << i << " is " << SignalQuality[i+3] << "\n";
+		chncolor[i] = SigInd[SignalQuality[i+3]];		
+			//The ordering of the array is consistent with the ordering of the logical input channels in EE_InputChannels_enum.
+			//is only returning the active electrodes. NOT DRL or CMS
 	}
 }
 
@@ -336,26 +338,25 @@ void process_emotiv(void)	//calls process_packets() function
 	{
 		EE_Event_t eventType = EE_EmoEngineEventGetType(eEvent);
 
-		if (eventType == EE_UserAdded && !readytocollect) 
+		if (eventType == EE_UserAdded) 
 		{
 			std::cout << "User added event detected\n";
 
 			EE_EmoEngineEventGetUserId(eEvent, &userID);
-			if (userID == userID_selected)
-			{
-				std::cout << "User acquisition enabled for user " << userID <<"\n";
+			// if (userID == userID_selected)
+			//{
+				std::cout << "User ID is: " << userID <<"\n";
 
 				EE_DataAcquisitionEnable(userID,true);
 				readytocollect = true;
-			}
-			std::cout << "User ID does not match - acquisition not enabled\n";
-
+			//}
+			// else std::cout << "User ID does not match - acquisition not enabled\n";
 		}
 	}
 
-	if(readytocollect && (userID == userID_selected))
+	if(readytocollect)  // && (userID == userID_selected))
 	{
-		std::cout << "calling DataUpdateHandle\n";
+		std::cout << "-";
 		EE_DataUpdateHandle(userID, hData);
 		EE_DataGetNumberOfSample(hData, &nSamplesTaken);
 	
@@ -369,25 +370,27 @@ void process_emotiv(void)	//calls process_packets() function
 			for (int channel = 0 ; channel < MAX_CHANNELS; channel++)
 			{
 				EE_DataGet(hData, targetChannelList[channel+1], data, nSamplesTaken);
-				std::cout << " DataGet for channel " << channel << " returned :";
+				// std::cout << " DataGet for channel " << channel << " returned :";
 
 				for (unsigned int j = 0; j < nSamplesTaken; j++)
 				{
 					buffer[channel].push_back((const float)data[j]);
-					std::cout << data[j] << ", ";
+					//std::cout << data[j] << ", ";
 				}
- 				std::cout << "\n";
+ 				//std::cout << "\n";
 			}
 			delete[] data;
 
 			for (unsigned int j = 0; j < nSamplesTaken; j++)
 			{
 				for (int channel = 0 ; channel < MAX_CHANNELS; channel++) {
-					std::cout << "now sending sample " << j+1 << " to output port " << channel  <<": " << buffer[channel].at(j) << "\n";
+					// std::cout << "now sending sample " << j+1 << " to output port " << channel  <<": " << buffer[channel].at(j) << "\n";
 					gEMOTIV->pass_values(channel, buffer[channel].at(j));
 				}
 				process_packets();
+				std::cout << "*";
 			}
+			std::cout << "\n";
 		}
 	}
 }
