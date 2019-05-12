@@ -75,25 +75,33 @@ public:
         std::cout << "Local port : " << localPort << "\n\n";
 
         // Initialize SDL_net
-        if (!InitSDL_Net())
+        if (!InitSDL_Net()) {
+	        std::cout << "Init SDL failed \n";
             return false;
+		}
 
-        if (!OpenPort(localPort))
+        if (!OpenPort(localPort)) {
+	        std::cout << "Open local Port failed \n";
             return false;
+		}
 
-        if (!SetIPAndPort(ip, remotePort))
+        if (!SetIPAndPort(ip, remotePort)){
+	        std::cout << "SetIPandPort Port failed \n";
             return false;
+		}
 
-        if (!CreatePacket(65536))
+        if (!CreatePacket(65536)){
+	        std::cout << "Create Packet \n";
             return false;
+		}
 
         /* bind server address to channel 0 */
         if (SDLNet_UDP_Bind(ourSocket, 0, &serverIP) == -1)
         {
-            printf("SDLNet_UDP_Bind: %s\n", SDLNet_GetError());
+            printf("SDLNet_UDP_Bind failed: %s\n", SDLNet_GetError());
             return false;
         }
-
+        std::cout << "UDP init successful.\n";
         return true;
     }
     bool InitServer(int32_t remotePort, int32_t localPort) {
@@ -154,23 +162,30 @@ public:
     }
     bool OpenPort(int32_t port)
     {
-        std::cout << "Opening port " << port << "...\n";
+		int tested=0;
 
         // Sets our sovket with our local port
 		if (ourSocket != nullptr) {
 		    SDLNet_UDP_Unbind(ourSocket,0);
 			SDLNet_UDP_Close(ourSocket);
 		}
-        ourSocket = SDLNet_UDP_Open(port);
 
-        if (ourSocket == nullptr)
-        {
-            std::cout << "\tSDLNet_UDP_Open failed : " << SDLNet_GetError() << std::endl;
-            return false;
-        }
+		do {
+			std::cout << "Opening port " << port << "...\n";
 
-        std::cout << "\tSuccess!\n\n";
-        return true;
+			ourSocket = SDLNet_UDP_Open(port);
+
+			if (ourSocket == nullptr)
+			{
+				std::cout << "\tSDLNet_UDP_Open Port " << port << " failed : " << SDLNet_GetError() << std::endl;
+			} else {
+				std::cout << "\tSuccess!\n\n";
+				return true;
+			}
+			port++;tested++;
+		} while (tested<32);
+		std::cout << "Giving up!!\n";
+		return(false);
     }
     bool ClosePort()
     {
