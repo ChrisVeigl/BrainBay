@@ -37,12 +37,18 @@ LRESULT CALLBACK AndDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		case WM_INITDIALOG:
 				CheckDlgButton(hDlg, IDC_BINARY, st->binary);
 				CheckDlgButton(hDlg, IDC_ONE, st->output_one);
-				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->trueValue,1);
-				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->falseValue,1);
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send True-Value for true and False-Value for false" ) ;
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and False-Value for false" ) ;
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and nothing for false" ) ;
-				SendDlgItemMessage( hDlg, IDC_MODECOMBO, CB_SETCURSEL, (WPARAM) (st->mode), 0L ) ;
+				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->numericTrueValue,1);
+				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->numericFalseValue,1);
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "True-Value (512)" ) ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Input1") ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "max of Input1 and Input2") ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)" ) ;
+				SendDlgItemMessage( hDlg, IDC_TRUECOMBO, CB_SETCURSEL, (WPARAM) (st->trueMode), 0L ) ;
+
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "INVALID_VALUE (-32767)" ) ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)") ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "No Output" ) ;
+				SendDlgItemMessage( hDlg, IDC_FALSECOMBO, CB_SETCURSEL, (WPARAM) (st->falseMode), 0L ) ;
 				break;		
 		case WM_CLOSE:
 			    EndDialog(hDlg, LOWORD(wParam));
@@ -57,16 +63,19 @@ LRESULT CALLBACK AndDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 				case IDC_ONE:
 					st->output_one=IsDlgButtonChecked(hDlg,IDC_ONE);
                     break;
-
-				case IDC_MODECOMBO:
-					st->mode=SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				case IDC_TRUECOMBO:
+					st->trueMode=SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_GETCURSEL, 0, 0 ) ;
+					break;
+				case IDC_FALSECOMBO:
+					st->falseMode=SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_GETCURSEL, 0, 0 ) ;
+					break;
 				case IDC_TRUE_VALUE:
 					GetDlgItemText(hDlg, IDC_TRUE_VALUE, temp,sizeof(temp));
-					st->trueValue=(float)atoi(temp);
+					st->numericTrueValue=(float)atoi(temp);
                     break;
 				case IDC_FALSE_VALUE:
 					GetDlgItemText(hDlg, IDC_FALSE_VALUE, temp,sizeof(temp));
-					st->falseValue=(float)atoi(temp);
+					st->numericFalseValue=(float)atoi(temp);
                     break;
 			}
 			return TRUE;
@@ -90,9 +99,10 @@ ANDOBJ::ANDOBJ(int num) : BASE_CL()
 	input2 = INVALID_VALUE;
 	binary=0;
 	output_one=0;
-	trueValue=512.0;
-	falseValue=INVALID_VALUE;
-	mode=0;
+	numericTrueValue=1;
+	numericFalseValue=0;
+	trueMode=0;
+	falseMode=0;
 }
 
 	
@@ -107,11 +117,14 @@ void ANDOBJ::load(HANDLE hFile)
 	load_object_basics(this);
 	load_property("binary",P_INT,&binary);
 	load_property("one",P_INT,&output_one);
-	load_property("mode",P_INT,&mode);
-	load_property("trueValue",P_INT,&tmp);
-	trueValue=tmp;
-	load_property("falseValue",P_INT,&tmp);
-	falseValue=tmp;
+	load_property("trueMode",P_INT,&trueMode);
+	load_property("falseMode",P_INT,&falseMode);
+	tmp=1;
+	load_property("numericTrueValue",P_INT,&tmp);
+	numericTrueValue=tmp;
+	tmp=0;
+	load_property("numericFalseValue",P_INT,&tmp);
+	numericFalseValue=tmp;
 }
 
 void ANDOBJ::save(HANDLE hFile) 
@@ -120,11 +133,12 @@ void ANDOBJ::save(HANDLE hFile)
 	save_object_basics(hFile, this);
 	save_property(hFile,"binary",P_INT,&binary);
 	save_property(hFile,"one",P_INT,&output_one);
-	save_property(hFile,"mode",P_INT,&mode);
-	tmp=trueValue;
-	save_property(hFile,"trueValue",P_INT,&tmp);
-	tmp=falseValue;
-	save_property(hFile,"falseValue",P_INT,&tmp);
+	save_property(hFile,"trueMode",P_INT,&trueMode);
+	save_property(hFile,"falseMode",P_INT,&falseMode);
+	tmp=numericTrueValue;
+	save_property(hFile,"numericTrueValue",P_INT,&tmp);
+	tmp=numericFalseValue;
+	save_property(hFile,"numericFalseValue",P_INT,&tmp);
 }
 	
 void ANDOBJ::incoming_data(int port, float value)
@@ -140,22 +154,23 @@ void ANDOBJ::work(void)
 	float value = TRUE_VALUE;
 	if (!binary)
 	{
-		switch (mode) {
-			case 0:
-				if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE))
-					pass_values(0, trueValue);
-				else pass_values(0, falseValue);
-				break;
-			case 1:
-				if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE))
-					pass_values(0, input1);
-				else pass_values(0, falseValue);
-				break;
-			case 2:
-				if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE)) 
-					pass_values(0, input1);
-				break;
+		float actTrueValue=0,actFalseValue=0;
+
+		switch (trueMode) {
+			case 0: actTrueValue=TRUE_VALUE; break;
+			case 1: actTrueValue=input1; break;
+			case 2: actTrueValue=(input1>input2) ? input1 : input2; break;
+			case 3: actTrueValue=numericTrueValue; break;
 		}
+
+		switch (falseMode) {
+			case 0: actFalseValue=INVALID_VALUE; break;
+			case 1: actFalseValue=numericFalseValue; break;
+		}
+
+		if ((input1 != INVALID_VALUE) && (input2 != INVALID_VALUE))
+					pass_values(0, actTrueValue);
+		else if (falseMode != 2) pass_values(0, actFalseValue);
 	}
 	else
 	{

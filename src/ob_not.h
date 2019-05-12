@@ -28,8 +28,9 @@ class NOTOBJ : public BASE_CL
 	public:
 		int binary;
 		int bits;
-		float trueValue, falseValue;
-		int mode;
+		float numericTrueValue, numericFalseValue;
+		int trueMode;
+		int falseMode;
 	
 	NOTOBJ(int num);
 	

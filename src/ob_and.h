@@ -29,8 +29,9 @@ class ANDOBJ : public BASE_CL
 	public:
 		int binary;
 		int output_one;
-		float trueValue, falseValue;
-		int mode;
+		float numericTrueValue, numericFalseValue;
+		int trueMode;
+		int falseMode;
 
 	ANDOBJ(int num);
 	

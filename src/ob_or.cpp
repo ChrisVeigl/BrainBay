@@ -35,13 +35,19 @@ LRESULT CALLBACK OrDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	{
 		case WM_INITDIALOG:
 				CheckDlgButton(hDlg, IDC_BINARY, st->binary);
-				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->trueValue,1);
-				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->falseValue,1);
+				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->numericTrueValue,1);
+				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->numericFalseValue,1);
 
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send True-Value for true and False-Value for false" ) ;
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and False-Value for false" ) ;
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send Input1 for true and nothing for false" ) ;
-				SendDlgItemMessage( hDlg, IDC_MODECOMBO, CB_SETCURSEL, (WPARAM) (st->mode), 0L ) ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "True-Value (512)" ) ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Input1") ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "max of Input1 and Input2") ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)" ) ;
+				SendDlgItemMessage( hDlg, IDC_TRUECOMBO, CB_SETCURSEL, (WPARAM) (st->trueMode), 0L ) ;
+
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "INVALID_VALUE (-32767)" ) ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)") ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "No Output" ) ;
+				SendDlgItemMessage( hDlg, IDC_FALSECOMBO, CB_SETCURSEL, (WPARAM) (st->falseMode), 0L ) ;
 				break;		
 
 		case WM_CLOSE:
@@ -55,15 +61,20 @@ LRESULT CALLBACK OrDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 					st->binary=IsDlgButtonChecked(hDlg,IDC_BINARY);
                     break;
 
-				case IDC_MODECOMBO:
-					st->mode=SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				case IDC_TRUECOMBO:
+					st->trueMode=SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_GETCURSEL, 0, 0 ) ;
+					break;
+				case IDC_FALSECOMBO:
+					st->falseMode=SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_GETCURSEL, 0, 0 ) ;
+					break;
+
 				case IDC_TRUE_VALUE:
 					GetDlgItemText(hDlg, IDC_TRUE_VALUE, temp,sizeof(temp));
-					st->trueValue=(float)atoi(temp);
+					st->numericTrueValue=(float)atoi(temp);
                     break;
 				case IDC_FALSE_VALUE:
 					GetDlgItemText(hDlg, IDC_FALSE_VALUE, temp,sizeof(temp));
-					st->falseValue=(float)atoi(temp);
+					st->numericFalseValue=(float)atoi(temp);
                     break;
 
 			}
@@ -89,9 +100,10 @@ OROBJ::OROBJ(int num) : BASE_CL()
 	input1 = INVALID_VALUE;
 	input2 = INVALID_VALUE;
 	binary=0;
-	trueValue=512.0;
-	falseValue=INVALID_VALUE;
-	mode=0;
+	numericTrueValue=1;
+	numericFalseValue=0;
+	trueMode=0;
+	falseMode=0;
 }
 	
 void OROBJ::make_dialog(void) 
@@ -105,11 +117,14 @@ void OROBJ::load(HANDLE hFile)
 	int tmp;
 	load_object_basics(this);
 	load_property("binary",P_INT,&binary);
-	load_property("mode",P_INT,&mode);
+	load_property("trueMode",P_INT,&trueMode);
+	load_property("falseMode",P_INT,&falseMode);
+    tmp=1;
 	load_property("trueValue",P_INT,&tmp);
-	trueValue=tmp;
+	numericTrueValue=tmp;
+    tmp=0;
 	load_property("falseValue",P_INT,&tmp);
-	falseValue=tmp;
+	numericFalseValue=tmp;
 }
 
 void OROBJ::save(HANDLE hFile) 
@@ -117,10 +132,11 @@ void OROBJ::save(HANDLE hFile)
 	int tmp;
 	save_object_basics(hFile, this);
 	save_property(hFile,"binary",P_INT,&binary);
-	save_property(hFile,"mode",P_INT,&mode);
-	tmp=trueValue;
+	save_property(hFile,"trueMode",P_INT,&trueMode);
+	save_property(hFile,"falseMode",P_INT,&falseMode);
+	tmp=numericTrueValue;
 	save_property(hFile,"trueValue",P_INT,&tmp);
-	tmp=falseValue;
+	tmp=numericFalseValue;
 	save_property(hFile,"falseValue",P_INT,&tmp);
 }
 	
@@ -138,22 +154,23 @@ void OROBJ::work(void)
 	
 	if (!binary)
 	{
-		switch (mode) {
-			case 0:
-				if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE))
-					pass_values(0, trueValue);
-				else pass_values(0, falseValue);
-				break;
-			case 1:
-				if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE))
-					pass_values(0, input1);
-				else pass_values(0, falseValue);
-				break;
-			case 2:
-				if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE)) 
-					pass_values(0, input1);
-				break;
+		float actTrueValue=0,actFalseValue=0;
+
+		switch (trueMode) {
+			case 0: actTrueValue=TRUE_VALUE; break;
+			case 1: actTrueValue=input1; break;
+			case 2: actTrueValue=(input1>input2) ? input1 : input2; break;
+			case 3: actTrueValue=numericTrueValue; break;
 		}
+
+		switch (falseMode) {
+			case 0: actFalseValue=INVALID_VALUE; break;
+			case 1: actFalseValue=numericFalseValue; break;
+		}
+
+		if ((input1 != INVALID_VALUE) || (input2 != INVALID_VALUE))
+					pass_values(0, actTrueValue);
+		else if (falseMode != 2) pass_values(0, actFalseValue);
 	}
 	else
 	{

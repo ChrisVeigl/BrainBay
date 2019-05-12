@@ -27,8 +27,8 @@ class OROBJ : public BASE_CL
 		
 	public:
 		int binary;
-		float trueValue, falseValue;
-		int mode;
+		float numericTrueValue, numericFalseValue;
+		int trueMode,falseMode;
 
 	OROBJ(int num);
 	

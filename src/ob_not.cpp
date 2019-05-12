@@ -35,12 +35,18 @@ LRESULT CALLBACK NotDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		case WM_INITDIALOG:
 				CheckDlgButton(hDlg, IDC_BINARY, st->binary);
 				SetDlgItemInt(hDlg,IDC_BITS,st->bits,0);
-				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->trueValue,1);
-				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->falseValue,1);
+				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->numericTrueValue,1);
+				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->numericFalseValue,1);
 
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send True-Value for incoming INVALID_VALUE and False-Value for all others" ) ;
-				SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Send True-Value for incoming False-Value and vice versa" ) ;
-				SendDlgItemMessage( hDlg, IDC_MODECOMBO, CB_SETCURSEL, (WPARAM) (st->mode), 0L ) ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "True-Value (512)" ) ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)" ) ;
+				SendDlgItemMessage( hDlg, IDC_TRUECOMBO, CB_SETCURSEL, (WPARAM) (st->trueMode), 0L ) ;
+
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "INVALID_VALUE (-32767)" ) ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)") ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "No Output" ) ;
+				SendDlgItemMessage( hDlg, IDC_FALSECOMBO, CB_SETCURSEL, (WPARAM) (st->falseMode), 0L ) ;
+
 				break;		
 		case WM_CLOSE:
 			    EndDialog(hDlg, LOWORD(wParam));
@@ -55,15 +61,19 @@ LRESULT CALLBACK NotDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 				case IDC_BITS:
 					st->bits=GetDlgItemInt(hDlg,IDC_BITS,NULL,0);
                     break;
-				case IDC_MODECOMBO:
-					st->mode=SendDlgItemMessage(hDlg, IDC_MODECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				case IDC_TRUECOMBO:
+					st->trueMode=SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_GETCURSEL, 0, 0 ) ;
+					break;
+				case IDC_FALSECOMBO:
+					st->falseMode=SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_GETCURSEL, 0, 0 ) ;
+					break;
 				case IDC_TRUE_VALUE:
 					GetDlgItemText(hDlg, IDC_TRUE_VALUE, temp,sizeof(temp));
-					st->trueValue=(float)atoi(temp);
+					st->numericTrueValue=(float)atoi(temp);
                     break;
 				case IDC_FALSE_VALUE:
 					GetDlgItemText(hDlg, IDC_FALSE_VALUE, temp,sizeof(temp));
-					st->falseValue=(float)atoi(temp);
+					st->numericFalseValue=(float)atoi(temp);
                     break;
 			}
 			return TRUE;
@@ -87,9 +97,10 @@ NOTOBJ::NOTOBJ(int num) : BASE_CL()
 	input = INVALID_VALUE;
 	binary=0;
 	bits=127;
-	trueValue=512.0;
-	falseValue=INVALID_VALUE;
-	mode=0;
+	numericTrueValue=1.0;
+	numericFalseValue=0.0;
+	trueMode=0;
+	falseMode=0;
 }
 	
 void NOTOBJ::make_dialog(void)
@@ -104,11 +115,14 @@ void NOTOBJ::load(HANDLE hFile)
 	load_object_basics(this);
 	load_property("binary",P_INT,&binary);
 	load_property("bits",P_INT,&bits);
-	load_property("mode",P_INT,&mode);
+	load_property("trueMode",P_INT,&trueMode);
+	load_property("falseMode",P_INT,&falseMode);
+    tmp=1;
 	load_property("trueValue",P_INT,&tmp);
-	trueValue=tmp;
+	numericTrueValue=tmp;
+    tmp=0;
 	load_property("falseValue",P_INT,&tmp);
-	falseValue=tmp;
+	numericFalseValue=tmp;
 }
 
 void NOTOBJ::save(HANDLE hFile) 
@@ -117,10 +131,11 @@ void NOTOBJ::save(HANDLE hFile)
 	save_object_basics(hFile, this);
 	save_property(hFile,"binary",P_INT,&binary);
 	save_property(hFile,"bits",P_INT,&bits);
-	save_property(hFile,"mode",P_INT,&mode);
-	tmp=trueValue;
+	save_property(hFile,"trueMode",P_INT,&trueMode);
+	save_property(hFile,"falseMode",P_INT,&falseMode);
+	tmp=numericTrueValue;
 	save_property(hFile,"trueValue",P_INT,&tmp);
-	tmp=falseValue;
+	tmp=numericFalseValue;
 	save_property(hFile,"falseValue",P_INT,&tmp);
 }
 	
@@ -136,18 +151,22 @@ void NOTOBJ::work(void)
 
 	if (!binary)
 	{
-		switch (mode) {
-			case 0:
-				if (input == INVALID_VALUE) 
-					pass_values(0, trueValue);
-				else pass_values(0, falseValue);
-				break;
-			case 1:
-				if (input == falseValue) 
-					pass_values(0, trueValue);
-				else pass_values(0, falseValue);
-				break;
+		float actTrueValue=0,actFalseValue=0;
+
+		switch (trueMode) {
+			case 0: actTrueValue=TRUE_VALUE; break;
+			case 1: actTrueValue=numericTrueValue; break;
 		}
+
+		switch (falseMode) {
+			case 0: actFalseValue=INVALID_VALUE; break;
+			case 1: actFalseValue=numericFalseValue; break;
+		}
+
+		if (input == INVALID_VALUE)
+			pass_values(0, actTrueValue);
+		else if (falseMode != 2) pass_values(0, actFalseValue);
+
 	}
 	else
 	{

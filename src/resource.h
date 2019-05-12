@@ -140,7 +140,10 @@
 #define IDC_PAR1TEXT4                   1051
 #define IDC_HARMONICLIST                1052
 #define IDC_ADAPTINTERVALBAR            1052
+#define IDC_PAR1TEXT5                   1052
+#define IDC_PAR1TEXT6                   1053
 #define IDC_SAVEHARMONIC                1054
+#define IDC_PAR1TEXT7                   1054
 #define IDC_HARMONICNAME                1056
 #define IDC_LOADHARMONIC                1057
 #define IDC_PITCHRANGE                  1058
@@ -751,9 +754,10 @@
 #define IDC_STARTSTOP                   1527
 #define IDC_BLOCK_INVALID_VALUE         1528
 #define IDC_ONLY_CHANGING               1529
-#define IDC_ORCOMBO                     1529
 #define IDC_TRUE_VALUE                  1530
 #define IDC_FALSE_VALUE                 1531
+#define IDC_TRUECOMBO                   1532
+#define IDC_FALSECOMBO                  1533
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -923,7 +927,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
 #define _APS_NEXT_COMMAND_VALUE         32957
-#define _APS_NEXT_CONTROL_VALUE         1531
+#define _APS_NEXT_CONTROL_VALUE         1533
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
