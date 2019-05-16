@@ -142,6 +142,7 @@ BEGIN
             MENUITEM "Shadow",                      IDM_INSERTSHADOW
             MENUITEM "Sound-Player",                IDM_INSERTWAV
             MENUITEM "TCP-Sender",                  IDM_INSERTTCPSENDER
+            MENUITEM "Threshold / Meter",           IDM_INSERTTHRESHOLD
             MENUITEM "Volume",                      IDM_INSERTVOLUME
         END
         POPUP "Others"
@@ -195,12 +196,12 @@ CAPTION "Info"
 FONT 8, "System", 0, 0, 0x0
 BEGIN
     ICON            107,IDC_MYICON,14,9,20,20
-    LTEXT           "BrainBay  --  Version 2.4  (04/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
+    LTEXT           "BrainBay  --  Version 2.4  (05/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
     LTEXT           "The OpenEEG-Project:                                     http://www.openeeg.sf.net",IDC_STATIC,52,40,118,19
-    LTEXT           "Christoph Veigl, Jeremy Wilkerson, Lester John               Jim Peters, Rudi Cilibrasi, Joerg Hansmann, Stephan Gerhard, Robert Anessi, Raymond Nguyen, Franz Strobl",IDC_STATIC,67,75,195,29
+    LTEXT           "Christoph Veigl, Jeremy Wilkerson, Lester John,               Jim Peters, Rudi Cilibrasi, Joerg Hansmann, Stephan Gerhard, Robert Anessi, Raymond Nguyen, Franz Strobl, William Croft, Elliot Mebane",IDC_STATIC,67,75,195,35
     LTEXT           " BrainBay-Contributors:",IDC_STATIC,53,65,77,8
-    LTEXT           " Special Thanks for valuable resources:",IDC_STATIC,54,108,130,8
-    LTEXT           "Don Cross, HeNe, Craig Peacock",IDC_STATIC,67,118,151,15
+    LTEXT           " Special Thanks for valuable resources:",IDC_STATIC,54,114,130,8
+    LTEXT           "Don Cross, HeNe, Craig Peacock",IDC_STATIC,67,124,151,15
 END
 
 IDD_EEGBOX_CHANSELECT DIALOGEX 0, 0, 289, 260
@@ -394,7 +395,7 @@ BEGIN
     LTEXT           "Value:",IDC_STATIC,40,55,21,8
 END
 
-IDD_THRESHOLDBOX DIALOGEX 0, 0, 285, 282
+IDD_THRESHOLDBOX DIALOGEX 0, 0, 285, 349
 STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
 CAPTION "Threshold"
@@ -403,52 +404,61 @@ BEGIN
     LTEXT           "Averaging Period",IDC_STATIC,19,22,56,11
     EDITTEXT        IDC_AVGINTERVAL,226,20,21,12,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER
     SCROLLBAR       IDC_AVGINTERVALBAR,81,20,140,11
-    EDITTEXT        IDC_AVGFROM,168,77,39,13,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER
-    EDITTEXT        IDC_AVGTO,168,93,39,13,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER
-    SCROLLBAR       IDC_AVGFROMBAR,71,77,94,11
-    SCROLLBAR       IDC_AVGTOBAR,71,93,93,11
+    EDITTEXT        IDC_AVGFROM,168,92,39,13,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER
+    EDITTEXT        IDC_AVGTO,168,75,39,13,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER
+    SCROLLBAR       IDC_AVGFROMBAR,71,92,94,11
+    SCROLLBAR       IDC_AVGTOBAR,71,75,93,11
     EDITTEXT        IDC_AVGGAIN,226,36,22,12,ES_AUTOHSCROLL | ES_READONLY | ES_NUMBER
     LTEXT           "Gain (%)",IDC_STATIC,47,37,27,8
     SCROLLBAR       IDC_AVGGAINBAR,81,36,139,11
-    LTEXT           "bigger than",IDC_PAR1TEXT,26,78,43,8,NOT WS_GROUP
-    LTEXT           "smaller than",IDC_PAR2TEXT,25,94,40,8
+    LTEXT           "lower limit:",IDC_PAR1TEXT,26,93,43,8,NOT WS_GROUP
+    LTEXT           "upper limit:",IDC_PAR2TEXT,25,76,40,8
     CONTROL         "AND",IDC_AND,"Button",BS_AUTORADIOBUTTON,231,79,31,10
     CONTROL         "OR",IDC_OR,"Button",BS_AUTORADIOBUTTON,231,92,27,10
-    CONTROL         "Show Meter ",IDC_SHOWMETER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,219,56,10,WS_EX_RIGHT
-    PUSHBUTTON      "",IDC_SELECTCOLOR,171,236,17,13,BS_FLAT,WS_EX_STATICEDGE
-    LTEXT           "Meter",IDC_STATIC,150,239,19,8
+    CONTROL         "Show Meter ",IDC_SHOWMETER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,282,56,10,WS_EX_RIGHT
+    PUSHBUTTON      "",IDC_SELECTCOLOR,171,299,17,13,BS_FLAT,WS_EX_STATICEDGE
+    LTEXT           "Meter",IDC_STATIC,150,302,19,8
     CONTROL         "allow only rising values",IDC_RISING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,25,111,79,10,WS_EX_RIGHT
     CONTROL         "allow only falling values",IDC_FALLING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,124,111,82,10,WS_EX_RIGHT
     GROUPBOX        "Preparation",IDC_STATIC,7,5,271,51
     GROUPBOX        "Threshold Levels",IDC_STATIC,7,59,271,141
-    EDITTEXT        IDC_BIGADAPT,74,163,19,13,ES_AUTOHSCROLL
-    LTEXT           "% of last interval",IDC_STATIC,95,165,52,8
-    EDITTEXT        IDC_SMALLADAPT,74,178,19,13,ES_AUTOHSCROLL
-    LTEXT           "% of last interval",IDC_STATIC,95,180,57,8
+    EDITTEXT        IDC_BIGADAPT,74,182,19,13,ES_AUTOHSCROLL
+    LTEXT           "% of last interval",IDC_STATIC,95,184,52,8
+    EDITTEXT        IDC_SMALLADAPT,74,166,19,13,ES_AUTOHSCROLL
+    LTEXT           "% of last interval",IDC_STATIC,95,168,57,8
     LTEXT           "Dynamic threshold calculation:",IDC_STATIC,26,134,104,9
     EDITTEXT        IDC_ADAPTINTERVAL,170,146,24,12,ES_AUTOHSCROLL
-    LTEXT           "upper limit :",IDC_PAR1TEXT2,36,165,36,8,NOT WS_GROUP
-    LTEXT           "lower limit :",IDC_PAR2TEXT2,38,179,33,8
-    EDITTEXT        IDC_METERCAPTION,130,217,138,13,ES_AUTOHSCROLL
-    LTEXT           "Caption",IDC_PAR1TEXT3,102,219,27,8,NOT WS_GROUP
+    LTEXT           "lower limit :",IDC_PAR1TEXT2,34,184,35,8,NOT WS_GROUP
+    LTEXT           "upper limit :",IDC_PAR2TEXT2,34,168,35,8
+    EDITTEXT        IDC_METERCAPTION,130,280,138,13,ES_AUTOHSCROLL
+    LTEXT           "Caption",IDC_PAR1TEXT3,102,282,27,8,NOT WS_GROUP
     SCROLLBAR       IDC_ADAPTINTERVALBAR,73,147,92,11
-    GROUPBOX        "Meter Window",IDC_STATIC,6,206,272,70
-    PUSHBUTTON      "",IDC_BKCOLOR,252,236,17,13,BS_FLAT,WS_EX_STATICEDGE
-    LTEXT           "Background",IDC_STATIC,209,239,40,8
+    GROUPBOX        "Meter Window",IDC_STATIC,6,271,272,68
+    PUSHBUTTON      "",IDC_BKCOLOR,252,299,17,13,BS_FLAT,WS_EX_STATICEDGE
+    LTEXT           "Background",IDC_STATIC,209,302,40,8
     LTEXT           " Interval ",IDC_STATIC,37,149,28,8
-    SCROLLBAR       IDC_FONTSIZEBAR,48,255,60,11
-    LTEXT           "Font Size",IDC_STATIC,14,256,30,8
-    EDITTEXT        IDC_FONTSIZE,109,254,26,12,ES_AUTOHSCROLL | ES_READONLY
-    SCROLLBAR       IDC_BARSIZEBAR,48,238,60,11
-    LTEXT           "Bar Size",IDC_STATIC,17,238,27,8
-    EDITTEXT        IDC_BARSIZE,110,237,26,12,ES_AUTOHSCROLL | ES_READONLY
-    PUSHBUTTON      "",IDC_FONTCOL,171,253,17,13,BS_FLAT,WS_EX_STATICEDGE
-    LTEXT           "Font",IDC_STATIC,153,256,15,8
-    PUSHBUTTON      "",IDC_FONTBKCOL,252,253,17,13,BS_FLAT,WS_EX_STATICEDGE
-    LTEXT           "Font-Background",IDC_STATIC,194,255,56,8
+    SCROLLBAR       IDC_FONTSIZEBAR,48,318,60,11
+    LTEXT           "Font Size",IDC_STATIC,14,320,30,8
+    EDITTEXT        IDC_FONTSIZE,109,317,26,12,ES_AUTOHSCROLL | ES_READONLY
+    SCROLLBAR       IDC_BARSIZEBAR,48,301,60,11
+    LTEXT           "Bar Size",IDC_STATIC,17,302,27,8
+    EDITTEXT        IDC_BARSIZE,110,300,26,12,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "",IDC_FONTCOL,171,316,17,13,BS_FLAT,WS_EX_STATICEDGE
+    LTEXT           "Font",IDC_STATIC,153,319,15,8
+    PUSHBUTTON      "",IDC_FONTBKCOL,252,316,17,13,BS_FLAT,WS_EX_STATICEDGE
+    LTEXT           "Font-Background",IDC_STATIC,194,318,56,8
     CONTROL         "use median instead of average",IDC_USE_MEDIAN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,164,107,10
     CONTROL         "only once (get baseline)",IDC_BASELINE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,177,107,10
     LTEXT           "Samples",IDC_INTERVALUNIT,198,148,28,8
+    COMBOBOX        IDC_TRUECOMBO,20,231,109,78,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Output for True:",IDC_STATIC,20,221,91,8
+    EDITTEXT        IDC_TRUE_VALUE,102,245,26,14,ES_AUTOHSCROLL
+    LTEXT           "Output for False:",IDC_STATIC,155,220,95,8
+    EDITTEXT        IDC_FALSE_VALUE,232,245,26,14,ES_AUTOHSCROLL
+    COMBOBOX        IDC_FALSECOMBO,154,231,104,78,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Numeric Value:",IDC_PAR1TEXT6,47,247,52,8,NOT WS_GROUP
+    LTEXT           "Numeric Value:",IDC_PAR1TEXT7,178,248,52,8,NOT WS_GROUP
+    GROUPBOX        "Select output behaviour:",IDC_STATIC,7,203,271,62
 END
 
 IDD_OSCIBOX DIALOGEX 0, 0, 398, 256
@@ -1541,7 +1551,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 278
         TOPMARGIN, 7
-        BOTTOMMARGIN, 276
+        BOTTOMMARGIN, 343
     END
 
     IDD_OSCIBOX, DIALOG
