@@ -919,6 +919,8 @@
 #define ID_TARGET_OSC                   32954
 #define IDM_INSERTOSCSENDER             32955
 #define IDM_INSERTVOLUME                32956
+#define ID_TARGET_THRESHOLD             32957
+#define IDM_INSERT_THRESHOLD            32958
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -926,7 +928,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32957
+#define _APS_NEXT_COMMAND_VALUE         32959
 #define _APS_NEXT_CONTROL_VALUE         1533
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

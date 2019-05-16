@@ -200,6 +200,16 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			{
 				SCROLLINFO lpsi;
 				
+				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->numericTrueValue,1);
+				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->numericFalseValue,1);
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Input-Value") ;
+				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)" ) ;
+				SendDlgItemMessage( hDlg, IDC_TRUECOMBO, CB_SETCURSEL, (WPARAM) (st->trueMode), 0L ) ;
+
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "INVALID_VALUE (-32767)" ) ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "NumericValue (below)") ;
+				SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "No Output" ) ;
+				SendDlgItemMessage( hDlg, IDC_FALSECOMBO, CB_SETCURSEL, (WPARAM) (st->falseMode), 0L ) ;
 				
 				lpsi.cbSize=sizeof(SCROLLINFO);
 				lpsi.fMask=SIF_RANGE; // |SIF_POS;
@@ -276,6 +286,20 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				if (st->baseline) SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Seconds");
 				else SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Samples");
 				break;
+			case IDC_TRUECOMBO:
+				st->trueMode=SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				break;
+			case IDC_FALSECOMBO:
+				st->falseMode=SendDlgItemMessage(hDlg, IDC_FALSECOMBO, CB_GETCURSEL, 0, 0 ) ;
+				break;
+			case IDC_TRUE_VALUE:
+				GetDlgItemText(hDlg, IDC_TRUE_VALUE, temp,sizeof(temp));
+				st->numericTrueValue=(float)atoi(temp);
+                break;
+			case IDC_FALSE_VALUE:
+				GetDlgItemText(hDlg, IDC_FALSE_VALUE, temp,sizeof(temp));
+				st->numericFalseValue=(float)atoi(temp);
+                break;
 			case IDC_SELECTCOLOR:
 				st->color=select_color(hDlg,st->color);
 				st->redraw=1;
@@ -471,14 +495,20 @@ LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 
 THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 	  {
-		outports = 1;
+		outports = 3;
 		inports = 1;
 		width=65;
 		strcpy(in_ports[0].in_name,"in");
 		strcpy(out_ports[0].out_name,"out");
+		strcpy(out_ports[1].out_name,"lower");
+		strcpy(out_ports[2].out_name,"upper");
 
 		play_interval=0;from_input=1; to_input=512;	signal_gain=100;
 		strcpy (wndcaption,"Meter");
+		numericTrueValue=1;
+		numericFalseValue=0;
+		trueMode=0;
+		falseMode=0;
 
 		last_value=0;
 		for (accupos=0;accupos<ACCULEN;accupos++) accu[accupos]=0; 
@@ -526,50 +556,60 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 
 	  void THRESHOLDOBJ::make_dialog(void)
 	  {
-		  	display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_THRESHOLDBOX, ghWndStatusbox, (DLGPROC)ThresholdDlgHandler));
+	 		display_toolbox(hDlg=CreateDialog(hInst, (LPCTSTR)IDD_THRESHOLDBOX, ghWndStatusbox, (DLGPROC)ThresholdDlgHandler));
 	  }
 	  void THRESHOLDOBJ::load(HANDLE hFile) 
 	  {
-		  float temp;
-		  load_object_basics(this);
-		  load_property("play_interval",P_INT,&play_interval);
-		  load_property("interval_len",P_INT,&interval_len);
-		  load_property("gain",P_INT,&signal_gain);
-		  load_property("from-input",P_FLOAT,&from_input);
-		  load_property("to-input",P_FLOAT,&to_input);
-		  load_property("and/or",P_INT,&op);
-		  load_property("show-meter",P_INT,&showmeter);
-		  load_property("only-rising",P_INT,&rising);
-		  load_property("only-falling",P_INT,&falling);
-		  load_property("usemedian",P_INT,&usemedian);
-		  load_property("baseline",P_INT,&baseline);
-		  load_property("color",P_FLOAT,&temp);
-		  color=(COLORREF)temp;
-		  load_property("bkcol",P_FLOAT,&temp);
-		  bkcolor=(COLORREF)temp;
-		  if (bkcolor==color) bkcolor=RGB(255,255,255);
-		  temp=0;
-		  load_property("fontcol",P_FLOAT,&temp);
-		  fontcolor=(COLORREF)temp;
-		  temp=RGB(255,255,255);
-		  load_property("fontbkcol",P_FLOAT,&temp);
-		  fontbkcolor=(COLORREF)temp;
-		  load_property("top",P_INT,&top);
-		  load_property("left",P_INT,&left);
-		  load_property("right",P_INT,&right);
-		  load_property("bottom",P_INT,&bottom);
-		  load_property("bigadapt",P_INT,&bigadapt);
-		  load_property("smalladapt",P_INT,&smalladapt);
-		  load_property("adaptinterval",P_INT,&adapt_interval);
-		  load_property("fontsize",P_INT,&fontsize);
-		  if (fontsize)
-		  {
+		float temp;
+		load_object_basics(this);
+		load_property("play_interval",P_INT,&play_interval);
+		load_property("interval_len",P_INT,&interval_len);
+		load_property("gain",P_INT,&signal_gain);
+		load_property("from-input",P_FLOAT,&from_input);
+		load_property("to-input",P_FLOAT,&to_input);
+		load_property("and/or",P_INT,&op);
+		load_property("show-meter",P_INT,&showmeter);
+		load_property("only-rising",P_INT,&rising);
+		load_property("only-falling",P_INT,&falling);
+		load_property("usemedian",P_INT,&usemedian);
+		load_property("baseline",P_INT,&baseline);
+		load_property("color",P_FLOAT,&temp);
+		color=(COLORREF)temp;
+		load_property("bkcol",P_FLOAT,&temp);
+		bkcolor=(COLORREF)temp;
+		if (bkcolor==color) bkcolor=RGB(255,255,255);
+		temp=0;
+		load_property("fontcol",P_FLOAT,&temp);
+		fontcolor=(COLORREF)temp;
+		temp=RGB(255,255,255);
+		load_property("fontbkcol",P_FLOAT,&temp);
+		fontbkcolor=(COLORREF)temp;
+		load_property("top",P_INT,&top);
+		load_property("left",P_INT,&left);
+		load_property("right",P_INT,&right);
+		load_property("bottom",P_INT,&bottom);
+		load_property("bigadapt",P_INT,&bigadapt);
+		load_property("smalladapt",P_INT,&smalladapt);
+		load_property("adaptinterval",P_INT,&adapt_interval);
+		load_property("fontsize",P_INT,&fontsize);
+		if (fontsize)
+		{
 			if (font) DeleteObject(font);
 		    if (!(font = CreateFont(-MulDiv(fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
 					report_error("Font creation failed!");
-		  }
-		  load_property("barsize",P_INT,&barsize);
-		  load_property("wndcaption",P_STRING,wndcaption);
+		}
+		load_property("barsize",P_INT,&barsize);
+		load_property("wndcaption",P_STRING,wndcaption);
+
+		int tmp;
+		load_property("trueMode",P_INT,&trueMode);
+		load_property("falseMode",P_INT,&falseMode);
+		tmp=1;
+		load_property("numericTrueValue",P_INT,&tmp);
+		numericTrueValue=tmp;
+		tmp=0;
+		load_property("numericFalseValue",P_INT,&tmp);
+		numericFalseValue=tmp;
 
 		if (!showmeter)
 		{
@@ -591,37 +631,45 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		
 	  void THRESHOLDOBJ::save(HANDLE hFile) 
 	  {	  
-		  float temp;
-	 	  save_object_basics(hFile, this);
-		  save_property(hFile,"play_interval",P_INT,&play_interval);
-		  save_property(hFile,"interval_len",P_INT,&interval_len);
-		  save_property(hFile,"gain",P_INT,&signal_gain);
-		  save_property(hFile,"from-input",P_FLOAT,&from_input);
-		  save_property(hFile,"to-input",P_FLOAT,&to_input);
-		  save_property(hFile,"and/or",P_INT,&op);
-		  save_property(hFile,"show-meter",P_INT,&showmeter);
-		  save_property(hFile,"only-rising",P_INT,&rising);
-		  save_property(hFile,"only-falling",P_INT,&falling);
-		  save_property(hFile,"usemedian",P_INT,&usemedian);
-		  save_property(hFile,"baseline",P_INT,&baseline);
-		  temp=(float)color;
-		  save_property(hFile,"color",P_FLOAT,&temp);
-		  temp=(float)bkcolor;
-		  save_property(hFile,"bkcol",P_FLOAT,&temp);
-		  temp=(float)fontcolor;
-		  save_property(hFile,"fontcol",P_FLOAT,&temp);
-		  temp=(float)fontbkcolor;
-		  save_property(hFile,"fontbkcol",P_FLOAT,&temp);
-		  save_property(hFile,"top",P_INT,&top);
-		  save_property(hFile,"left",P_INT,&left);
-		  save_property(hFile,"right",P_INT,&right);
-		  save_property(hFile,"bottom",P_INT,&bottom);
-		  save_property(hFile,"bigadapt",P_INT,&bigadapt);
-		  save_property(hFile,"smalladapt",P_INT,&smalladapt);
-		  save_property(hFile,"adaptinterval",P_INT,&adapt_interval);
-		  save_property(hFile,"barsize",P_INT,&barsize);
-		  save_property(hFile,"fontsize",P_INT,&fontsize);
-		  save_property(hFile,"wndcaption",P_STRING,wndcaption);
+		float temp;
+	 	save_object_basics(hFile, this);
+		save_property(hFile,"play_interval",P_INT,&play_interval);
+		save_property(hFile,"interval_len",P_INT,&interval_len);
+		save_property(hFile,"gain",P_INT,&signal_gain);
+		save_property(hFile,"from-input",P_FLOAT,&from_input);
+		save_property(hFile,"to-input",P_FLOAT,&to_input);
+		save_property(hFile,"and/or",P_INT,&op);
+		save_property(hFile,"show-meter",P_INT,&showmeter);
+		save_property(hFile,"only-rising",P_INT,&rising);
+		save_property(hFile,"only-falling",P_INT,&falling);
+		save_property(hFile,"usemedian",P_INT,&usemedian);
+		save_property(hFile,"baseline",P_INT,&baseline);
+		temp=(float)color;
+		save_property(hFile,"color",P_FLOAT,&temp);
+		temp=(float)bkcolor;
+		save_property(hFile,"bkcol",P_FLOAT,&temp);
+		temp=(float)fontcolor;
+		save_property(hFile,"fontcol",P_FLOAT,&temp);
+		temp=(float)fontbkcolor;
+		save_property(hFile,"fontbkcol",P_FLOAT,&temp);
+		save_property(hFile,"top",P_INT,&top);
+		save_property(hFile,"left",P_INT,&left);
+		save_property(hFile,"right",P_INT,&right);
+		save_property(hFile,"bottom",P_INT,&bottom);
+		save_property(hFile,"bigadapt",P_INT,&bigadapt);
+		save_property(hFile,"smalladapt",P_INT,&smalladapt);
+		save_property(hFile,"adaptinterval",P_INT,&adapt_interval);
+		save_property(hFile,"barsize",P_INT,&barsize);
+		save_property(hFile,"fontsize",P_INT,&fontsize);
+		save_property(hFile,"wndcaption",P_STRING,wndcaption);
+
+		int tmp;
+		save_property(hFile,"trueMode",P_INT,&trueMode);
+		save_property(hFile,"falseMode",P_INT,&falseMode);
+		tmp=numericTrueValue;
+		save_property(hFile,"numericTrueValue",P_INT,&tmp);
+		tmp=numericFalseValue;
+		save_property(hFile,"numericFalseValue",P_INT,&tmp);
 	  }
 
 
@@ -723,7 +771,16 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		if ((!op)&&((gained_value<from_input)&&(gained_value>to_input)))  x=INVALID_VALUE;
 
 		if (baseline && firstadapt) x=INVALID_VALUE;
-		pass_values(0,x);
+
+		if (x != INVALID_VALUE) {
+			if (trueMode==0) pass_values(0,x);
+			else if (trueMode==1) pass_values(0,numericTrueValue);
+		} else {
+			if (falseMode==0) pass_values(0,x);
+			else if (falseMode==1) pass_values(0,numericFalseValue);
+		}
+		pass_values(1,from_input);
+		pass_values(2,to_input);
 		
 		if ((hDlg==ghWndToolbox)&&(!TIMING.dialog_update))
 		{ 

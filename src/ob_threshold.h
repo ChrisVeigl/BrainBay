@@ -56,6 +56,9 @@ class THRESHOLDOBJ : public BASE_CL
     int adapt_num;
 	char wndcaption[50];
 	HFONT font;
+	float numericTrueValue, numericFalseValue;
+	int trueMode;
+	int falseMode;
 
 
     THRESHOLDOBJ(int num);
