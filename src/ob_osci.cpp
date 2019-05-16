@@ -1025,7 +1025,10 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 	  {
 		  if (inputcount[port]==0)
 			input[port] = value;
-		  else 	input[port] += value;
+		  else 	{
+			  if (value == INVALID_VALUE) input[port]=INVALID_VALUE;
+			  else if (input[port]!=INVALID_VALUE) input[port] += value;
+		  }
 	      inputcount[port]++;
 	  }
 
@@ -1087,7 +1090,6 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 					if (inputcount[t]>0)
 					{
 						v=input[t]/inputcount[t];
-						inputcount[t]=0;
 					} else v=input[t];
 					if (within)
 					{
@@ -1103,6 +1105,7 @@ OSCIOBJ::OSCIOBJ(int num) : BASE_CL()
 					pixelbuffer[t][newpixels]=v;
 				}
 			    else pixelbuffer[t][newpixels]=INVALID_VALUE;
+				inputcount[t]=0;
 			}
 			if (newpixels<499) newpixels++;
 			InvalidateRect(displayWnd,NULL,FALSE);
