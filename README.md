@@ -15,10 +15,10 @@ Version Info
 
 * Recent changes for this release:
   * New elements Shadow and Volume allow control of volume and desktop transparency
-  * New element OSC-Sender for transfer of live values to other applications via UDP
+  * New element OSC-Sender for transfer of live values to other applications via Open Sound Control / UDP
   * Logical elements And, Or and Not got extended modes, increasing flexibility
-  * Threshold element was improved, inceasing flexibility
-  * Support for OpenBCI Ganglion and the new OpenBCIHub improved
+  * Threshold element improved, increasing flexibility
+  * user manual updated!
 
 
 * Not-so-recent changes worth mentioning:
