@@ -11,12 +11,17 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 2.4  (2019-04-27)
+* The current release version is 2.4  (2019-05-17)
 
-* Recent changes:
+* Recent changes for this release:
   * New elements Shadow and Volume allow control of volume and desktop transparency
   * New element OSC-Sender for transfer of live values to other applications via UDP
+  * Logical elements And, Or and Not got extended modes, increasing flexibility
+  * Threshold element was improved, inceasing flexibility
   * Support for OpenBCI Ganglion and the new OpenBCIHub improved
+
+
+* Not-so-recent changes worth mentioning:
   * Support for Neurosky devices
   * Cursorkey integration for Oscilloscope and Threshold Windows
   * Oscilloscope features snapshots for training reporting
@@ -59,6 +64,7 @@ Credits
 * Franz Strobl for the OCZ NIA support
 * Stephan Gerhard for the QDS parser
 * William Croft (OpenBCI) for various fixes, enhancements and blog posts
+* Elliot Mebane for valuable feedback and hints for improvements
 
 
 Further Information
@@ -66,8 +72,9 @@ Further Information
 
 * Find documentation on the project hompage http://brainbay.lo-res.org
 and in the user and developer manuals.
-I also recommend having a look at the OpenEEG site http://openeeg.sf.net
-and the OpenBCI project: http://www.openbci.org
+
+* I recommend having a look at the OpenEEG site http://openeeg.sf.net,
+the OpenBCI project: http://www.openbci.org and the Neurobit devices http://www.neurobitsystems.com/
 
 * If you want to share your BrainBay design files for neurofeedback or biofeedback
 protocols, I would be happy to include them in the release.
