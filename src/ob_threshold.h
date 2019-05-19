@@ -18,7 +18,10 @@
 
 #define ACCULEN 1000
 
-
+#define THRESHOLD_ADAPTMODE_NONE 0
+#define THRESHOLD_ADAPTMODE_RANGE 1
+#define THRESHOLD_ADAPTMODE_QUANTILE 2
+#define THRESHOLD_ADAPTMODE_AVERAGE 3
 
 
 class THRESHOLDOBJ : public BASE_CL
@@ -29,31 +32,34 @@ class THRESHOLDOBJ : public BASE_CL
   public: 
 	float input;
 
-	float gained_value;
+	float current_value;
+	float last_risingTest;
 	int  last_value;
 	float accu[ACCULEN];
 	int  accupos;
+	int buckets[1025];
+    int adapt_num;
 	int  play_interval;
 	int  interval_len;
 	int  signal_gain;
-	float from_input;
-	float to_input;
-	float avgsum;
+	float lower_limit;
+	float upper_limit;
+	float threshold_avg_sum;
+	float interval_sum;
+	float range_min,range_max;
 	int  op;
 	int  showmeter;
 	int  rising,falling;
-	int  usemedian;
 	int  baseline;
 	int  firstadapt;
-	int  bigadapt,smalladapt;
+	int  adapt_lower_limit,adapt_upper_limit;
+	int  adapt_lower_mode,adapt_upper_mode;
 	int  adapt_interval;
 	int old_y1,old_y2;
 	int barsize,fontsize;
 	int redraw;
 	COLORREF color,bkcolor, fontcolor, fontbkcolor;
 	int  top,left,right,bottom;
-	int buckets[1025];
-    int adapt_num;
 	char wndcaption[50];
 	HFONT font;
 	float numericTrueValue, numericFalseValue;
@@ -62,6 +68,7 @@ class THRESHOLDOBJ : public BASE_CL
 
 
     THRESHOLDOBJ(int num);
+    float get_quantile(int number_of_values); 
 
 	void session_start(void);
 	void session_reset(void);
@@ -77,5 +84,6 @@ class THRESHOLDOBJ : public BASE_CL
     
   private:
   	void empty_buckets(void);
+    void clear_averagers();
 
 };

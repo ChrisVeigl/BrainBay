@@ -48,9 +48,9 @@ void draw_meter(THRESHOLDOBJ * st)
 	bottom=rect.bottom-15;
 	height=(bottom-rect.top-20);
 
-    act=bottom-(int)(size_value(min,max,st->gained_value,0.0f,(float)height,0));
-	y1 =bottom-(int)(size_value(min,max,(float)st->from_input,0.0f,(float)height,0));
-	y2 =bottom-(int)(size_value(min,max,(float)st->to_input,0.0f,(float)height,0));
+    act=bottom-(int)(size_value(min,max,st->current_value,0.0f,(float)height,0));
+	y1 =bottom-(int)(size_value(min,max,(float)st->lower_limit,0.0f,(float)height,0));
+	y2 =bottom-(int)(size_value(min,max,(float)st->upper_limit,0.0f,(float)height,0));
 
 	if (act>bottom) act=bottom;
 	if (act<bottom-height) act=bottom-height;
@@ -62,14 +62,14 @@ void draw_meter(THRESHOLDOBJ * st)
     
    	SelectObject (hdc, bkpen);		
    	SelectObject (hdc, bkbrush);
-	if (st->bigadapt)
+	if (st->adapt_lower_limit)
 	{
 		Rectangle(hdc,15,st->old_y1,50,st->old_y1+15);
 		MoveToEx(hdc,5, st->old_y1,NULL);	
 		LineTo(hdc,rect.right, st->old_y1);
 	}
 
-	if (st->smalladapt)
+	if (st->adapt_upper_limit)
 	{
 		Rectangle(hdc,15,st->old_y2,50,st->old_y2+15);
 		MoveToEx(hdc,5, st->old_y2,NULL);	
@@ -95,14 +95,14 @@ void draw_meter(THRESHOLDOBJ * st)
 		SetBkColor(hdc, st->fontbkcolor);
 		SetTextColor(hdc,st->fontcolor);
 
-		//wsprintf(szdata, "%d   ",(int)(st->gained_value+0.5f));
+		//wsprintf(szdata, "%d   ",(int)(st->current_value+0.5f));
 		//ExtTextOut( hdc, rect.right-40,10, 0, &rect,szdata, strlen(szdata), NULL ) ;
 
 		txtpos.left=5;txtpos.right=50;
 		txtpos.top=0;txtpos.bottom=0;
 		if ((st->baseline) && (st->firstadapt)) 
 			sprintf(szdata, "  ");
-		else sprintf(szdata, " %.2f ",st->from_input);
+		else sprintf(szdata, " %.2f ",st->lower_limit);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
 		x=txtpos.bottom;
 		txtpos.top=y1-x;txtpos.bottom=txtpos.top+x;
@@ -113,7 +113,7 @@ void draw_meter(THRESHOLDOBJ * st)
 		txtpos.top=0;txtpos.bottom=0;
 		if ((st->baseline) && (st->firstadapt)) 
 			sprintf(szdata, " get baseline ");
-		else sprintf(szdata, " %.2f ",st->to_input);
+		else sprintf(szdata, " %.2f ",st->upper_limit);
 		DrawText(hdc, szdata, -1, &txtpos, DT_CALCRECT);
 //		txtpos.top=y2+1;txtpos.bottom+=y2+1;
 
@@ -157,8 +157,8 @@ void apply_threshold(HWND hDlg, THRESHOLDOBJ * st)
 	
 	st->interval_len= GetDlgItemInt(hDlg, IDC_AVGINTERVAL,NULL,0);
 	st->signal_gain= GetDlgItemInt(hDlg, IDC_AVGGAIN,NULL,TRUE);
-	st->bigadapt=GetDlgItemInt(hDlg, IDC_BIGADAPT,NULL,TRUE);
-	st->smalladapt=GetDlgItemInt(hDlg, IDC_SMALLADAPT,NULL,TRUE);
+	st->adapt_lower_limit=GetDlgItemInt(hDlg, IDC_ADAPT_LOWERLIMIT,NULL,TRUE);
+	st->adapt_upper_limit=GetDlgItemInt(hDlg, IDC_ADAPT_UPPERLIMIT,NULL,TRUE);
 	st->adapt_interval=GetDlgItemInt(hDlg, IDC_ADAPTINTERVAL,NULL,TRUE);
 	st->barsize=GetDlgItemInt(hDlg, IDC_BARSIZE,NULL,TRUE);
 	st->fontsize=GetDlgItemInt(hDlg, IDC_FONTSIZE,NULL,TRUE);
@@ -200,6 +200,18 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			{
 				SCROLLINFO lpsi;
 				
+				SendDlgItemMessage(hDlg, IDC_UPPERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Not used") ;
+				SendDlgItemMessage(hDlg, IDC_UPPERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Percent of min/max range" ) ;
+				SendDlgItemMessage(hDlg, IDC_UPPERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Quantile of samples" ) ;
+				SendDlgItemMessage(hDlg, IDC_UPPERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Percent of average value" ) ;
+				SendDlgItemMessage( hDlg, IDC_UPPERMODE_COMBO, CB_SETCURSEL, (WPARAM) (st->adapt_upper_mode), 0L ) ;
+
+				SendDlgItemMessage(hDlg, IDC_LOWERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Not used") ;
+				SendDlgItemMessage(hDlg, IDC_LOWERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Percent of min/max range" ) ;
+				SendDlgItemMessage(hDlg, IDC_LOWERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Quantile of samples" ) ;
+				SendDlgItemMessage(hDlg, IDC_LOWERMODE_COMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Percent of average value" ) ;
+				SendDlgItemMessage( hDlg, IDC_LOWERMODE_COMBO, CB_SETCURSEL, (WPARAM) (st->adapt_lower_mode), 0L ) ;
+
 				SetDlgItemInt(hDlg,IDC_TRUE_VALUE,(int)st->numericTrueValue,1);
 				SetDlgItemInt(hDlg,IDC_FALSE_VALUE,(int)st->numericFalseValue,1);
 				SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) "Input-Value") ;
@@ -243,16 +255,16 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				SetDlgItemInt(hDlg, IDC_FONTSIZE, st->fontsize,0);
 				SetScrollPos(GetDlgItem(hDlg,IDC_FONTSIZEBAR), SB_CTL,st->fontsize,TRUE);
 
-				sprintf(temp,"%.2f",st->from_input);
+				sprintf(temp,"%.2f",st->lower_limit);
 				SetDlgItemText(hDlg, IDC_AVGFROM, temp);
-				SetScrollPos(GetDlgItem(hDlg,IDC_AVGFROMBAR), SB_CTL,(int) size_value(st->in_ports[0].in_min,st->in_ports[0].in_max, st->from_input ,0.0f,1000.0f,0),TRUE);
+				SetScrollPos(GetDlgItem(hDlg,IDC_AVGFROMBAR), SB_CTL,(int) size_value(st->in_ports[0].in_min,st->in_ports[0].in_max, st->lower_limit ,0.0f,1000.0f,0),TRUE);
 
-				sprintf(temp,"%.2f",st->to_input);
+				sprintf(temp,"%.2f",st->upper_limit);
 				SetDlgItemText(hDlg, IDC_AVGTO, temp);
-				SetScrollPos(GetDlgItem(hDlg,IDC_AVGTOBAR), SB_CTL,(int) size_value(st->in_ports[0].in_min,st->in_ports[0].in_max, st->to_input ,0.0f,1000.0f,0),TRUE);
+				SetScrollPos(GetDlgItem(hDlg,IDC_AVGTOBAR), SB_CTL,(int) size_value(st->in_ports[0].in_min,st->in_ports[0].in_max, st->upper_limit ,0.0f,1000.0f,0),TRUE);
 
-				SetDlgItemInt(hDlg, IDC_BIGADAPT, st->bigadapt,TRUE);
-				SetDlgItemInt(hDlg, IDC_SMALLADAPT, st->smalladapt,TRUE);
+				SetDlgItemInt(hDlg, IDC_ADAPT_LOWERLIMIT, st->adapt_lower_limit,TRUE);
+				SetDlgItemInt(hDlg, IDC_ADAPT_UPPERLIMIT, st->adapt_upper_limit,TRUE);
 
 				SetDlgItemText(hDlg, IDC_METERCAPTION, st->wndcaption);
 
@@ -261,7 +273,7 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				CheckDlgButton(hDlg, IDC_SHOWMETER,st->showmeter);
 				CheckDlgButton(hDlg, IDC_RISING,st->rising);
 				CheckDlgButton(hDlg, IDC_FALLING,st->falling);
-				CheckDlgButton(hDlg, IDC_USE_MEDIAN,st->usemedian);
+				// CheckDlgButton(hDlg, IDC_USE_MEDIAN,st->usemedian);
 				CheckDlgButton(hDlg, IDC_BASELINE,st->baseline);
 				if (st->baseline) SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Seconds");
 				else SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Samples");
@@ -281,10 +293,16 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_OR:  st->op=FALSE; break;
 			case IDC_RISING: st->rising=IsDlgButtonChecked(hDlg,IDC_RISING); break;
 			case IDC_FALLING: st->falling=IsDlgButtonChecked(hDlg,IDC_FALLING); break;
-			case IDC_USE_MEDIAN: st->usemedian=IsDlgButtonChecked(hDlg,IDC_USE_MEDIAN); break;
+			// case IDC_USE_MEDIAN: st->usemedian=IsDlgButtonChecked(hDlg,IDC_USE_MEDIAN); break;
 			case IDC_BASELINE: st->baseline=IsDlgButtonChecked(hDlg,IDC_BASELINE); 
 				if (st->baseline) SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Seconds");
 				else SetDlgItemText(hDlg,IDC_INTERVALUNIT,"Samples");
+				break;
+			case IDC_UPPERMODE_COMBO:
+				st->adapt_upper_mode=SendDlgItemMessage(hDlg, IDC_UPPERMODE_COMBO, CB_GETCURSEL, 0, 0 ) ;
+				break;
+			case IDC_LOWERMODE_COMBO:
+				st->adapt_lower_mode=SendDlgItemMessage(hDlg, IDC_LOWERMODE_COMBO, CB_GETCURSEL, 0, 0 ) ;
 				break;
 			case IDC_TRUECOMBO:
 				st->trueMode=SendDlgItemMessage(hDlg, IDC_TRUECOMBO, CB_GETCURSEL, 0, 0 ) ;
@@ -324,18 +342,18 @@ LRESULT CALLBACK ThresholdDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 			case IDC_AVGFROM:
 				GetDlgItemText(hDlg, IDC_AVGFROM,temp,sizeof(temp));
 				if (!init)	
-					 st->from_input=(float)atof(temp);
+					 st->lower_limit=(float)atof(temp);
 				break;
 			case IDC_AVGTO:
 				GetDlgItemText(hDlg, IDC_AVGTO,temp,sizeof(temp));
 				if (!init) 
-					st->to_input=(float)atof(temp);
+					st->upper_limit=(float)atof(temp);
 				break;
 			case IDC_AVGINTERVAL:
 			case IDC_ADAPTINTERVAL:
 			case IDC_AVGGAIN:
-			case IDC_BIGADAPT:
-			case IDC_SMALLADAPT:
+			case IDC_ADAPT_LOWERLIMIT:
+			case IDC_ADAPT_UPPERLIMIT:
 			case IDC_METERCAPTION:
 				 if (!init) 
 					 apply_threshold(hDlg, st);
@@ -424,13 +442,13 @@ LRESULT CALLBACK MeterWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				case KEY_UP:
 				  // step=st->gain/50; 
 				  //if (step<1) step=1;
-  				  st->from_input+=1;
+  				  st->lower_limit+=1;
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 				case KEY_DOWN:
 				  // step=st->gain/50; 
 				  // if (step<1) step=1;
-  				  st->from_input-=1;
+  				  st->lower_limit-=1;
 	   			  InvalidateRect(st->displayWnd,NULL,TRUE);
 				break;
 				}
@@ -503,7 +521,8 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		strcpy(out_ports[1].out_name,"lower");
 		strcpy(out_ports[2].out_name,"upper");
 
-		play_interval=0;from_input=1; to_input=512;	signal_gain=100;
+		play_interval=0;lower_limit=1; upper_limit=512;	signal_gain=100;
+		range_min=0; range_max=0;
 		strcpy (wndcaption,"Meter");
 		numericTrueValue=1;
 		numericFalseValue=0;
@@ -514,14 +533,16 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		for (accupos=0;accupos<ACCULEN;accupos++) accu[accupos]=0; 
 		accupos=0;redraw=1;firstadapt=1;
 		interval_len=1; op=TRUE;
-		usemedian=1;avgsum=0;baseline=0;
-		showmeter=1;rising=0;falling=0; bigadapt=0;smalladapt=0;adapt_interval=200;
-		input=0;gained_value=0;
+		threshold_avg_sum=0;baseline=0;
+		showmeter=1;rising=0;falling=0; adapt_lower_limit=0;adapt_upper_limit=0;adapt_interval=200;
+		adapt_upper_mode=THRESHOLD_ADAPTMODE_NONE;
+		adapt_lower_mode=THRESHOLD_ADAPTMODE_NONE;
+		input=0;current_value=0;
 		fontsize=10; barsize=30;
 		left=510;right=550;top=20;bottom=400;
 		color=RGB(0,0,100);bkcolor=RGB(255,255,255);fontcolor=0;fontbkcolor=RGB(255,255,255);
         
-        empty_buckets();
+        clear_averagers();
 
 		if (!(font = CreateFont(-MulDiv(fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
 			report_error("Font creation failed!");
@@ -536,22 +557,17 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 
 	void THRESHOLDOBJ::session_start(void)
 	{
-		accupos=0;
-		for (int t=0;t<interval_len;t++) accu[t]=0;
-		empty_buckets();
+		clear_averagers();
 	}
 	
 	void THRESHOLDOBJ::session_reset(void)
 	{
-		accupos=0;firstadapt=1;avgsum=0;
-		for (int t=0;t<1000;t++) accu[t]=0;
-		empty_buckets();
+		firstadapt=1;
+		clear_averagers();
 	}
 	void THRESHOLDOBJ::session_pos(long pos)
 	{
-		accupos=0;avgsum=0;
-		for (int t=0;t<1000;t++) accu[t]=0;
-		empty_buckets();
+		clear_averagers();
 	}
 
 	  void THRESHOLDOBJ::make_dialog(void)
@@ -565,13 +581,12 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		load_property("play_interval",P_INT,&play_interval);
 		load_property("interval_len",P_INT,&interval_len);
 		load_property("gain",P_INT,&signal_gain);
-		load_property("from-input",P_FLOAT,&from_input);
-		load_property("to-input",P_FLOAT,&to_input);
+		load_property("from-input",P_FLOAT,&lower_limit);
+		load_property("to-input",P_FLOAT,&upper_limit);
 		load_property("and/or",P_INT,&op);
 		load_property("show-meter",P_INT,&showmeter);
 		load_property("only-rising",P_INT,&rising);
 		load_property("only-falling",P_INT,&falling);
-		load_property("usemedian",P_INT,&usemedian);
 		load_property("baseline",P_INT,&baseline);
 		load_property("color",P_FLOAT,&temp);
 		color=(COLORREF)temp;
@@ -588,8 +603,25 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		load_property("left",P_INT,&left);
 		load_property("right",P_INT,&right);
 		load_property("bottom",P_INT,&bottom);
-		load_property("bigadapt",P_INT,&bigadapt);
-		load_property("smalladapt",P_INT,&smalladapt);
+
+		if (! load_property("adapt_lower_limit",P_INT,&adapt_lower_limit))
+		load_property("bigadapt",P_INT,&adapt_lower_limit);     // legacy support
+
+		if (!load_property("adapt_upper_limit",P_INT,&adapt_upper_limit))
+		load_property("smalladapt",P_INT,&adapt_upper_limit);  // legacy support
+
+		load_property("adapt_upper_mode",P_INT,&adapt_upper_mode);
+		if (!load_property("adapt_lower_mode",P_INT,&adapt_lower_mode))
+		{   //legacy support
+			int  usemedian;
+			load_property("usemedian",P_INT,&usemedian);
+			if (adapt_upper_limit==0) adapt_upper_mode=THRESHOLD_ADAPTMODE_NONE;
+			else adapt_upper_mode= usemedian ? THRESHOLD_ADAPTMODE_QUANTILE : THRESHOLD_ADAPTMODE_AVERAGE;
+
+			if (adapt_lower_limit==0) adapt_lower_mode=THRESHOLD_ADAPTMODE_NONE;
+			else adapt_lower_mode= usemedian ? THRESHOLD_ADAPTMODE_QUANTILE : THRESHOLD_ADAPTMODE_AVERAGE;
+		}
+
 		load_property("adaptinterval",P_INT,&adapt_interval);
 		load_property("fontsize",P_INT,&fontsize);
 		if (fontsize)
@@ -626,6 +658,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		    SetWindowText(displayWnd,wndcaption);
 			InvalidateRect (displayWnd, NULL, TRUE);
 		}
+		session_reset();
 		redraw=1;
 	  }
 		
@@ -636,13 +669,13 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		save_property(hFile,"play_interval",P_INT,&play_interval);
 		save_property(hFile,"interval_len",P_INT,&interval_len);
 		save_property(hFile,"gain",P_INT,&signal_gain);
-		save_property(hFile,"from-input",P_FLOAT,&from_input);
-		save_property(hFile,"to-input",P_FLOAT,&to_input);
+		save_property(hFile,"from-input",P_FLOAT,&lower_limit);
+		save_property(hFile,"to-input",P_FLOAT,&upper_limit);
 		save_property(hFile,"and/or",P_INT,&op);
 		save_property(hFile,"show-meter",P_INT,&showmeter);
 		save_property(hFile,"only-rising",P_INT,&rising);
 		save_property(hFile,"only-falling",P_INT,&falling);
-		save_property(hFile,"usemedian",P_INT,&usemedian);
+		//save_property(hFile,"usemedian",P_INT,&usemedian);
 		save_property(hFile,"baseline",P_INT,&baseline);
 		temp=(float)color;
 		save_property(hFile,"color",P_FLOAT,&temp);
@@ -656,8 +689,10 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		save_property(hFile,"left",P_INT,&left);
 		save_property(hFile,"right",P_INT,&right);
 		save_property(hFile,"bottom",P_INT,&bottom);
-		save_property(hFile,"bigadapt",P_INT,&bigadapt);
-		save_property(hFile,"smalladapt",P_INT,&smalladapt);
+		save_property(hFile,"adapt_lower_limit",P_INT,&adapt_lower_limit);
+		save_property(hFile,"adapt_upper_limit",P_INT,&adapt_upper_limit);
+		save_property(hFile,"adapt_lower_mode",P_INT,&adapt_lower_mode);
+		save_property(hFile,"adapt_upper_mode",P_INT,&adapt_upper_mode);
 		save_property(hFile,"adaptinterval",P_INT,&adapt_interval);
 		save_property(hFile,"barsize",P_INT,&barsize);
 		save_property(hFile,"fontsize",P_INT,&fontsize);
@@ -680,135 +715,148 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 
 	  void THRESHOLDOBJ::incoming_data(int port, float value)
       {
-		int i;
-		input=value;
-		i = (int)size_value(in_ports[0].in_min,in_ports[0].in_max,value,-512.0f,512.0f,0);
-		if (i < -512) i=-512;
-		if (i > 512) i=512;
-		// if ((i >= -512) && (i <= 512))
-		buckets[i+512]++;
-		adapt_num++;
+  		  input=value;
       }
-        
 
 	  void THRESHOLDOBJ::work(void) 
 	  {
-		float l,x,sum;
-		int t,i;
+		// signal preparation: gain
+	    float gain_value=(float)((input)*signal_gain/100.0);
 
-		x=(float)((input)*signal_gain/100.0);
-		l=accu[accupos];
-		avgsum+=x; // (float)input;
-		
-		if ((accupos>=999)||(accupos<0)) accupos=0; 
-		else accupos++;
+		// signal preparation: averaging
+		interval_sum-=accu[accupos];
+		accupos++;
+		if (accupos>=interval_len) accupos=0; 
+		accu[accupos]=gain_value;
+		interval_sum+=gain_value;
 
-		accu[accupos]=x;
-		sum=0;
-		for (t=0;t<interval_len;t++)
-		{
-			i=accupos-t; if (i<0) i+=1000;
-			sum+=accu[i];
-		}
-		gained_value=sum/interval_len;
+		last_risingTest=gain_value;
+		current_value=interval_sum/interval_len;
 
 		long interval=adapt_interval;
 
-		if ((baseline) && (!usemedian)) { 
+		if (baseline) {     // extend interval from samples to seconds if baseline measurement
 			interval*=PACKETSPERSECOND;
 		}
 
-        if (adapt_num >= interval)
+		threshold_avg_sum+=gain_value;
+		buckets[(int)size_value(in_ports[0].in_min,in_ports[0].in_max,gain_value,0,1024,1)]++;
+
+		if (adapt_num==0) { 
+			range_min=current_value; 
+			range_max=current_value;
+		}
+		else {
+			if (current_value>range_max) range_max=current_value;
+			if (current_value<range_min) range_min=current_value;
+		}
+
+		adapt_num++;
+        if (adapt_num >= interval)   // enough samples for adaptive threshold calculation
         {
-			if (usemedian) {
-        		int numtrue, i, sum;
-        		if (bigadapt != 0)
-				{
-            		numtrue = (int)(adapt_num * bigadapt / 100.0f);
-					for (i = 1024, sum = 0; (i >= 0) && (sum < numtrue); i--)
-					{
-                		sum += buckets[i];
-					}
-					from_input = size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0);
-					redraw=1;
+			int emptyBuckets;
+			if ((adapt_lower_mode) || (adapt_upper_mode)) redraw=1;
+			if ((adapt_lower_mode==THRESHOLD_ADAPTMODE_QUANTILE) || (adapt_upper_mode==THRESHOLD_ADAPTMODE_QUANTILE)) 
+				emptyBuckets=1;
+			else emptyBuckets=0;
+
+			if ((!baseline) || (firstadapt)) {
+				switch (adapt_lower_mode) {
+					case THRESHOLD_ADAPTMODE_NONE:
+						break;
+					case THRESHOLD_ADAPTMODE_RANGE:
+						lower_limit=size_value(0,100,adapt_lower_limit,range_min,range_max,0);
+						break;
+					case THRESHOLD_ADAPTMODE_QUANTILE:
+						lower_limit=get_quantile(adapt_num * adapt_lower_limit / 100.0f);
+						break;
+					case THRESHOLD_ADAPTMODE_AVERAGE:
+						lower_limit = threshold_avg_sum/interval*adapt_lower_limit/100.0f;
+						break;
 				}
-        		if (smalladapt != 0)
-				{
-            		numtrue = (int)(adapt_num * smalladapt / 100.0f);
-					for (i = 0, sum = 0; (i <= 1024) && (sum < numtrue); i++)
-					{
-                		sum += buckets[i];
-					}
-					to_input = size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0);
-					redraw=1;
-				}
-				empty_buckets();
-			}
-			else {
-				if ((!baseline) || (firstadapt)) {
-        			if (bigadapt != 0)
-					{
-						from_input = avgsum/interval*bigadapt/100.0f;
-						redraw=1;
-					}
-        			if (smalladapt != 0)
-					{
-						to_input = avgsum/interval*smalladapt/100.0f;
-						redraw=1;
-					}
-					firstadapt=0;
+				switch (adapt_upper_mode) {
+					case THRESHOLD_ADAPTMODE_NONE:
+						break;
+					case THRESHOLD_ADAPTMODE_RANGE:
+						upper_limit=size_value(0,100,adapt_upper_limit,range_min,range_max,0);
+						break;
+					case THRESHOLD_ADAPTMODE_QUANTILE:
+						// TBD: check if compatibility break (% of value counted from top ?)
+						upper_limit=get_quantile(adapt_num * adapt_upper_limit / 100.0f);
+						break;
+					case THRESHOLD_ADAPTMODE_AVERAGE:
+						upper_limit = threshold_avg_sum/interval*adapt_upper_limit/100.0f;
+						break;
 				}
 			}
 			adapt_num=0;
-			avgsum=0;
+			firstadapt=0;
+			threshold_avg_sum=0;
+			if (emptyBuckets) empty_buckets();
 		}
 		
-	
-		x=gained_value;
-		if (rising&&(l>=accu[accupos])) x=INVALID_VALUE;
-		if (falling&&(l<=accu[accupos])) x=INVALID_VALUE;
-		if (op&&((gained_value<from_input)||(gained_value>to_input)))  x=INVALID_VALUE;
-		if ((!op)&&((gained_value<from_input)&&(gained_value>to_input)))  x=INVALID_VALUE;
+		float output_value=current_value;
+		if (rising&&(last_risingTest>=current_value)) output_value=INVALID_VALUE;
+		if (falling&&(last_risingTest<=current_value)) output_value=INVALID_VALUE;
+		if (op&&((current_value<lower_limit)||(current_value>upper_limit)))  output_value=INVALID_VALUE;
+		if ((!op)&&((current_value<lower_limit)&&(current_value>upper_limit)))  output_value=INVALID_VALUE;
 
-		if (baseline && firstadapt) x=INVALID_VALUE;
+		if (baseline && firstadapt) output_value=INVALID_VALUE;
 
-		if (x != INVALID_VALUE) {
-			if (trueMode==0) pass_values(0,x);
+		if (output_value != INVALID_VALUE) {
+			if (trueMode==0) pass_values(0,output_value);
 			else if (trueMode==1) pass_values(0,numericTrueValue);
 		} else {
-			if (falseMode==0) pass_values(0,x);
+			if (falseMode==0) pass_values(0,output_value);
 			else if (falseMode==1) pass_values(0,numericFalseValue);
 		}
-		pass_values(1,from_input);
-		pass_values(2,to_input);
+
+		pass_values(1,lower_limit);
+		pass_values(2,upper_limit);
 		
 		if ((hDlg==ghWndToolbox)&&(!TIMING.dialog_update))
 		{ 
 			  char temp[100];
 
-			  sprintf(temp,"%.2f",from_input);
+			  sprintf(temp,"%.2f",lower_limit);
 			  SetDlgItemText(hDlg, IDC_AVGFROM, temp);
-			  sprintf(temp,"%.2f",to_input);
+			  sprintf(temp,"%.2f",upper_limit);
 			  SetDlgItemText(hDlg, IDC_AVGTO, temp);
 
-			  if (smalladapt) SetScrollPos(GetDlgItem(hDlg,IDC_AVGTOBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, to_input,0.0f,1000.0f,0),TRUE);
-			  if (bigadapt) SetScrollPos(GetDlgItem(hDlg,IDC_AVGFROMBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, from_input ,0.0f,1000.0f,0),TRUE);
-			  
+			  if (adapt_upper_mode) SetScrollPos(GetDlgItem(hDlg,IDC_AVGTOBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, upper_limit,0.0f,1000.0f,0),TRUE);
+			  if (adapt_lower_mode) SetScrollPos(GetDlgItem(hDlg,IDC_AVGFROMBAR), SB_CTL,(int) size_value(in_ports[0].in_min,in_ports[0].in_max, lower_limit ,0.0f,1000.0f,0),TRUE);			  
 		}
 
 		if ((displayWnd)&&(!TIMING.draw_update)&&(!GLOBAL.fly))  InvalidateRect(displayWnd,NULL,FALSE);
 	  
 	  }
-	  
+
+	  float THRESHOLDOBJ::get_quantile(int number_of_values) 
+	  {
+		int i, sum;
+		for (i = 0, sum = 0; (i < 1024) && (sum < number_of_values); i++)
+		//for (i = 1024, sum = 0; (i > 0) && (sum < number_or_values); i--)
+		{
+            sum += buckets[i];
+		}
+		printf("sum=%d, i=%d\n",sum,i);
+		return(size_value(0.0f,1024.0f,(float)i,in_ports[0].in_min,in_ports[0].in_max,0));
+	  }
 
       void THRESHOLDOBJ::empty_buckets()
       {
-            for (int i = 0; i <= 1024; i++)
-            {
-            	buckets[i] = 0;
-            }
+            for (int i = 0; i <= 1024; i++)	buckets[i] = 0;
             adapt_num = 0;
       }
+      void THRESHOLDOBJ::clear_averagers()
+      {
+			for (int i=0;i<1000;i++) accu[i]=0;
+			accupos=0;
+			threshold_avg_sum=0;
+			interval_sum=0;
+  		    last_risingTest=0;
+			empty_buckets();
+	  }
 
 THRESHOLDOBJ::~THRESHOLDOBJ()
 	  {
