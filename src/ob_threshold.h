@@ -69,6 +69,8 @@ class THRESHOLDOBJ : public BASE_CL
 
     THRESHOLDOBJ(int num);
     float get_quantile(int number_of_values); 
+  	void empty_buckets(void);
+    void clear_averagers();
 
 	void session_start(void);
 	void session_reset(void);
@@ -81,9 +83,5 @@ class THRESHOLDOBJ : public BASE_CL
 	void update_inports(void);
 	void work(void);
     ~THRESHOLDOBJ();
-    
-  private:
-  	void empty_buckets(void);
-    void clear_averagers();
 
 };

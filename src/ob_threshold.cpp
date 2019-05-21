@@ -155,7 +155,10 @@ void apply_threshold(HWND hDlg, THRESHOLDOBJ * st)
   { 
 	updating=TRUE;
 	
-	st->interval_len= GetDlgItemInt(hDlg, IDC_AVGINTERVAL,NULL,0);
+	if (st->interval_len != GetDlgItemInt(hDlg, IDC_AVGINTERVAL,NULL,0)) {
+		st->interval_len= GetDlgItemInt(hDlg, IDC_AVGINTERVAL,NULL,0);
+		st->clear_averagers();
+	}
 	st->signal_gain= GetDlgItemInt(hDlg, IDC_AVGGAIN,NULL,TRUE);
 	st->adapt_lower_limit=GetDlgItemInt(hDlg, IDC_ADAPT_LOWERLIMIT,NULL,TRUE);
 	st->adapt_upper_limit=GetDlgItemInt(hDlg, IDC_ADAPT_UPPERLIMIT,NULL,TRUE);
@@ -172,6 +175,7 @@ void apply_threshold(HWND hDlg, THRESHOLDOBJ * st)
 	st->op=IsDlgButtonChecked(hDlg,IDC_AND);
 	updating=FALSE;
   }
+
 }
 
 
@@ -724,20 +728,27 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 	    float gain_value=(float)((input)*signal_gain/100.0);
 
 		// signal preparation: averaging
-		interval_sum-=accu[accupos];
+		/*interval_sum-=accu[accupos];
 		accupos++;
 		if (accupos>=interval_len) accupos=0; 
 		accu[accupos]=gain_value;
 		interval_sum+=gain_value;
+		current_value=interval_sum/interval_len;
+		printf("gain_value=%d, sum=%d, interval=%d, current_val=%d\n",(int)gain_value,(int)interval_sum,interval_len,(int)current_value);
+		*/
+
+		accu[accupos]=gain_value;
+		interval_sum=0;
+		for (int i=0;i<interval_len;i++) {
+			int p=accupos-i;
+			if (p<0) p+=1000;
+			interval_sum+=accu[p];
+		}
+		current_value=interval_sum/interval_len;
+		accupos++;
+		if (accupos>=1000) accupos=0; 
 
 		last_risingTest=gain_value;
-		current_value=interval_sum/interval_len;
-
-		long interval=adapt_interval;
-
-		if (baseline) {     // extend interval from samples to seconds if baseline measurement
-			interval*=PACKETSPERSECOND;
-		}
 
 		threshold_avg_sum+=gain_value;
 		buckets[(int)size_value(in_ports[0].in_min,in_ports[0].in_max,gain_value,0,1024,1)]++;
@@ -751,8 +762,12 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 			if (current_value<range_min) range_min=current_value;
 		}
 
+        // extend interval from samples to seconds if baseline measurement
+		long interval=adapt_interval;
+		if (baseline) interval*=PACKETSPERSECOND;
+
 		adapt_num++;
-        if (adapt_num >= interval)   // enough samples for adaptive threshold calculation
+        if (adapt_num >= interval)   // enough samples: perform adaptive threshold calculation
         {
 			int emptyBuckets;
 			if ((adapt_lower_mode) || (adapt_upper_mode)) redraw=1;
@@ -781,7 +796,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 						upper_limit=size_value(0,100,adapt_upper_limit,range_min,range_max,0);
 						break;
 					case THRESHOLD_ADAPTMODE_QUANTILE:
-						// TBD: check if compatibility break (% of value counted from top ?)
+						// TBD: check if compatibility break (quantile counted from top ?)
 						upper_limit=get_quantile(adapt_num * adapt_upper_limit / 100.0f);
 						break;
 					case THRESHOLD_ADAPTMODE_AVERAGE:
