@@ -620,7 +620,11 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 			int  usemedian;
 			load_property("usemedian",P_INT,&usemedian);
 			if (adapt_upper_limit==0) adapt_upper_mode=THRESHOLD_ADAPTMODE_NONE;
-			else adapt_upper_mode= usemedian ? THRESHOLD_ADAPTMODE_QUANTILE : THRESHOLD_ADAPTMODE_AVERAGE;
+			else {
+				adapt_upper_limit=100-adapt_upper_limit;    //  upper quantile was given in % from top value in earlier versions ... 
+				if (adapt_upper_limit<1) adapt_upper_limit=1;
+				adapt_upper_mode= usemedian ? THRESHOLD_ADAPTMODE_QUANTILE : THRESHOLD_ADAPTMODE_AVERAGE;
+			}
 
 			if (adapt_lower_limit==0) adapt_lower_mode=THRESHOLD_ADAPTMODE_NONE;
 			else adapt_lower_mode= usemedian ? THRESHOLD_ADAPTMODE_QUANTILE : THRESHOLD_ADAPTMODE_AVERAGE;
@@ -728,30 +732,20 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 	    float gain_value=(float)((input)*signal_gain/100.0);
 
 		// signal preparation: averaging
-		/*interval_sum-=accu[accupos];
 		accupos++;
 		if (accupos>=interval_len) accupos=0; 
+		interval_sum-=accu[accupos];
 		accu[accupos]=gain_value;
 		interval_sum+=gain_value;
 		current_value=interval_sum/interval_len;
-		printf("gain_value=%d, sum=%d, interval=%d, current_val=%d\n",(int)gain_value,(int)interval_sum,interval_len,(int)current_value);
-		*/
+		//printf("gain_value=%d, sum=%d, interval=%d, current_val=%d\n",(int)gain_value,(int)interval_sum,interval_len,(int)current_value);
 
-		accu[accupos]=gain_value;
-		interval_sum=0;
-		for (int i=0;i<interval_len;i++) {
-			int p=accupos-i;
-			if (p<0) p+=1000;
-			interval_sum+=accu[p];
-		}
-		current_value=interval_sum/interval_len;
-		accupos++;
-		if (accupos>=1000) accupos=0; 
 
-		last_risingTest=gain_value;
-
-		threshold_avg_sum+=gain_value;
-		buckets[(int)size_value(in_ports[0].in_min,in_ports[0].in_max,gain_value,0,1024,1)]++;
+		// update of adaptive threshold values (percentage and quantile)
+		float compare_value=current_value;  // was: gain_value ... changed to averaged signal!
+		threshold_avg_sum+=compare_value;
+		int bucket_index=(int)size_value(in_ports[0].in_min,in_ports[0].in_max,compare_value,0,1024,1);
+		buckets[bucket_index]++;
 
 		if (adapt_num==0) { 
 			range_min=current_value; 
@@ -811,8 +805,8 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 		}
 		
 		float output_value=current_value;
-		if (rising&&(last_risingTest>=current_value)) output_value=INVALID_VALUE;
-		if (falling&&(last_risingTest<=current_value)) output_value=INVALID_VALUE;
+		if (rising&&(last_risingTest!=INVALID_VALUE)&&(last_risingTest>=current_value)) output_value=INVALID_VALUE;
+		if (falling&&(last_risingTest!=INVALID_VALUE)&&(last_risingTest<=current_value)) output_value=INVALID_VALUE;
 		if (op&&((current_value<lower_limit)||(current_value>upper_limit)))  output_value=INVALID_VALUE;
 		if ((!op)&&((current_value<lower_limit)&&(current_value>upper_limit)))  output_value=INVALID_VALUE;
 
@@ -828,6 +822,8 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 
 		pass_values(1,lower_limit);
 		pass_values(2,upper_limit);
+
+		last_risingTest=current_value;
 		
 		if ((hDlg==ghWndToolbox)&&(!TIMING.dialog_update))
 		{ 
@@ -869,7 +865,7 @@ THRESHOLDOBJ::THRESHOLDOBJ(int num) : BASE_CL()
 			accupos=0;
 			threshold_avg_sum=0;
 			interval_sum=0;
-  		    last_risingTest=0;
+  		    last_risingTest=INVALID_VALUE;
 			empty_buckets();
 	  }
 
