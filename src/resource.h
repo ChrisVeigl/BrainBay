@@ -334,8 +334,10 @@
 #define IDC_CORRINTERVAL                1201
 #define IDC_ENDSESSION                  1201
 #define IDC_BIGADAPT                    1204
+#define IDC_ADAPT_LOWERLIMIT            1204
 #define IDC_SMALLADAPT                  1205
 #define IDC_MIN                         1205
+#define IDC_ADAPT_UPPERLIMIT            1205
 #define IDC_METERCAPTION                1206
 #define IDC_MAX                         1207
 #define IDC_FROM                        1210
@@ -758,6 +760,9 @@
 #define IDC_FALSE_VALUE                 1531
 #define IDC_TRUECOMBO                   1532
 #define IDC_FALSECOMBO                  1533
+#define IDC_UPPERMODE_COMBO             1534
+#define IDC_UPPERMODE_COMBO2            1535
+#define IDC_LOWERMODE_COMBO             1535
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
