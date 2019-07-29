@@ -791,6 +791,7 @@ BOOL save_settings(void)
 	save_property(hFile,"ganglionhubpath",P_STRING,GLOBAL.ganglionhubpath);
 	save_property(hFile,"gangliondevicename",P_STRING,GLOBAL.gangliondevicename);
 	save_property(hFile,"ganglionbledevice",P_INT,&GLOBAL.ganglion_bledongle);
+	save_property(hFile,"neurobit_device",P_STRING,GLOBAL.neurobit_device);
 	save_property(hFile,"addtime",P_INT,&GLOBAL.add_archivetime);
 	save_property(hFile,"startdesign",P_INT,&GLOBAL.startdesign);
 	save_property(hFile,"startdesignpath",P_STRING,GLOBAL.startdesignpath);
@@ -842,6 +843,7 @@ BOOL load_settings(void)
 	load_property("ganglionhubpath",P_STRING,GLOBAL.ganglionhubpath);
 	load_property("gangliondevicename",P_STRING,GLOBAL.gangliondevicename);
 	load_property("ganglionbledevice",P_INT,&GLOBAL.ganglion_bledongle);
+	load_property("neurobit_device",P_STRING,GLOBAL.neurobit_device);
 	load_property("startdesign",P_INT,&GLOBAL.startdesign);
 	load_property("startdesignpath",P_STRING,GLOBAL.startdesignpath);
 	load_property("locksession",P_INT,&GLOBAL.locksession);

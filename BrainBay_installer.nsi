@@ -8,7 +8,7 @@
 
   ;Name and file
   Name "BrainBay"
-  RequestExecutionLevel user
+  RequestExecutionLevel admin
   OutFile "Setup_BrainBay.exe"
 
   ;Default installation folder
@@ -26,7 +26,7 @@
 >> Read this first. <<   \
 *Uninstall* will remove ALL FILES from the folder below, \
 INCLUDING any of your own .con files \
-created in CONFIGUATIONS or other sub-folders. \
+created in CONFIGURATIONS or other sub-folders. \
 YOU MUST SAVE your own files BEFORE \
 you press the *Uninstall* button."
 
@@ -123,6 +123,10 @@ Section "Application" SecApp
   SetOutPath $INSTDIR\ComputerVision
   File "bin\ComputerVision\*.*"
   
+  SetOutPath $SYSDIR
+  File "bin\NeurobitRuntime\ftd2xx.dll"
+
+
 ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\BrainBay "Install_Dir" "$INSTDIR"
   

@@ -4,14 +4,14 @@
 	Identifiers of configuration parameters (constant and variable)
 	for data acquisition devices by Neurobit Systems.
 	
-	IMPORTANT NOTE: Not all available parameters may be listed here.
+	IMPORTANT! Not all available parameters may be listed here.
 	Not all of those parameters have to be available in every device.
 	Use NdEnumParams() function to retrieve up-to-date list of
 	parameters for given device at runtime.
 
 	ANSI C system independent source.
 
-	Copyright (c) by Neurobit Systems, 2010
+	Copyright (c) by Neurobit Systems, 2010-2017
 
 --------------------------------------------------------------------------*/
 
@@ -53,11 +53,15 @@ enum {
 	ND_PAR_CH_BAND_FL,       /**Absolute lower limit of frequency band */
 	ND_PAR_CH_BAND_FU,       /**Relative upper limit of frequency band */
 	ND_PAR_CH_FUNC,          /* Channel function */
-	ND_PAR_CH_CHAR,          /* Frequency or probe characteristic */
+	ND_PAR_CH_CHAR,          /* Frequency characteristic */
 	ND_PAR_CH_POW_FT,        /* Power interference filter */
 	ND_PAR_CH_SUM_DISC,      /* Sum disconnected */
 	ND_PAR_CH_TEST_SR,       /* Sampling rate for input circuit continuity test */
 	ND_PAR_CH_TEST_RANGE,    /* Measurement range for input circuit continuity test */
+	ND_PAR_CH_REF,           /* Connection of "-" input to common reference electrode */
+	
+	/* Added for new NO architecture: */
+	ND_PAR_CH_CAP_CON,       /* Channel connection to EEG cap */
 	/* <- new channel parameters can be added here */
 
 	ND_CHAN_PAR_END          /* Have to be at the end of general parameter list */

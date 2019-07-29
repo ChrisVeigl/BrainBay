@@ -9,6 +9,7 @@
 
 #include "brainBay.h"
 
+#define DEFAULT_NEUROBIT_DEVICE "Neurobit Optima 4"
 
 
 
@@ -27,8 +28,8 @@ protected:
 
     NEUROBITOBJ(int num);
     void update_channelinfo(void);
-	void save_devctx(void);
-	void load_devctx(void);
+	void save_device_config(void);
+	void load_device_config(void);
 	void session_reset(void);
 	void session_start(void);
 	void session_stop (void);

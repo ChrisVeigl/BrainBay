@@ -26,8 +26,6 @@
 #define MAX_SIGNALS 16
 #define MAX_PACK_PHASES 100
 
-/* Default device */
-#define DEFAULT_DEVICE "Neurobit Optima 4"
 
 /* Indexes of indicator colors */
 enum {
@@ -64,6 +62,7 @@ TSelectDevContext NdSelectDevContext;
 TCloseDevContext NdCloseDevContext;
 TGetDevConfig NdGetDevConfig;
 TSetDevConfig NdSetDevConfig;
+TChangeDevice NdChangeDevice;
 
 TGetDevName NdGetDevName;
 TEnumParams NdEnumParams;
@@ -100,6 +99,7 @@ static char NB_DirName[256];
 static HMODULE DrvLib = NULL;
 NEUROBITOBJ * NB_OBJ=NULL;
 
+void setDefaultNeurobitDevice(NEUROBITOBJ * st,const char * name);
 
 
 /*----------------------------------------------------------------------*/
@@ -252,7 +252,7 @@ void NdProcSamples(word dc, word phase, word sum_st, const NdPackChan *chans)
 /* Read parameters from given file to new device context.
 	The function returns device context (>=0), and on error it returns negative
 	value. */
-int ReadCfgFile(const char *fname)
+int ReadCfgFile(NEUROBITOBJ * st, const char *fname)
 {
 	DWORD len, n;
 	char *buf;
@@ -268,8 +268,15 @@ int ReadCfgFile(const char *fname)
 		r = -3;
 	else if (!ReadFile(cf, buf, len, &n, NULL) || len!=n)
 		r = -4;
-	else if ((r=NdSetDevConfig(ND_NO_CONTEXT, buf, len)) < 0)
-		r = -5;
+	else if ((r=NdSetDevConfig(DevCtx, buf, len)) < 0)  {  // try to switch config for existing context
+		if (r==-3) {  // inadequate configuration for the current model
+			NdCloseDevContext(DevCtx);
+			DevCtx=NdSetDevConfig(ND_NO_CONTEXT, buf, len);
+		    report("Configuration inadequate to the previously selected device. The device model has been changed, please check.");
+			setDefaultNeurobitDevice(st,NdGetDevName());
+			r=0;
+		} else r = -5;
+	}
 	CloseHandle(cf);
 	if (buf)
 		free(buf);
@@ -369,6 +376,7 @@ static HMODULE InitNeurobitDrvLib(char * drvLibName)
 		!(NdCloseDevContext = (TCloseDevContext) GetProcAddress(drv_lib, "NdCloseDevContext")) ||
 		!(NdGetDevConfig = (TGetDevConfig) GetProcAddress(drv_lib, "NdGetDevConfig")) ||
 		!(NdSetDevConfig = (TSetDevConfig) GetProcAddress(drv_lib, "NdSetDevConfig")) ||
+		!(NdChangeDevice = (TChangeDevice) GetProcAddress(drv_lib, "NdChangeDevice")) ||
 
 		!(NdGetDevName = (TGetDevName) GetProcAddress(drv_lib, "NdGetDevName")) ||
 		!(NdEnumParams = (TEnumParams) GetProcAddress(drv_lib, "NdEnumParams")) ||
@@ -428,6 +436,12 @@ void updateDialog(HWND hDlg, NEUROBITOBJ * st)
 	InvalidateRect(ghWndDesign,NULL,TRUE);
 }
 
+void setDefaultNeurobitDevice(NEUROBITOBJ * st,const char * name)
+{
+	strcpy (st->device,name);
+	strcpy(GLOBAL.neurobit_device,name);
+	save_settings();
+}
 
 LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
@@ -461,10 +475,18 @@ LRESULT CALLBACK OPTIMADlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARA
 			case IDC_NB_DEVICECOMBO:
 					if (HIWORD(wParam)==CBN_SELCHANGE)
 					{   int sel;
-					    sel=SendDlgItemMessage(hDlg, IDC_NB_DEVICECOMBO, CB_GETCURSEL, 0, 0 ) ;
-						strcpy (st->device,DevTab[sel]);
-						if (DevCtx>=0) NdCloseDevContext(DevCtx);
-						DevCtx=NdOpenDevContext(st->device);
+					    sel=SendDlgItemMessage(hDlg, IDC_NB_DEVICECOMBO, CB_GETCURSEL, 0, 0 );
+						setDefaultNeurobitDevice(st, DevTab[sel]);
+
+						int r=NdChangeDevice(st->device);
+						if (r==0) { 
+							report_error("Could not apply device settings... using default settings");
+						    if (DevCtx>=0) NdCloseDevContext(DevCtx);
+						    DevCtx=NdOpenDevContext(st->device);
+						} 
+						else if (r<0) {
+							report("Default settings have been applied for your Neurobit device - please check settings...");
+						}
 				        st->update_channelinfo();
 						//InvalidateRect(hDlg,NULL,FALSE);
 					}
@@ -609,7 +631,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		strcpy(NB_DirName,GLOBAL.resourcepath);
 		strcat(NB_DirName,NEUROBIT_DIR);
 
-		strcpy(device,DEFAULT_DEVICE);
+		strcpy(device,GLOBAL.neurobit_device);
 
 		DrvLib = InitNeurobitDrvLib(DrvLibName);
 		if (DrvLib)
@@ -620,8 +642,10 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 				report_error("List of supported devices is empty");
 				FreeLibrary(DrvLib);
 			}
-			else DevCtx=NdOpenDevContext(device);			
+			else DevCtx=NdOpenDevContext(device); 
+
 		}
+		else report_error("Neurobit Driver Lib error"); 
 	    filehandle=INVALID_HANDLE_VALUE;
 	    filemode=0;
 }
@@ -689,7 +713,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		 if (ghWndToolbox == hDlg) InvalidateRect(ghWndToolbox,NULL,FALSE);
 	}
 
-	void NEUROBITOBJ::load_devctx(void)
+	void NEUROBITOBJ::load_device_config(void)
 	{
 		char szFileName[256];
 		char *extension;
@@ -699,13 +723,15 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 			strcpy(extension,".nb");
 		else strcat(szFileName,".nb");
 
-		write_logfile("loading Neurobit device context from %s",szFileName);
+		write_logfile("loading Neurobit device configuration from %s",szFileName);
 
 		GLOBAL.neurobit_available=0;
-		if (DevCtx>=0) NdCloseDevContext(DevCtx);
-		DevCtx=ReadCfgFile(szFileName);
-		if (DevCtx<0) {
-			report_error ("Could not load Neurobit Config File - using default configuration");
+		//
+		//DevCtx=
+		int r=ReadCfgFile(this, szFileName);
+		if (r<0) {
+	        report_error ("Could not load Neurobit Config File - using default configuration");
+			if (DevCtx>=0) NdCloseDevContext(DevCtx);
 			DevCtx=NdOpenDevContext(device);
 		}
 		strcpy(device,NdGetDevName());
@@ -716,7 +742,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		SetDlgItemText(hDlg,IDC_NB_DEVICECOMBO,device);
 	}
 
-	void NEUROBITOBJ::save_devctx(void)
+	void NEUROBITOBJ::save_device_config(void)
 	{
 		char szFileName[256];
 		char *extension;
@@ -743,9 +769,8 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 	  {
   		  load_object_basics(this);
 		  load_property("device",P_STRING,device);
+		  load_device_config();
 
-	  	  if (DevCtx>=0) NdCloseDevContext(DevCtx);
-		  load_devctx();
 		  update_channelinfo();
  		  GLOBAL.neurobit_available=1;
 
@@ -766,7 +791,7 @@ NEUROBITOBJ::NEUROBITOBJ(int num) : BASE_CL()
 		  save_property(hFile,"device",P_STRING,device);
 		  save_property(hFile,"archivefile",P_STRING,archivefile);
 		  save_property(hFile,"filemode",P_INT,&filemode);
-		  save_devctx();
+		  save_device_config();
 	  }
 
 	  void NEUROBITOBJ::session_reset(void) 

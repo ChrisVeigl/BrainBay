@@ -14,11 +14,6 @@
 
 #include "common.h"
 
-//typedef enum {
-//	false,
-//	true
-//} bool;
-
 /* Type of parameter and option numeric identifier */
 typedef word NDPARAMID;
 typedef unsigned int NDOPTID;
@@ -110,7 +105,9 @@ typedef struct {
 } NDGETVAL;
 
 /* Parameter flags */
-/* Read only parameter: cannot be edited */
+/* Read only parameter: cannot be edited. 
+	IMPORTANT! It is intended only for constant parameters not mapped locally or 
+	remotely into a variable. */
 #define ND_PF_RDONLY 0x01
 /* Hidden parameter: should not be displayed */
 #define ND_PF_HIDDEN 0x02
@@ -120,6 +117,12 @@ typedef struct {
 
 /* Delimiter of option list */
 #define ND_OPT_NONE 0xffff
+
+/* Special flag added to a parameter id on a dependency list to mark that 
+	a change of a switching parameter should not set default value of the 
+	depending parameter, if possible (if it still belongs to the new domain).
+	Note: it cannot appear for dependency on channel profile. */
+#define ND_DEP_DONT_SET_DEF_FL 0x8000
 
 /* Parameter description structure.
 	It collects all parameters of multi-channel data acquisition/output unit.
@@ -158,15 +161,18 @@ typedef struct {
 } NDPARAM;
 
 /* Notes:
-	* For parameters with ND_PF_RDONLY and without ND_T_LIST, domain is ignored and can
-		be zero-filled.
-	* For parameters with ND_T_BOOL and without ND_T_LIST, domain is not used and can
-		be zero-filled.
+	* Flag ND_PF_RDONLY is intended only for constant parameters not mapped locally 
+		or remotely into a variable. 
+	* For parameters with ND_PF_RDONLY and without ND_T_LIST, domain is ignored 
+		and can be zero-filled.
+	* For parameters with ND_T_BOOL and without ND_T_LIST, domain is not used and 
+		can be zero-filled.
 	* Parameter with not empty dependency list and without ND_T_LIST cannot be
 		ND_T_FLOAT or ND_T_TEXT.
-	* If a parameter depends on two or more other parameters, its definition
-		changes for each of their combinations.
+	* It is assumed that a parameter with set both ND_PF_HIDDEN and ND_PF_RDONLY 
+		flags is not mapped into a user interface (configuration window). 
 	* Parameters with set ND_T_LIST and single item option on the list can be
-		treated as read-only. */
+		considered as read-only.
+*/
 
 #endif /* __DEV_INFO_H__ */
