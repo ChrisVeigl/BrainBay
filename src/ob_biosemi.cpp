@@ -785,6 +785,8 @@ void BIOSEMIOBJ::update_outports(void)
 
 void BIOSEMIOBJ::get_chunk(chunk_t& result) // get data from the amp? 
 {
+	
+	if (DevActive == 0) return;
 	// get current buffer offset
 	int cur_idx;
 	if (!READ_POINTER(hConn_, (unsigned*)&cur_idx))
