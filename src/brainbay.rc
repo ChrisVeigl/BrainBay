@@ -16,7 +16,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// German (Germany) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
@@ -30,7 +30,9 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_SMALL               ICON                    "small.ico"
+
 IDI_MYEEG               ICON                    "icon1.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -76,6 +78,7 @@ BEGIN
                 MENUITEM "QDS NFK (2/4 Channels)",      IDM_INSERT_EEG_QDS
                 MENUITEM "SmartBrainTechnologies (4 Channel EEG)", IDM_INSERT_EEG_SBT4
                 MENUITEM "SmartBrainTechnologies (2 Channel Bluetooth EEG)", IDM_INSERT_EEG_SBT2
+                MENUITEM "BioSemi Active Two",          IDM_INSERT_EEG_BIOSEMI
             END
             MENUITEM "Camera",                      IDM_INSERTCAM
             MENUITEM "Com-Reader",                  IDM_INSERTCOMREADER
@@ -196,7 +199,7 @@ CAPTION "Info"
 FONT 8, "System", 0, 0, 0x0
 BEGIN
     ICON            107,IDC_MYICON,14,9,20,20
-    LTEXT           "BrainBay  --  Version 2.5  (07/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
+    LTEXT           "BrainBay  --  Version 2.4  (05/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
     LTEXT           "The OpenEEG-Project:                                     http://www.openeeg.sf.net",IDC_STATIC,52,40,118,19
     LTEXT           "Christoph Veigl, Jeremy Wilkerson, Lester John,               Jim Peters, Rudi Cilibrasi, Joerg Hansmann, Stephan Gerhard, Robert Anessi, Raymond Nguyen, Franz Strobl, William Croft, Elliot Mebane",IDC_STATIC,67,75,195,35
     LTEXT           " BrainBay-Contributors:",IDC_STATIC,53,65,77,8
@@ -1823,12 +1826,12 @@ BEGIN
     IDS_STRING1             "rc.bottom-rc.top"
 END
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -1919,12 +1922,72 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Englisch (USA) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Österreich) resources
+// English (United Kingdom) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_BIOSEMIBOX DIALOGEX 0, 0, 260, 166
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "BioSemi"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "OK",IDC_APPLY,183,100,50,14
+    LTEXT           "EEG Channel Subset",IDC_STATIC,21,54,71,8
+    COMBOBOX        IDC_CHANSET,95,51,94,91,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Update Channel Info",IDC_BIOSEMI_UPDATEBOX,20,100,87,14
+    LTEXT           "...",IDC_BIOSEMI_UPDATE_STATUS,113,103,63,8
+    PUSHBUTTON      "Cancel",IDC_BIOSEMI_CANCEL,183,119,50,14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_BIOSEMIBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 253
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 159
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_BIOSEMIBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United Kingdom) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Austria) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
@@ -2893,12 +2956,18 @@ END
 //
 
 IDC_CURSOR1             CURSOR                  "CURSORS\\dwell_arrow1.cur"
+
 IDC_CURSOR2             CURSOR                  "CURSORS\\dwell_arrow6.cur"
+
 IDC_CURSOR3             CURSOR                  "CURSORS\\dwell_arrow2.cur"
+
 IDC_CURSOR4             CURSOR                  "CURSORS\\dwell_arrow3.cur"
+
 IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
+
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
-#endif    // Deutsch (Österreich) resources
+
+#endif    // German (Austria) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

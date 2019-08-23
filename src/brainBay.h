@@ -141,8 +141,9 @@ extern "C" {
 #define OB_SHADOW       66
 #define OB_VOLUME       67
 #define OB_OSC_SENDER   68
+#define OB_BIOSEMI		69
 
-#define OBJECT_COUNT 	69
+#define OBJECT_COUNT 	70
 
 
 
@@ -160,7 +161,7 @@ extern "C" {
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
 				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK", \
-				 "SHADOW", "VOLUME", "OSC-SENDER"
+				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -364,6 +365,7 @@ typedef struct GLOBALStruct
 
 	int neurobit_available;
 	int emotiv_available;
+	int biosemi_available;
 	int ganglion_available;
 	int ganglion_bledongle;
 
@@ -383,7 +385,6 @@ typedef struct GLOBALStruct
 	char startdesignpath[256];
 	char ganglionhubpath[256];
 	char gangliondevicename[100];
-	char neurobit_device[100];
 
 	long session_length;
 	long session_start;
