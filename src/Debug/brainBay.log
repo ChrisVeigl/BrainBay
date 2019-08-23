@@ -1,0 +1,163 @@
+﻿  fidlib.c
+  brainbay.cpp
+  dialogs.cpp
+  draw.cpp
+  files.cpp
+  globals.cpp
+  midi.cpp
+  NIA.cpp
+  ob_and.cpp
+  ob_array3600.cpp
+  ob_average.cpp
+  ob_avi.cpp
+  ob_ballgame.cpp
+  ob_biosemi.cpp
+  ob_buffer.cpp
+  ob_button.cpp
+  ob_cam.cpp
+  ob_com_writer.cpp
+  ob_compare.cpp
+  ob_comreader.cpp
+  ob_constant.cpp
+  Generating Code...
+  Compiling...
+  ob_correlation.cpp
+  ob_counter.cpp
+  ob_debounce.cpp
+  ob_delay.cpp
+  ob_deviation.cpp
+  ob_differentiate.cpp
+  ob_displayvector.cpp
+  ob_doku.cpp
+  ob_edf_reader.cpp
+  ob_edf_writer.cpp
+  ob_eeg.cpp
+  ob_emotiv.cpp
+  ob_erpdetect.cpp
+  ob_evaluator.cpp
+  ob_evaluator_exprtk.cpp
+  ob_fft.cpp
+  ob_file_reader.cpp
+  ob_file_writer.cpp
+  ob_filter.cpp
+  ob_floatvector.cpp
+  Generating Code...
+  Compiling...
+  ob_ganglion.cpp
+  ob_integrate.cpp
+  ob_keycapture.cpp
+  ob_keystrike.cpp
+  ob_limiter.cpp
+  ob_magnitude.cpp
+  ob_martini.cpp
+  ob_matlab.cpp
+  ob_max.cpp
+  ob_mci.cpp
+  ob_midi.cpp
+  ob_min.cpp
+  ob_mixer4.cpp
+  ob_mouse.cpp
+  ob_neurobit.cpp
+  ob_not.cpp
+  ob_or.cpp
+  ob_osci.cpp
+  ob_osc_sender.cpp
+  ob_particle.cpp
+  Generating Code...
+  Compiling...
+  ob_peakdetect.cpp
+  ob_port_io.cpp
+  ob_round.cpp
+  ob_sample_hold.cpp
+  ob_sessionmanager.cpp
+  ob_shadow.cpp
+  ob_signal.cpp
+  ob_skindialog.cpp
+  ob_speller.cpp
+  ob_sessiontime.cpp
+  ob_tcp_receive.cpp
+  ob_tcp_sender.cpp
+  ob_threshold.cpp
+  ob_translate.cpp
+  ob_vectorfloat.cpp
+  ob_volume.cpp
+  ob_wav.cpp
+  timer.cpp
+  tty.cpp
+  Generating Code...
+fidlib.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+matheval.lib(error.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(error.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(matheval.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(matheval.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(node.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(node.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(parser.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(parser.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(scanner.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(scanner.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(symbol_table.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(symbol_table.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(xmalloc.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(xmalloc.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+matheval.lib(xmath.obj) : warning LNK4099: PDB 'vc60.pdb' was not found with 'matheval.lib(xmath.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\vc60.pdb'; linking object as if no debug info
+opencv_core242d.lib(alloc.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(alloc.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(arithm.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(arithm.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(array.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(array.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(convert.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(convert.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(copy.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(copy.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(datastructs.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(datastructs.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(drawing.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(drawing.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(dxt.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(dxt.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(gpumat.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(gpumat.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(lapack.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(lapack.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(mathfuncs.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(mathfuncs.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(matmul.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(matmul.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(matop.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(matop.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(matrix.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(matrix.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(opengl_interop.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(opengl_interop.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(persistence.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(persistence.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(rand.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(rand.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(stat.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(stat.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(system.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(system.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_core242d.lib(tables.obj) : warning LNK4099: PDB 'opencv_core242d.pdb' was not found with 'opencv_core242d.lib(tables.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_core242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(cap.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(cap.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(cap_images.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(cap_images.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(cap_ffmpeg.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(cap_ffmpeg.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(loadsave.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(loadsave.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(utils.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(utils.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(window_w32.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(window_w32.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(cap_vfw.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(cap_vfw.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(cap_dshow.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(cap_dshow.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_base.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_base.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_bmp.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_bmp.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_jpeg.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_jpeg.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_jpeg2000.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_jpeg2000.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_png.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_png.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_pxm.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_pxm.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_sunras.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_sunras.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(grfmt_tiff.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(grfmt_tiff.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_highgui242d.lib(bitstrm.obj) : warning LNK4099: PDB 'opencv_highgui242d.pdb' was not found with 'opencv_highgui242d.lib(bitstrm.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_highgui242d.pdb'; linking object as if no debug info
+opencv_objdetect242d.lib(cascadedetect.obj) : warning LNK4099: PDB 'opencv_objdetect242d.pdb' was not found with 'opencv_objdetect242d.lib(cascadedetect.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_objdetect242d.pdb'; linking object as if no debug info
+opencv_objdetect242d.lib(haar.obj) : warning LNK4099: PDB 'opencv_objdetect242d.pdb' was not found with 'opencv_objdetect242d.lib(haar.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_objdetect242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(approx.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(approx.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(canny.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(canny.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(color.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(color.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(contours.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(contours.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(convhull.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(convhull.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(cornersubpix.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(cornersubpix.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(deriv.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(deriv.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(filter.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(filter.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(geometry.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(geometry.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(imgwarp.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(imgwarp.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(linefit.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(linefit.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(matchcontours.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(matchcontours.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(moments.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(moments.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(pyramids.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(pyramids.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(rotcalipers.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(rotcalipers.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(samplers.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(samplers.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(shapedescr.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(shapedescr.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(smooth.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(smooth.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(sumpixels.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(sumpixels.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(tables.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(tables.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(templmatch.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(templmatch.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(thresh.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(thresh.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_imgproc242d.lib(utils.obj) : warning LNK4099: PDB 'opencv_imgproc242d.pdb' was not found with 'opencv_imgproc242d.lib(utils.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_imgproc242d.pdb'; linking object as if no debug info
+opencv_video242d.lib(lkpyramid.obj) : warning LNK4099: PDB 'opencv_video242d.pdb' was not found with 'opencv_video242d.lib(lkpyramid.obj)' or at 'C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\Debug\opencv_video242d.pdb'; linking object as if no debug info
+  brainBay.vcxproj -> C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\.\Debug\BrainBay.exe
+  The syntax of the command is incorrect.
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(113,5): error MSB3073: The command "copy C:\Users\sapyh\OneDrive - Cardiff University\Yi-Jhong\Documents\Visual Studio Projects\BrainBay Git\src\.\Debug\BrainBay.exe ..\bin
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppCommon.targets(113,5): error MSB3073: :VCEnd" exited with code 1.
