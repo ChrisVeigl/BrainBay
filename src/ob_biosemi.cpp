@@ -4,7 +4,7 @@
 
   MODULE: OB_BIOSEMI.CPP:  contains the interface to
 		  BIOSEMI Active Two devices (Mk1 and Mk2)
-  Author: Yi-Jhong Han (the codes are extensively referenced and copied from
+  Author: Denny Yi-Jhong Han (the codes are extensively referenced and copied from
 		  Lab Straming Layer (LSL) projects, credits also goes to them!)
 
   This program is free software; you can redistribute it and/or
@@ -55,13 +55,14 @@ int last_idx_;
 // send a chunk every approx. this many ms
 // to get a uniform lag distribution this should not be a divisor of 64 (= the default stride of the BioSemi driver)
 const int send_interval_ms = 13;
+//const int send_interval_ms = 100;
 
 // the age of each chunk received (in seconds) is anywhere between 0 and send_interval_ms miliseconds old, and is on average half of the maximum
 const double buffer_lag = (send_interval_ms / 2000.0);
 
 // allocate temp data & resamplers...
 BIOSEMIOBJ::chunk_t raw_chunk;
-std::vector<std::vector<float> > scaled_chunk_tr;
+std::vector<std::vector<double>> scaled_chunk_tr;
 
 // the biosemi backend
 std::shared_ptr<BIOSEMIOBJ> biosemi_;
@@ -96,10 +97,12 @@ uint32_t cur_idx;
 int DevActive; // toggle device status
 int started; // toggle session start/stop status
 
-//gui
-int updated = 0;
-int changed = 0;
+//gui flow control
 int first_update = 1;
+int chanset_changed = 1;
+int output_changed = 1;
+
+//BIOSEMIOBJ* gBIOSEMI = NULL;
 
 /* Init BioSemi driver library use */
 static HMODULE InitBioSemiDrvLib(char* drvLibName)
@@ -133,12 +136,22 @@ static HMODULE InitBioSemiDrvLib(char* drvLibName)
 
 BIOSEMIOBJ::BIOSEMIOBJ(int num) : BASE_CL()
 {
-	outports = 32;
+	outports = 16;
 	inports = 0;
 	width = 75;
 
 	// default channel subset entry
-	chansetn = 5;
+	chansetn = 9;
+	
+	//gui flow control
+	first_update = 1;
+	chanset_changed = 1;
+	output_changed = 1;
+
+	// default output channel 1-16 entry
+	for (int c = 0, e = 16; c < e; c++) {
+		opn.push_back(0);
+	}
 
 	/* Init protocol driver library */
 	strcat(DrvLibName, BIOSEMI_DLL);
@@ -153,6 +166,7 @@ BIOSEMIOBJ::BIOSEMIOBJ(int num) : BASE_CL()
 
 	filehandle = INVALID_HANDLE_VALUE;
 	filemode = 0;	
+	//gBIOSEMI = this;
 }
 
 void BIOSEMIOBJ::make_dialog(void)  // will be called when element is right-clicked
@@ -169,91 +183,225 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
 	switch (message)
 	{
-	case WM_INITDIALOG:			// the user dialog is to be created
-		// IDC_CHANSET: eeg channel set
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "all");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "160");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "128");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "64");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "32");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "all, no AUX");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "160, no AUX");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "128, no AUX");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "64, no AUX");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "32, no AUX");
-		SendDlgItemMessage(hDlg, IDC_CHANSET, CB_SETCURSEL, st->chansetn, 0L);
-		st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
-		SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
-
-		break;
-
-	case WM_CLOSE:		// the user dialog is to be closed
-		EndDialog(hDlg, LOWORD(wParam));
-		return TRUE;
-		break;
-
-	case WM_COMMAND:	// a dialog item received a message
-		switch (LOWORD(wParam))	// get the ID of the dialog item
-		{
-			// IDC_BIOSEMI_UPDATEBOX: update channel info on the box
-			case IDC_BIOSEMI_UPDATEBOX:
+		case WM_INITDIALOG:			// the user dialog is to be created
+			// IDC_CHANSET: eeg channel set
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "all");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "160");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "128");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "64");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "32");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "all, no AUX");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "160, no AUX");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "128, no AUX");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "64, no AUX");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "32, no AUX");
+			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_SETCURSEL, st->chansetn, 0L);
+			st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
+			SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
+				
+			// if channel matrix exists			
+			if (!channels_.empty())
 			{
-				SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "...Updating");
-				started = 1; 
-				st->biosemi_io();
-				if (DevActive == 1) st->get_channel_set_index();
-				if (DevActive == 1) st->update_outports();
-				if (DevActive == 1) st->release_biosemi();
-				SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Updated!");
-				updated = 1; first_update = 0;
-				break;
-			}
-
-			// channel subset
-			case IDC_CHANSET:
-			{
-				if (HIWORD(wParam) == CBN_SELCHANGE)
+				// send retrieved channel labels to all the comboboxes
+				for (int k = 0; k < channels_.size(); k++)
 				{
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+				}
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_SETCURSEL, st->opn[0], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_SETCURSEL, st->opn[1], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_SETCURSEL, st->opn[2], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_SETCURSEL, st->opn[3], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_SETCURSEL, st->opn[4], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_SETCURSEL, st->opn[5], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_SETCURSEL, st->opn[6], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_SETCURSEL, st->opn[7], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_SETCURSEL, st->opn[8], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_SETCURSEL, st->opn[9], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_SETCURSEL, st->opn[10], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_SETCURSEL, st->opn[11], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_SETCURSEL, st->opn[12], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_SETCURSEL, st->opn[13], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_SETCURSEL, st->opn[14], 0L);
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_ADDSTRING, 0, (LPARAM) "None");
+				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_SETCURSEL, st->opn[15], 0L);
+			}		
+
+			return TRUE;
+
+		case WM_CLOSE:		// the user dialog is to be closed
+			// discard changes
+			chanset_changed = 0;  output_changed = 0; 
+			EndDialog(hDlg, LOWORD(wParam));
+			return TRUE;
+			break;
+
+		case WM_COMMAND:	// a dialog item received a message
+			switch (LOWORD(wParam))	// get the ID of the dialog item
+			{
+				// IDC_BIOSEMI_UPDATEBOX: update channel info
+				case IDC_BIOSEMI_UPDATEBOX:
+				{
+					//if (GLOBAL.biosemi_available == 1) report_error("session ongoing - stop the session first"); return;
+					if (chanset_changed == 1) {
+						SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "...Updating");
+						started = 1;
+
+						// retrieve the latest channel subset setting
+						st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
+						SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
+
+						st->biosemi_io();
+						
+						if (DevActive == 1) st->get_channel_set_index();
+
+						// set new default item - all pointed to the channels_.size (None), except the first output
+						st->opn[0] = 0;
+						for (int k = 1; k < st->opn.size(); k++) st->opn[k] = channels_.size();
+						
+						if (DevActive == 1) st->release_biosemi();
+						if (DevActive == 1) st->clear_ui();
+						if (DevActive == 1) st->update_output_ui();
+						if (DevActive == 1) st->update_outports();
+						
+						if (DevActive == 1) {
+							SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Updated!");
+							chanset_changed = 0; 
+							first_update = 0; 
+							output_changed = 0;
+						}
+						else {
+							chanset_changed = 1; 
+							first_update = 1; 
+							output_changed = 1;
+						}
+					}
+					else SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Nothing to update!");
+					break;
+				}
+				
+				// IDC_BIOSEMI_APPLY_SELECTION, update box
+				case IDC_BIOSEMI_APPLY_SELECTION:
+				{
+					if (output_changed == 1) {
+						SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "...Applying");
+						// save the output channels chosen
+						st->save_ui();
+						// update box
+						if (DevActive == 1) st->update_outports();
+						SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "Applied!");
+						output_changed = 0; first_update = 0; 
+					}					
+					else SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "Nothing to apply!");
+					break;
+				}
+			
+				// IDC_APPLY: OK button
+				case IDC_APPLY:
+				{
+					// retrieve channel subset setting
 					st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
 					SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
-					changed = 1;
+					// save the output channels chosen
+					st->save_ui();
+
+					// update the box if the ui options have been changed but not yet updated (either of the two update buttons was not pressed)
+					// or when the first time of bringing up the dialogue
+					if (chanset_changed == 1 || (first_update == 1)) {
+						SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "...Updating");
+						started = 1;
+						st->biosemi_io();
+						if (DevActive == 1) st->get_channel_set_index();
+						
+						// set new default item - all pointed to the channels_.size (None), except the first output
+						st->opn[0] = 0;
+						for (int k = 1; k < st->opn.size(); k++) st->opn[k] = channels_.size();
+						
+						if (DevActive == 1) st->update_outports();
+						if (DevActive == 1) st->release_biosemi();
+						SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Updated!");
+						chanset_changed = 0; first_update = 0; output_changed = 0;
+					}
+
+					// when output options are change - apply to the box
+					if (output_changed == 1) {
+						SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "...Applying");
+						// save the output channels chosen
+						st->save_ui();
+
+						// update box
+						if (DevActive == 1) st->update_outports();
+						SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "Applied!");
+					}
+					EndDialog(hDlg, LOWORD(wParam));
+					return TRUE;
+					break;
 				}
-				break;
-			}
+				// channel subset
+				case IDC_CHANSET: if (HIWORD(wParam) == CBN_SELCHANGE) chanset_changed = 1; break;
 
-			// IDC_APPLY: apply button
-			case IDC_APPLY:
-			{
-				// update the box if the subset has been changed but not yet updated (the update button was not pressed)
-				// or when the first time of bringing up the dialogue
-				if ((changed == 1 && updated == 0) || (first_update == 1)) {
-					SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "...Updating");
-					started = 1; 
-					st->biosemi_io();
-					if (DevActive == 1) st->get_channel_set_index();
-					if (DevActive == 1) st->update_outports();
-					if (DevActive == 1) st->release_biosemi();
-					SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Updated!");
-				}			
-				changed = 0; updated = 0; first_update = 0;
-				EndDialog(hDlg, LOWORD(wParam));
-				return TRUE;
-				break;
-			}
-			case IDC_BIOSEMI_CANCEL:
-			{
-				EndDialog(hDlg, LOWORD(wParam));
-				return TRUE;
-				break;
-			}
-		}
-		return TRUE;
+				// output options 1-16
+				case IDC_BIOSEMI_OP1: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP2: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP3: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP4: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP5: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP6: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP7: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP8: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP9: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP10: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP11: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP12: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP13: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP14: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP15: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP16: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
 
-	case WM_SIZE:		// when the user dialog was moved or sized@			
-	case WM_MOVE:
-		update_toolbox_position(hDlg); // save the new position
-		break;
-		return TRUE;
+
+				// IDC_BIOSEMI_TenTwenty, IDC_BIOSEMI_ABC, radio buttons toggle between labelling systems						
+				case IDC_BIOSEMI_CANCEL: {
+					// discard changes
+					chanset_changed = 0;  output_changed = 0;
+					EndDialog(hDlg, LOWORD(wParam)); return TRUE; break;
+				}
+			}
+			return TRUE;
+
+		case WM_SIZE:		// when the user dialog was moved or sized@			
+		case WM_MOVE:
+			update_toolbox_position(hDlg); // save the new position
+			break;
+			return TRUE;
 	}
 	return FALSE;
 }
@@ -267,32 +415,56 @@ void BIOSEMIOBJ::session_start(void) // will be called when Play -button
 		if (biosemi_)
 			biosemi_.reset();
 
-		started = 1;
+		started = 1;		
+
 		biosemi_io();
-		if (DevActive == 0) return;
 		
 		get_channel_set_index();
+
+		// if start the session right away without config the gui options
+		if (first_update == 1) {
+			// set new default item - all pointed to the channels_.size (None), except the first output
+			opn[0] = 0;
+			for (int k = 1; k < opn.size(); k++) opn[k] = channels_.size(); 
+			// update ui in case it's active
+			update_output_ui(); chanset_changed = 0; output_changed = 0; first_update = 0;
+		}
+		
 		update_outports();
+		update_samplingrate(srate_);
+		//update_samplingrate(12);
 
 		GLOBAL.biosemi_available = 1;		
 	}
 	else {
 		GLOBAL.biosemi_available = 0;
 	}
+
+	//if (DevActive == 0) chanset_changed = 1; first_update = 1; output_changed = 1; return;
 }
 
 void BIOSEMIOBJ::work(void) // generate output value
 {
 	if (DrvLib == NULL) return;
 	if (DevActive == 0) return;
+
+	// don't steam data if no active outports is specified
+	if (active_outports.empty()) return;
+
+	biosemi_process();
+}
+
+void BIOSEMIOBJ::biosemi_process(void)
+{
 	// get a chunk from the device --> raw_chunk is [#insamples x #channels]
 	biosemi_->get_chunk(raw_chunk);
 
 	int outchannels = channels_.size();
 	int insamples = raw_chunk.size();
 
-	if (insamples > 0) {
+	//pass_values(1, (float) insamples);
 
+	if (insamples > 0) {
 		// convert to microvolts --> scaled_chunk_tr is [#channels x #insamples]
 		scaled_chunk_tr.resize(outchannels);
 		for (int c = 0, e = outchannels; c < e; c++) {
@@ -310,21 +482,28 @@ void BIOSEMIOBJ::work(void) // generate output value
 		}
 
 		// send it off to outports
-		for (int c = 0, e = outchannels; c < e; c++) {
-			for (int s = 0, e = insamples; s < e; s++) {
-				pass_values(c, scaled_chunk_tr[c].at(s));
+		for (int s = 0, e = insamples; s < e; s++) {
+			//double tmp;
+			for (int c = 0, e = active_outports.size(); c < e; c++) {
+				// max-min scaling
+				/*tmp = scaled_chunk_tr[opn[active_outports[c]]].at(s) - out_ports[active_outports[c]].out_min /
+					out_ports[active_outports[c]].out_max - out_ports[active_outports[c]].out_min;*/
+					// send it off
+				pass_values(active_outports[c], scaled_chunk_tr[opn[active_outports[c]]].at(s));
 			}
+			process_packets();
 		}
-
-		// sleep until we get the next chunk
-		Sleep(send_interval_ms);
 	}
+	// sleep until we get the next chunk
+	Sleep(send_interval_ms);
+	//Sleep(100);
 }
 
 void BIOSEMIOBJ::session_stop(void) // will be called when Stop- button 
 {
 	if (DrvLib == NULL) return;
 	release_biosemi();
+	GLOBAL.biosemi_available = 0;
 }
 
 void BIOSEMIOBJ::session_reset(void) // will be called when Reset- button
@@ -343,12 +522,44 @@ void BIOSEMIOBJ::load(HANDLE hFile)
 {
 	load_object_basics(this);
 	load_property("chansetn", P_INT, &chansetn);
+	load_property("opn[0]", P_INT, &opn[0]);
+	load_property("opn[1]", P_INT, &opn[1]);
+	load_property("opn[2]", P_INT, &opn[2]);
+	load_property("opn[3]", P_INT, &opn[3]);
+	load_property("opn[4]", P_INT, &opn[4]);
+	load_property("opn[5]", P_INT, &opn[5]);
+	load_property("opn[6]", P_INT, &opn[6]);
+	load_property("opn[7]", P_INT, &opn[7]);
+	load_property("opn[8]", P_INT, &opn[8]);
+	load_property("opn[9]", P_INT, &opn[9]);
+	load_property("opn[10]", P_INT, &opn[10]);
+	load_property("opn[11]", P_INT, &opn[11]);
+	load_property("opn[12]", P_INT, &opn[12]);
+	load_property("opn[13]", P_INT, &opn[13]);
+	load_property("opn[14]", P_INT, &opn[14]);
+	load_property("opn[15]", P_INT, &opn[15]);
 }
 
 void BIOSEMIOBJ::save(HANDLE hFile)  // hFile will be the opened configfile
 {
 	save_object_basics(hFile, this);
 	save_property(hFile, "chansetn", P_INT, &chansetn);
+	save_property(hFile, "opn[0]", P_INT, &opn[0]);
+	save_property(hFile, "opn[1]", P_INT, &opn[1]);
+	save_property(hFile, "opn[2]", P_INT, &opn[2]);
+	save_property(hFile, "opn[3]", P_INT, &opn[3]);
+	save_property(hFile, "opn[4]", P_INT, &opn[4]);
+	save_property(hFile, "opn[5]", P_INT, &opn[5]);
+	save_property(hFile, "opn[6]", P_INT, &opn[6]);
+	save_property(hFile, "opn[7]", P_INT, &opn[7]);
+	save_property(hFile, "opn[8]", P_INT, &opn[8]);
+	save_property(hFile, "opn[9]", P_INT, &opn[9]);
+	save_property(hFile, "opn[10]", P_INT, &opn[10]);
+	save_property(hFile, "opn[11]", P_INT, &opn[11]);
+	save_property(hFile, "opn[12]", P_INT, &opn[12]);
+	save_property(hFile, "opn[13]", P_INT, &opn[13]);
+	save_property(hFile, "opn[14]", P_INT, &opn[14]);
+	save_property(hFile, "opn[15]", P_INT, &opn[15]);
 }
 
 
@@ -359,6 +570,7 @@ BIOSEMIOBJ::~BIOSEMIOBJ()
 	GLOBAL.biosemi_available = 0;
 	FreeLibrary(DrvLib);
 	DevActive = 0;
+	channels_.clear(); // for the next insertion
 } // deconstructor
 
 void BIOSEMIOBJ::biosemi_io(void)
@@ -453,8 +665,9 @@ void BIOSEMIOBJ::biosemi_io(void)
 			//FreeLibrary(DrvLib);
 			delete ring_buffer_;
 			DevActive = 0;
-			if (cur_idx - start_idx < 8)
+			if (cur_idx - start_idx < 8) {
 				report_error("BioSemi driver does not transmit data. Is the box turned on?");
+			}
 			else
 				report_error("Did not get a sync signal from BioSemi driver. Is the battery charged?");
 			break;
@@ -761,24 +974,135 @@ void BIOSEMIOBJ::get_channel_set_index(void)
 	}
 }
 
+void BIOSEMIOBJ::save_ui(void)
+{
+	opn[0] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP1), CB_GETCURSEL, 0, 0);
+	opn[1] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP2), CB_GETCURSEL, 0, 0);
+	opn[2] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP3), CB_GETCURSEL, 0, 0);
+	opn[3] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP4), CB_GETCURSEL, 0, 0);
+	opn[4] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP5), CB_GETCURSEL, 0, 0);
+	opn[5] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP6), CB_GETCURSEL, 0, 0);
+	opn[6] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP7), CB_GETCURSEL, 0, 0);
+	opn[7] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP8), CB_GETCURSEL, 0, 0);
+	opn[8] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP9), CB_GETCURSEL, 0, 0);
+	opn[9] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP10), CB_GETCURSEL, 0, 0);
+	opn[10] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP11), CB_GETCURSEL, 0, 0);
+	opn[11] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP12), CB_GETCURSEL, 0, 0);
+	opn[12] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP13), CB_GETCURSEL, 0, 0);
+	opn[13] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP14), CB_GETCURSEL, 0, 0);
+	opn[14] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP15), CB_GETCURSEL, 0, 0);
+	opn[15] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP16), CB_GETCURSEL, 0, 0);
+}
+
+void BIOSEMIOBJ::clear_ui(void)
+{
+	// reset the contents of the combobox
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_RESETCONTENT, NULL, NULL);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_RESETCONTENT, NULL, NULL);
+}
+
+void BIOSEMIOBJ::update_output_ui(void)
+{
+	// send retrieved channel labels to all the comboboxes
+	for (int k=0; k < channels_.size(); k++)
+	{
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+		SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_ADDSTRING, 0, (LPARAM)channels_[k].c_str());
+	}
+	
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_SETCURSEL, opn[0], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_SETCURSEL, opn[1], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_SETCURSEL, opn[2], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_SETCURSEL, opn[3], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_SETCURSEL, opn[4], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_SETCURSEL, opn[5], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_SETCURSEL, opn[6], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_ADDSTRING, 0, (LPARAM) "None"); 
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_SETCURSEL, opn[7], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_SETCURSEL, opn[8], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_SETCURSEL, opn[9], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_SETCURSEL, opn[10], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_SETCURSEL, opn[11], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_SETCURSEL, opn[12], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_SETCURSEL, opn[13], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_SETCURSEL, opn[14], 0L);
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_ADDSTRING, 0, (LPARAM) "None");
+	SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_SETCURSEL, opn[15], 0L);
+}
+
 void BIOSEMIOBJ::update_outports(void)
 {
 	// update outports of the box, to be called by an Update button on the gui
-	outports = channels_.size();
-	height = CON_START + outports * CON_HEIGHT + 5;
+	// outports = channels_.size();
+	// height = CON_START + outports * CON_HEIGHT + 5;
 
-	for (int k = 0; k < channels_.size(); k++) {
-		// channels go to output labels
-		strcpy(out_ports[k].out_name, channels_[k].c_str());
-		// channels (labels) also go to description, for the correct labels in the edf writer
-		strcpy(out_ports[k].out_desc, channels_[k].c_str());
-		// output unit mV
-		strcpy(out_ports[k].out_dim, "uV");
-
-		// other stuff
-		//out_ports[k].get_range = -1;
-		//out_ports[k].out_min = -500.0f;
-		//out_ports[k].out_max = 500.0f;
+	//for (int k = 0; k < channels_.size(); k++) {
+	active_outports.clear();
+	for (int k = 0; k < opn.size(); k++) {
+		if (opn[k] < channels_.size())
+		// channels selected are not "None"
+		{
+			// channels go to output labels
+			strcpy(out_ports[k].out_name, channels_[opn[k]].c_str());
+			// channels (labels) also go to description, for the correct labels in the edf writer
+			strcpy(out_ports[k].out_desc, channels_[opn[k]].c_str());
+			// output unit mV
+			strcpy(out_ports[k].out_dim, "uV");
+			active_outports.push_back(k);
+			// other stuff
+			out_ports[k].get_range = -1;
+			out_ports[k].out_min = -500.0f;
+			out_ports[k].out_max = 500.0f;
+		}		
+		else
+		// channels selected are "None"
+		{
+			strcpy(out_ports[k].out_name, "None");
+			strcpy(out_ports[k].out_desc, "None");
+			strcpy(out_ports[k].out_dim, "None");
+		}
 	}
 	InvalidateRect(ghWndDesign, NULL, TRUE);
 }
@@ -832,6 +1156,7 @@ void BIOSEMIOBJ::get_chunk(chunk_t& result) // get data from the amp?
 	// update last buffer pointer
 	last_idx_ = cur_idx;
 }
+
 void BIOSEMIOBJ::release_biosemi(void)
 {
 	if (started == 1 && DevActive == 1) {

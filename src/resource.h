@@ -664,23 +664,39 @@
 #define IDC_USE_VIDEOINPUT              1480
 #define IDC_CHANSET                     1480
 #define IDC_USE_CVCAPTURE               1481
+#define IDC_BIOSEMI_OP1                 1481
+#define IDC_BIOSEMI_OP2                 1482
 #define IDC_RADIO2                      1483
+#define IDC_BIOSEMI_OP3                 1483
 #define IDC_CHNLABEL                    1484
+#define IDC_BIOSEMI_OP4                 1484
 #define IDC_RESLABEL                    1485
+#define IDC_BIOSEMI_OP5                 1485
 #define IDC_RESLABEL2                   1486
+#define IDC_BIOSEMI_OP6                 1486
 #define IDC_CHNFROMPORT                 1487
+#define IDC_BIOSEMI_OP7                 1487
+#define IDC_BIOSEMI_OP8                 1488
+#define IDC_BIOSEMI_OP9                 1489
 #define IDC_DELAYTIME                   1490
+#define IDC_BIOSEMI_OP10                1490
 #define IDC_LOWERLIMIT                  1491
+#define IDC_BIOSEMI_OP11                1491
 #define IDC_UPPERLIMIT                  1492
+#define IDC_BIOSEMI_OP12                1492
 #define IDC_APPEND                      1493
+#define IDC_BIOSEMI_OP13                1493
 #define IDC_PLAY_ONCE                   1494
 #define IDC_ADD_DATE                    1494
+#define IDC_BIOSEMI_OP14                1494
 #define IDC_PLAY_ONCE2                  1495
 #define IDC_VALUES                      1495
 #define IDC_AUTOCREATE                  1495
+#define IDC_BIOSEMI_OP15                1495
 #define IDC_AUTOSTART                   1496
 #define IDC_DEVICETYPE                  1496
 #define IDC_SEMICOLON                   1496
+#define IDC_BIOSEMI_OP16                1496
 #define IDC_EMOTIV_ARCHIVE_NAME         1497
 #define IDC_SBT2STATUS                  1497
 #define IDC_OPEN_EMOTIV_ARCHIVE         1498
@@ -769,6 +785,11 @@
 #define IDC_BIOSEMI_UPDATE_STATUS       1559
 #define IDC_BUTTON1                     1560
 #define IDC_BIOSEMI_CANCEL              1560
+#define IDC_BIOSEMI_TenTwenty           1561
+#define IDC_BIOSEMI_ABC                 1562
+#define IDC_BIOSEMI_APPLY_SELECTION     1563
+#define IDC_BIOSEMI_UPDATE_STATUS2      1564
+#define IDC_BIOSEMI_APPLY_STATUS        1564
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -945,7 +966,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        266
 #define _APS_NEXT_COMMAND_VALUE         32964
-#define _APS_NEXT_CONTROL_VALUE         1561
+#define _APS_NEXT_CONTROL_VALUE         1564
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

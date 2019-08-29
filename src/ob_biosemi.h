@@ -47,8 +47,12 @@ public:
 	void get_chunk(chunk_t& result);
 	void biosemi_io(void);
 	void get_channel_set_index(void);
+	void save_ui(void);
+	void clear_ui(void);
+	void update_output_ui(void);
 	void update_outports(void);
 	void release_biosemi(void);
+	void biosemi_process(void);
 	
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);
@@ -56,6 +60,9 @@ public:
 	friend LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 	int chansetn;
+	std::vector<int> opn;
+	std::vector<int> active_outports;
+
 	// vector of channel labels (in BioSemi naming scheme)
 	std::vector<std::string> channel_labels_;
 	// vector of channel types (in LSL Semi naming scheme)
