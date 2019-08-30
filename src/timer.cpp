@@ -23,6 +23,7 @@
 #include "brainBay.h"
 #include "neurobit_api\\api.h"
 #include "ob_emotiv.h"
+#include "ob_biosemi.h"
 
 
 extern TProtocolEngine NdProtocolEngine;
@@ -96,6 +97,7 @@ void CALLBACK TimerProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
     check_keys();
     if (GLOBAL.neurobit_available) NdProtocolEngine();
 	if (GLOBAL.emotiv_available) process_emotiv();
+	if (GLOBAL.biosemi_available) process_biosemi();
 //	if (GLOBAL.ganglion_available) process_ganglion();
 
 	if ((!TIMING.pause_timer) && (!GLOBAL.loading))
@@ -125,7 +127,7 @@ void CALLBACK TimerProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
 			}
 
 			// process packets in case of no File-Read and no Com-Read
-			else if ((TTY.read_pause) && (!GLOBAL.neurobit_available) && (!GLOBAL.emotiv_available) && (!GLOBAL.ganglion_available))  
+			else if ((TTY.read_pause) && (!GLOBAL.neurobit_available) && (!GLOBAL.emotiv_available) && (!GLOBAL.biosemi_available) && (!GLOBAL.ganglion_available))
 				process_packets();
 
 			if (GLOBAL.fly)

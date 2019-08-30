@@ -19,6 +19,8 @@ typedef int (BIOSEMI_LINKAGE* READ_MULTIPLE_SWEEPS_t)(void*, char*, int);
 typedef int (BIOSEMI_LINKAGE* READ_POINTER_t)(void*, unsigned*);
 typedef int (BIOSEMI_LINKAGE* CLOSE_DRIVER_ASYNC_t)(void*);
 
+// process for receiving chunks, called in timer.cpp
+void process_biosemi(void);
 
 class BIOSEMIOBJ : public BASE_CL
 {
@@ -52,7 +54,6 @@ public:
 	void update_output_ui(void);
 	void update_outports(void);
 	void release_biosemi(void);
-	void biosemi_process(void);
 	
 	void load(HANDLE hFile);
 	void save(HANDLE hFile);
@@ -60,6 +61,10 @@ public:
 	friend LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 	int chansetn;
+	int chansetn_tmp;
+	int labeln;
+	int memory_montage;
+
 	std::vector<int> opn;
 	std::vector<int> active_outports;
 

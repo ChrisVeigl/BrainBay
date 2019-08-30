@@ -790,6 +790,9 @@
 #define IDC_BIOSEMI_APPLY_SELECTION     1563
 #define IDC_BIOSEMI_UPDATE_STATUS2      1564
 #define IDC_BIOSEMI_APPLY_STATUS        1564
+#define IDC_BIOSEMI_MEM                 1565
+#define IDC_BIOSEMI_MEM2                1566
+#define IDC_BIOSEMI_MAXMIN              1566
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -966,7 +969,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        266
 #define _APS_NEXT_COMMAND_VALUE         32964
-#define _APS_NEXT_CONTROL_VALUE         1564
+#define _APS_NEXT_CONTROL_VALUE         1566
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

@@ -801,6 +801,7 @@ void GlobalInitialize()
 	GLOBAL.draw_interval=DRAW_UPDATETIME;
 	GLOBAL.neurobit_available=0;
 	GLOBAL.emotiv_available=0;
+	GLOBAL.biosemi_available = 0;
 	GLOBAL.ganglion_available=0;
 	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;

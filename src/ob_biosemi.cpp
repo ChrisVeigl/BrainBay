@@ -5,7 +5,8 @@
   MODULE: OB_BIOSEMI.CPP:  contains the interface to
 		  BIOSEMI Active Two devices (Mk1 and Mk2)
   Author: Denny Yi-Jhong Han (the codes are extensively referenced and copied from
-		  Lab Straming Layer (LSL) projects, credits also goes to them!)
+		  Lab Straming Layer (LSL) projects, https://github.com/sccn/labstreaminglayer
+		  credits also goes to them!)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -102,7 +103,7 @@ int first_update = 1;
 int chanset_changed = 1;
 int output_changed = 1;
 
-//BIOSEMIOBJ* gBIOSEMI = NULL;
+BIOSEMIOBJ* gBIOSEMI = NULL;
 
 /* Init BioSemi driver library use */
 static HMODULE InitBioSemiDrvLib(char* drvLibName)
@@ -142,6 +143,9 @@ BIOSEMIOBJ::BIOSEMIOBJ(int num) : BASE_CL()
 
 	// default channel subset entry
 	chansetn = 9;
+	chansetn_tmp = chansetn;
+	// default labelling system
+	labeln = 0;
 	
 	//gui flow control
 	first_update = 1;
@@ -166,7 +170,7 @@ BIOSEMIOBJ::BIOSEMIOBJ(int num) : BASE_CL()
 
 	filehandle = INVALID_HANDLE_VALUE;
 	filemode = 0;	
-	//gBIOSEMI = this;
+	gBIOSEMI = this;
 }
 
 void BIOSEMIOBJ::make_dialog(void)  // will be called when element is right-clicked
@@ -199,6 +203,15 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 			st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
 			SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
 				
+			// IDC_BIOSEMI_TenTwenty, IDC_BIOSEMI_ABC, radio buttons toggle between labelling systems	
+			// check if the selected channel subset doesn't have 10-20 labelling
+
+			switch (st->labeln)
+			{
+				case 0: CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, TRUE); break;
+				case 1: CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, TRUE); break;
+			}
+
 			// if channel matrix exists			
 			if (!channels_.empty())
 			{
@@ -366,8 +379,71 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 					return TRUE;
 					break;
 				}
+
 				// channel subset
-				case IDC_CHANSET: if (HIWORD(wParam) == CBN_SELCHANGE) chanset_changed = 1; break;
+				case IDC_CHANSET: 
+				{
+					if (HIWORD(wParam) == CBN_SELCHANGE) {
+						st->chansetn_tmp = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
+						if ((st->chansetn_tmp == 0) || (st->chansetn_tmp == 1) || (st->chansetn_tmp == 2) || (st->chansetn_tmp == 2) ||
+							(st->chansetn_tmp == 5) || (st->chansetn_tmp == 6) || (st->chansetn_tmp == 7)) {
+							// disable IDC_BIOSEMI_TenTwenty and change option to BioSemi-ABC
+							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_TenTwenty);
+							EnableWindow(hCtl, FALSE);
+							st->labeln = 1;
+							switch (st->labeln) {
+							case 0: CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, TRUE); CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, FALSE); break;
+							case 1: CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, TRUE);  CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, FALSE); break;
+							}
+						}
+						else {
+							// enable IDC_BIOSEMI_TenTwenty
+							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_TenTwenty);
+							EnableWindow(hCtl, TRUE);
+							switch (st->labeln) {
+							case 0: CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, TRUE); CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, FALSE); break;
+							case 1: CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, TRUE);  CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, FALSE); break;
+							}
+						}
+						// IDC_BIOSEMI_MEM
+						// enable only when 32 channel options and 10-20 systems are selected
+						if (st->labeln == 0 && ((st->chansetn_tmp == 4) || (st->chansetn_tmp == 9))) {
+							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
+							EnableWindow(hCtl, TRUE);
+						}
+						else {
+							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
+							EnableWindow(hCtl, FALSE);
+						}
+						chanset_changed = 1; 						
+					}
+					break;
+				}
+
+				// labelling system
+				case IDC_BIOSEMI_TenTwenty: {
+					st->labeln = 0;
+					// enable only for 32 channel options
+					if ((st->chansetn_tmp == 4) || (st->chansetn_tmp == 9)) {
+						HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
+						EnableWindow(hCtl, TRUE);
+					}
+					break;
+				}
+				case IDC_BIOSEMI_ABC: {
+					st->labeln = 1;
+					HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
+					EnableWindow(hCtl, FALSE);
+					break;
+				}
+
+				// IDC_BIOSEMI_MEM, memory montage? apply to only 32 channel options
+				case IDC_BIOSEMI_MEM: {
+					st->memory_montage = IsDlgButtonChecked(hDlg, IDC_SHOWCOUNTER);
+
+				}				
+
+			    // IDC_BIOSEMI_MAXMIN, MAX-MIN scale the signal
 
 				// output options 1-16
 				case IDC_BIOSEMI_OP1: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
@@ -386,9 +462,7 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				case IDC_BIOSEMI_OP14: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
 				case IDC_BIOSEMI_OP15: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
 				case IDC_BIOSEMI_OP16: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-
-
-				// IDC_BIOSEMI_TenTwenty, IDC_BIOSEMI_ABC, radio buttons toggle between labelling systems						
+					
 				case IDC_BIOSEMI_CANCEL: {
 					// discard changes
 					chanset_changed = 0;  output_changed = 0;
@@ -406,10 +480,10 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	return FALSE;
 }
 
-void BIOSEMIOBJ::session_start(void) // will be called when Play -button
+void BIOSEMIOBJ::session_start(void) // will be called when Play -button is pressed
 {
-
 	if (DrvLib == NULL) return;
+	if (GLOBAL.biosemi_available == 1) return; // don't do again if the amp is active
 	if ((filehandle == INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
 	{
 		if (biosemi_)
@@ -432,8 +506,7 @@ void BIOSEMIOBJ::session_start(void) // will be called when Play -button
 		
 		update_outports();
 		update_samplingrate(srate_);
-		//update_samplingrate(12);
-
+		// for timer.cpp to initiate process_biosemi()
 		GLOBAL.biosemi_available = 1;		
 	}
 	else {
@@ -450,19 +523,15 @@ void BIOSEMIOBJ::work(void) // generate output value
 
 	// don't steam data if no active outports is specified
 	if (active_outports.empty()) return;
-
-	biosemi_process();
 }
 
-void BIOSEMIOBJ::biosemi_process(void)
+void process_biosemi(void)
 {
 	// get a chunk from the device --> raw_chunk is [#insamples x #channels]
 	biosemi_->get_chunk(raw_chunk);
 
 	int outchannels = channels_.size();
 	int insamples = raw_chunk.size();
-
-	//pass_values(1, (float) insamples);
 
 	if (insamples > 0) {
 		// convert to microvolts --> scaled_chunk_tr is [#channels x #insamples]
@@ -483,25 +552,21 @@ void BIOSEMIOBJ::biosemi_process(void)
 
 		// send it off to outports
 		for (int s = 0, e = insamples; s < e; s++) {
-			//double tmp;
-			for (int c = 0, e = active_outports.size(); c < e; c++) {
-				// max-min scaling
-				/*tmp = scaled_chunk_tr[opn[active_outports[c]]].at(s) - out_ports[active_outports[c]].out_min /
-					out_ports[active_outports[c]].out_max - out_ports[active_outports[c]].out_min;*/
-					// send it off
-				pass_values(active_outports[c], scaled_chunk_tr[opn[active_outports[c]]].at(s));
+			for (int c = 0, e = gBIOSEMI->active_outports.size(); c < e; c++) {
+				gBIOSEMI->pass_values(gBIOSEMI->active_outports[c], 
+					scaled_chunk_tr[gBIOSEMI->opn[gBIOSEMI->active_outports[c]]].at(s));
 			}
 			process_packets();
 		}
 	}
 	// sleep until we get the next chunk
 	Sleep(send_interval_ms);
-	//Sleep(100);
 }
 
 void BIOSEMIOBJ::session_stop(void) // will be called when Stop- button 
 {
 	if (DrvLib == NULL) return;
+	if (GLOBAL.biosemi_available == 0) return; // don't do anything is no amp active
 	release_biosemi();
 	GLOBAL.biosemi_available = 0;
 }
@@ -522,6 +587,7 @@ void BIOSEMIOBJ::load(HANDLE hFile)
 {
 	load_object_basics(this);
 	load_property("chansetn", P_INT, &chansetn);
+	load_property("labeln", P_INT, &labeln);
 	load_property("opn[0]", P_INT, &opn[0]);
 	load_property("opn[1]", P_INT, &opn[1]);
 	load_property("opn[2]", P_INT, &opn[2]);
@@ -544,6 +610,7 @@ void BIOSEMIOBJ::save(HANDLE hFile)  // hFile will be the opened configfile
 {
 	save_object_basics(hFile, this);
 	save_property(hFile, "chansetn", P_INT, &chansetn);
+	save_property(hFile, "labeln", P_INT, &labeln);
 	save_property(hFile, "opn[0]", P_INT, &opn[0]);
 	save_property(hFile, "opn[1]", P_INT, &opn[1]);
 	save_property(hFile, "opn[2]", P_INT, &opn[2]);
