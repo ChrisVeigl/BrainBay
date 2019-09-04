@@ -95,7 +95,7 @@
       </PreventDllBinding>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) ..\bin</Command>
+      <Command>copy "$(TargetPath)" ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,7 +144,7 @@
       <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) ..\bin</Command>
+      <Command>copy "$(TargetPath)" ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
