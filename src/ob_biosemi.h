@@ -52,6 +52,7 @@ public:
 	void save_ui(void);
 	void clear_ui(void);
 	void update_output_ui(void);
+	void reset_output_ui(void);
 	void update_outports(void);
 	void release_biosemi(void);
 	
@@ -63,7 +64,9 @@ public:
 	int chansetn;
 	int chansetn_tmp;
 	int labeln;
+	int labeln_tmp;
 	int memory_montage;
+	int memory_montage_tmp;
 
 	std::vector<int> opn;
 	std::vector<int> active_outports;

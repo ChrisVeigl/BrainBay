@@ -102,6 +102,25 @@ int started; // toggle session start/stop status
 int first_update = 1;
 int chanset_changed = 1;
 int output_changed = 1;
+int loaded = 0;
+
+// eeg chanset
+std::string chanset_mat [] = {
+	"all", "160", "128", "64", "32", "all, no AUX", "160, no AUX", "128, no AUX", "64, no AUX", "32, no AUX"};
+
+std::string thirtytwo_memory[] = {
+	"Fz", "Cz", "Pz", "Oz", "Fp1", "F7", "F5", "F3", "F1", "Fp2", "F8", "F6", "F4", "F2", "T7", "C5",
+	"C3", "C1", "T8", "C6", "C4", "C2", "P7", "P5", "P3", "P1", "P8", "P6", "P4", "P2", "O1", "O2" };
+
+std::string thirtytwo[] = {
+	"Fp1", "AF3", "F7", "F3", "FC1", "FC5", "T7", "C3", "CP1", "CP5", "P7", "P3", "Pz", "PO3", "O1", "Oz", 
+	"O2", "PO4", "P4", "P8", "CP6", "CP2", "C4", "T8", "FC6", "FC2", "F4", "F8", "AF4", "Fp2", "Fz","Cz"};
+
+std::string sixtyfour[] = {
+		"Fp1", "AF7", "AF3", "F1", "F3", "F5", "F7", "FT7", "FC5", "FC3", "FC1", "C1", "C3", "C5", "T7", "TP7",  
+		"CP5", "CP3", "CP1", "P1", "P3", "P5", "P7", "P9", "PO7", "PO3", "O1", "Iz", "Oz", "POz", "Pz", "CPz", 
+		"Fpz", "Fp2", "AF8", "AF4", "Afz", "Fz", "F2", "F4", "F6", "F8", "FT8", "FC6", "FC4", "FC2", "FCz", "Cz", 
+		"C2", "C4", "C6", "T8", "TP8", "CP6", "CP4", "CP2", "P2", "P4", "P6", "P8", "P10", "PO8", "PO4", "O2"};
 
 BIOSEMIOBJ* gBIOSEMI = NULL;
 
@@ -146,6 +165,10 @@ BIOSEMIOBJ::BIOSEMIOBJ(int num) : BASE_CL()
 	chansetn_tmp = chansetn;
 	// default labelling system
 	labeln = 0;
+	labeln_tmp = labeln;
+	// memory montage?
+	memory_montage = 1;
+	memory_montage_tmp = memory_montage;
 	
 	//gui flow control
 	first_update = 1;
@@ -153,7 +176,7 @@ BIOSEMIOBJ::BIOSEMIOBJ(int num) : BASE_CL()
 	output_changed = 1;
 
 	// default output channel 1-16 entry
-	for (int c = 0, e = 16; c < e; c++) {
+	for (int c = 0; c < 16; c++) {
 		opn.push_back(0);
 	}
 
@@ -189,28 +212,35 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	{
 		case WM_INITDIALOG:			// the user dialog is to be created
 			// IDC_CHANSET: eeg channel set
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "all");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "160");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "128");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "64");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "32");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "all, no AUX");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "160, no AUX");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "128, no AUX");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "64, no AUX");
-			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) "32, no AUX");
+			for (int k = 0; k < 10; k++) {
+				SendDlgItemMessage(hDlg, IDC_CHANSET, CB_ADDSTRING, 0, (LPARAM) chanset_mat[k].c_str());}
 			SendDlgItemMessage(hDlg, IDC_CHANSET, CB_SETCURSEL, st->chansetn, 0L);
-			st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
+			//st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
 			SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
 				
 			// IDC_BIOSEMI_TenTwenty, IDC_BIOSEMI_ABC, radio buttons toggle between labelling systems	
 			// check if the selected channel subset doesn't have 10-20 labelling
-
-			switch (st->labeln)
-			{
+			switch (st->labeln)	{
 				case 0: CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, TRUE); break;
 				case 1: CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, TRUE); break;
 			}
+			
+			// IDC_BIOSEMI_MEM
+			// enable only when 32 channel options and 10-20 systems are selected
+			if (st->labeln == 0 && ((st->chansetn == 4) || (st->chansetn == 9))) {
+				EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_MEM), TRUE);
+				CheckDlgButton(hDlg, IDC_BIOSEMI_MEM, st->memory_montage);
+			}
+			else {
+				EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_MEM), FALSE);
+				st->memory_montage_tmp = 0;
+				CheckDlgButton(hDlg, IDC_BIOSEMI_MEM, st->memory_montage_tmp);
+			}
+
+			// disable update button if no change
+			if (chanset_changed == 0) EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), FALSE);
+			// disable apply button if no change
+			if (output_changed == 0) EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), FALSE);
 
 			// if channel matrix exists			
 			if (!channels_.empty())
@@ -268,6 +298,43 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_ADDSTRING, 0, (LPARAM) "None");
 				SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_SETCURSEL, st->opn[15], 0L);
 			}		
+			else {
+				// if previous output assignments exist, after loading a design
+				if (st->out_ports[0].out_name != "1") {
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_ADDSTRING, 0, (LPARAM)st->out_ports[0].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_ADDSTRING, 0, (LPARAM)st->out_ports[1].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_ADDSTRING, 0, (LPARAM)st->out_ports[2].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_ADDSTRING, 0, (LPARAM)st->out_ports[3].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_ADDSTRING, 0, (LPARAM)st->out_ports[4].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_ADDSTRING, 0, (LPARAM)st->out_ports[5].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_ADDSTRING, 0, (LPARAM)st->out_ports[6].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_ADDSTRING, 0, (LPARAM)st->out_ports[7].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_ADDSTRING, 0, (LPARAM)st->out_ports[8].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_ADDSTRING, 0, (LPARAM)st->out_ports[9].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_ADDSTRING, 0, (LPARAM)st->out_ports[10].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_ADDSTRING, 0, (LPARAM)st->out_ports[11].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_ADDSTRING, 0, (LPARAM)st->out_ports[12].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_ADDSTRING, 0, (LPARAM)st->out_ports[13].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_ADDSTRING, 0, (LPARAM)st->out_ports[14].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_ADDSTRING, 0, (LPARAM)st->out_ports[15].out_name);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP1, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP2, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP3, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP4, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP5, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP6, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP7, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP8, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP9, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP10, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP11, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP12, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP13, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP14, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP15, CB_SETCURSEL, 0, 0L);
+					SendDlgItemMessage(hDlg, IDC_BIOSEMI_OP16, CB_SETCURSEL, 0, 0L);
+				}
+			}			
 
 			return TRUE;
 
@@ -292,15 +359,16 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 						// retrieve the latest channel subset setting
 						st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
 						SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
+						st->labeln = st->labeln_tmp;
+						st->memory_montage = st->memory_montage_tmp;
 
 						st->biosemi_io();
 						
 						if (DevActive == 1) st->get_channel_set_index();
-
-						// set new default item - all pointed to the channels_.size (None), except the first output
-						st->opn[0] = 0;
-						for (int k = 1; k < st->opn.size(); k++) st->opn[k] = channels_.size();
-						
+						if (DevActive == 1) {
+							// don't reset output selection if it's the first time from loading a design
+							if (loaded == 1) loaded = 0;
+							else st->reset_output_ui();	}
 						if (DevActive == 1) st->release_biosemi();
 						if (DevActive == 1) st->clear_ui();
 						if (DevActive == 1) st->update_output_ui();
@@ -308,9 +376,13 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 						
 						if (DevActive == 1) {
 							SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Updated!");
+							// disable update button
+							EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), FALSE);
+							// enable apply button
+							EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);
 							chanset_changed = 0; 
 							first_update = 0; 
-							output_changed = 0;
+							output_changed = 1;
 						}
 						else {
 							chanset_changed = 1; 
@@ -332,6 +404,8 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 						// update box
 						if (DevActive == 1) st->update_outports();
 						SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "Applied!");
+						// disable apply button
+						EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), FALSE);
 						output_changed = 0; first_update = 0; 
 					}					
 					else SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "Nothing to apply!");
@@ -344,8 +418,13 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 					// retrieve channel subset setting
 					st->chansetn = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
 					SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETLBTEXT, st->chansetn, (LPARAM)st->chanset_string);
-					// save the output channels chosen
-					st->save_ui();
+					// don't reset output selection if it's the first time from loading a design
+					if (loaded == 1) {
+						st->labeln = st->labeln_tmp;
+						st->memory_montage = st->memory_montage_tmp;
+						//loaded = 0;
+					}
+					else st->save_ui(); // else save the output channels chosen
 
 					// update the box if the ui options have been changed but not yet updated (either of the two update buttons was not pressed)
 					// or when the first time of bringing up the dialogue
@@ -354,22 +433,25 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 						started = 1;
 						st->biosemi_io();
 						if (DevActive == 1) st->get_channel_set_index();
-						
-						// set new default item - all pointed to the channels_.size (None), except the first output
-						st->opn[0] = 0;
-						for (int k = 1; k < st->opn.size(); k++) st->opn[k] = channels_.size();
-						
+						if (DevActive == 1) {
+							// don't reset output selection if it's the first time from loading a design
+							if (loaded == 1) loaded = 0;
+							else st->reset_output_ui();
+						}
 						if (DevActive == 1) st->update_outports();
 						if (DevActive == 1) st->release_biosemi();
 						SetDlgItemText(hDlg, IDC_BIOSEMI_UPDATE_STATUS, "Updated!");
+						// disable update button
+						EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), FALSE);
+						// disable apply button
+						EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), FALSE);
 						chanset_changed = 0; first_update = 0; output_changed = 0;
 					}
-
-					// when output options are change - apply to the box
+					// when output options are changed - apply to the box
 					if (output_changed == 1) {
 						SetDlgItemText(hDlg, IDC_BIOSEMI_APPLY_STATUS, "...Applying");
 						// save the output channels chosen
-						st->save_ui();
+						st->save_ui(); 
 
 						// update box
 						if (DevActive == 1) st->update_outports();
@@ -384,84 +466,94 @@ LRESULT CALLBACK BioSemiDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				case IDC_CHANSET: 
 				{
 					if (HIWORD(wParam) == CBN_SELCHANGE) {
+						// Enable update button
+						EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), TRUE);
+
 						st->chansetn_tmp = SendMessage(GetDlgItem(hDlg, IDC_CHANSET), CB_GETCURSEL, 0, 0);
 						if ((st->chansetn_tmp == 0) || (st->chansetn_tmp == 1) || (st->chansetn_tmp == 2) || (st->chansetn_tmp == 2) ||
 							(st->chansetn_tmp == 5) || (st->chansetn_tmp == 6) || (st->chansetn_tmp == 7)) {
 							// disable IDC_BIOSEMI_TenTwenty and change option to BioSemi-ABC
-							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_TenTwenty);
-							EnableWindow(hCtl, FALSE);
-							st->labeln = 1;
-							switch (st->labeln) {
+							EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_TenTwenty), FALSE);
+							st->labeln_tmp = 1;
+							switch (st->labeln_tmp) {
 							case 0: CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, TRUE); CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, FALSE); break;
 							case 1: CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, TRUE);  CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, FALSE); break;
 							}
 						}
 						else {
 							// enable IDC_BIOSEMI_TenTwenty
-							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_TenTwenty);
-							EnableWindow(hCtl, TRUE);
-							switch (st->labeln) {
+							EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_TenTwenty), TRUE);
+							switch (st->labeln_tmp) {
 							case 0: CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, TRUE); CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, FALSE); break;
 							case 1: CheckDlgButton(hDlg, IDC_BIOSEMI_ABC, TRUE);  CheckDlgButton(hDlg, IDC_BIOSEMI_TenTwenty, FALSE); break;
 							}
 						}
 						// IDC_BIOSEMI_MEM
 						// enable only when 32 channel options and 10-20 systems are selected
-						if (st->labeln == 0 && ((st->chansetn_tmp == 4) || (st->chansetn_tmp == 9))) {
-							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
-							EnableWindow(hCtl, TRUE);
+						if (st->labeln_tmp == 0 && ((st->chansetn_tmp == 4) || (st->chansetn_tmp == 9))) {
+							EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_MEM), TRUE);
+							st->memory_montage_tmp = 1;
+							CheckDlgButton(hDlg, IDC_BIOSEMI_MEM, st->memory_montage_tmp);
 						}
 						else {
-							HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
-							EnableWindow(hCtl, FALSE);
+							EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_MEM), FALSE);
+							st->memory_montage_tmp = 0;
+							CheckDlgButton(hDlg, IDC_BIOSEMI_MEM, st->memory_montage_tmp);
 						}
-						chanset_changed = 1; 						
+						chanset_changed = 1; output_changed = 1;
 					}
 					break;
 				}
 
 				// labelling system
 				case IDC_BIOSEMI_TenTwenty: {
-					st->labeln = 0;
+					st->labeln_tmp = 0;
 					// enable only for 32 channel options
 					if ((st->chansetn_tmp == 4) || (st->chansetn_tmp == 9)) {
-						HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
-						EnableWindow(hCtl, TRUE);
+						EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_MEM), TRUE);
+						CheckDlgButton(hDlg, IDC_BIOSEMI_MEM, st->memory_montage_tmp);
 					}
+					chanset_changed = 1; output_changed = 1;
+					// enable update button
+					EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), TRUE);
 					break;
 				}
 				case IDC_BIOSEMI_ABC: {
-					st->labeln = 1;
-					HWND hCtl = GetDlgItem(hDlg, IDC_BIOSEMI_MEM);
-					EnableWindow(hCtl, FALSE);
+					st->labeln_tmp = 1;
+					EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_MEM), FALSE);
+					st->memory_montage_tmp = 0;
+					CheckDlgButton(hDlg, IDC_BIOSEMI_MEM, st->memory_montage_tmp);
+					chanset_changed = 1; output_changed = 1;
+					// enable update button
+					EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), TRUE);
 					break;
 				}
 
 				// IDC_BIOSEMI_MEM, memory montage? apply to only 32 channel options
 				case IDC_BIOSEMI_MEM: {
-					st->memory_montage = IsDlgButtonChecked(hDlg, IDC_SHOWCOUNTER);
-
-				}				
-
-			    // IDC_BIOSEMI_MAXMIN, MAX-MIN scale the signal
+					st->memory_montage_tmp = IsDlgButtonChecked(hDlg, IDC_BIOSEMI_MEM);
+					chanset_changed = 1; output_changed = 1;
+					// enable update button
+					EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_UPDATEBOX), TRUE);
+				}	
 
 				// output options 1-16
-				case IDC_BIOSEMI_OP1: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP2: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP3: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP4: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP5: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP6: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP7: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP8: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP9: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP10: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP11: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP12: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP13: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP14: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP15: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
-				case IDC_BIOSEMI_OP16: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	break;
+				case IDC_BIOSEMI_OP1: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE); break;
+				case IDC_BIOSEMI_OP2: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE); break;
+				case IDC_BIOSEMI_OP3: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP4: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP5: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP6: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP7: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP8: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP9: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP10: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP11: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP12: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP13: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP14: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP15: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
+				case IDC_BIOSEMI_OP16: if (HIWORD(wParam) == CBN_SELCHANGE) output_changed = 1;	EnableWindow(GetDlgItem(hDlg, IDC_BIOSEMI_APPLY_SELECTION), TRUE);	break;
 					
 				case IDC_BIOSEMI_CANCEL: {
 					// discard changes
@@ -490,43 +582,48 @@ void BIOSEMIOBJ::session_start(void) // will be called when Play -button is pres
 			biosemi_.reset();
 
 		started = 1;		
+		
+		biosemi_io();		
 
-		biosemi_io();
+		// retrieve channel subset setting, if the gui isn't opened
+		if (loaded == 1) strcpy(chanset_string, chanset_mat[chansetn].c_str());
+
+		if (DevActive != 1) return;
 		
 		get_channel_set_index();
 
 		// if start the session right away without config the gui options
 		if (first_update == 1) {
-			// set new default item - all pointed to the channels_.size (None), except the first output
-			opn[0] = 0;
-			for (int k = 1; k < opn.size(); k++) opn[k] = channels_.size(); 
+			if (DevActive == 1) {
+				// don't reset output selection if it's the first time from loading a design
+				if (loaded == 1) loaded = 0;
+				else reset_output_ui();
+			}
 			// update ui in case it's active
 			update_output_ui(); chanset_changed = 0; output_changed = 0; first_update = 0;
-		}
-		
+		}		
 		update_outports();
 		update_samplingrate(srate_);
 		// for timer.cpp to initiate process_biosemi()
-		GLOBAL.biosemi_available = 1;		
+		GLOBAL.biosemi_available = 1;	
 	}
-	else {
+	else { 
 		GLOBAL.biosemi_available = 0;
 	}
-
-	//if (DevActive == 0) chanset_changed = 1; first_update = 1; output_changed = 1; return;
 }
 
 void BIOSEMIOBJ::work(void) // generate output value
 {
+	// data streaming is handled by process_biosemi() in timer.cpp
 	if (DrvLib == NULL) return;
-	if (DevActive == 0) return;
-
-	// don't steam data if no active outports is specified
-	if (active_outports.empty()) return;
+	if (DevActive == 0) return;	
 }
 
-void process_biosemi(void)
-{
+void process_biosemi(void) // to be called by timer.cpp while GLOBAL.biosemi_available == 1
+{	
+	// don't steam data if no active outports is specified
+	if (gBIOSEMI->active_outports.empty()) return;
+
 	// get a chunk from the device --> raw_chunk is [#insamples x #channels]
 	biosemi_->get_chunk(raw_chunk);
 
@@ -585,9 +682,15 @@ void BIOSEMIOBJ::session_pos(long pos) // will be called when Positioning the
 // need to plot all the fields on the GUI
 void BIOSEMIOBJ::load(HANDLE hFile)
 {
+	loaded = 1;
 	load_object_basics(this);
 	load_property("chansetn", P_INT, &chansetn);
+	//load_property("chansetn_tmp", P_INT, &chansetn_tmp);
+	//load_property("chanset_string", P_STRING, &chanset_string);
 	load_property("labeln", P_INT, &labeln);
+	load_property("labeln_tmp", P_INT, &labeln_tmp);
+	load_property("memory_montage", P_INT, &memory_montage);
+	load_property("memory_montage_tmp", P_INT, &memory_montage_tmp);
 	load_property("opn[0]", P_INT, &opn[0]);
 	load_property("opn[1]", P_INT, &opn[1]);
 	load_property("opn[2]", P_INT, &opn[2]);
@@ -604,13 +707,34 @@ void BIOSEMIOBJ::load(HANDLE hFile)
 	load_property("opn[13]", P_INT, &opn[13]);
 	load_property("opn[14]", P_INT, &opn[14]);
 	load_property("opn[15]", P_INT, &opn[15]);
+	load_property("out_ports[0].out_name", P_STRING, &out_ports[0].out_name);
+	load_property("out_ports[1].out_name", P_STRING, &out_ports[1].out_name);
+	load_property("out_ports[2].out_name", P_STRING, &out_ports[2].out_name);
+	load_property("out_ports[3].out_name", P_STRING, &out_ports[3].out_name);
+	load_property("out_ports[4].out_name", P_STRING, &out_ports[4].out_name);
+	load_property("out_ports[5].out_name", P_STRING, &out_ports[5].out_name);
+	load_property("out_ports[6].out_name", P_STRING, &out_ports[6].out_name);
+	load_property("out_ports[7].out_name", P_STRING, &out_ports[7].out_name);
+	load_property("out_ports[8].out_name", P_STRING, &out_ports[8].out_name);
+	load_property("out_ports[9].out_name", P_STRING, &out_ports[9].out_name);
+	load_property("out_ports[10].out_name", P_STRING, &out_ports[10].out_name);
+	load_property("out_ports[11].out_name", P_STRING, &out_ports[11].out_name);
+	load_property("out_ports[12].out_name", P_STRING, &out_ports[12].out_name);
+	load_property("out_ports[13].out_name", P_STRING, &out_ports[13].out_name);
+	load_property("out_ports[14].out_name", P_STRING, &out_ports[14].out_name);
+	load_property("out_ports[15].out_name", P_STRING, &out_ports[15].out_name);
 }
 
 void BIOSEMIOBJ::save(HANDLE hFile)  // hFile will be the opened configfile
 {
 	save_object_basics(hFile, this);
 	save_property(hFile, "chansetn", P_INT, &chansetn);
+	//save_property(hFile, "chansetn_tmp", P_INT, &chansetn_tmp);
+	//save_property(hFile, "chanset_string", P_STRING, &chanset_string);
 	save_property(hFile, "labeln", P_INT, &labeln);
+	save_property(hFile, "memory_montage", P_INT, &memory_montage);
+	save_property(hFile, "labeln_tmp", P_INT, &labeln_tmp);
+	save_property(hFile, "memory_montage_tmp", P_INT, &memory_montage_tmp);
 	save_property(hFile, "opn[0]", P_INT, &opn[0]);
 	save_property(hFile, "opn[1]", P_INT, &opn[1]);
 	save_property(hFile, "opn[2]", P_INT, &opn[2]);
@@ -627,8 +751,23 @@ void BIOSEMIOBJ::save(HANDLE hFile)  // hFile will be the opened configfile
 	save_property(hFile, "opn[13]", P_INT, &opn[13]);
 	save_property(hFile, "opn[14]", P_INT, &opn[14]);
 	save_property(hFile, "opn[15]", P_INT, &opn[15]);
+	save_property(hFile, "out_ports[0].out_name", P_STRING, &out_ports[0].out_name);
+	save_property(hFile, "out_ports[1].out_name", P_STRING, &out_ports[1].out_name);
+	save_property(hFile, "out_ports[2].out_name", P_STRING, &out_ports[2].out_name);
+	save_property(hFile, "out_ports[3].out_name", P_STRING, &out_ports[3].out_name);
+	save_property(hFile, "out_ports[4].out_name", P_STRING, &out_ports[4].out_name);
+	save_property(hFile, "out_ports[5].out_name", P_STRING, &out_ports[5].out_name);
+	save_property(hFile, "out_ports[6].out_name", P_STRING, &out_ports[6].out_name);
+	save_property(hFile, "out_ports[7].out_name", P_STRING, &out_ports[7].out_name);
+	save_property(hFile, "out_ports[8].out_name", P_STRING, &out_ports[8].out_name);
+	save_property(hFile, "out_ports[9].out_name", P_STRING, &out_ports[9].out_name);
+	save_property(hFile, "out_ports[10].out_name", P_STRING, &out_ports[10].out_name);
+	save_property(hFile, "out_ports[11].out_name", P_STRING, &out_ports[11].out_name);
+	save_property(hFile, "out_ports[12].out_name", P_STRING, &out_ports[12].out_name);
+	save_property(hFile, "out_ports[13].out_name", P_STRING, &out_ports[13].out_name);
+	save_property(hFile, "out_ports[14].out_name", P_STRING, &out_ports[14].out_name);
+	save_property(hFile, "out_ports[15].out_name", P_STRING, &out_ports[15].out_name);
 }
-
 
 
 BIOSEMIOBJ::~BIOSEMIOBJ()
@@ -1013,7 +1152,6 @@ void BIOSEMIOBJ::biosemi_io(void)
 	}
 
 	last_idx_ = 0;
-	
 }
 
 
@@ -1039,6 +1177,27 @@ void BIOSEMIOBJ::get_channel_set_index(void)
 			types_.push_back(types[k]);
 		}
 	}
+
+	// toggle 10-20 and biosemi-abc labelling, overwrite the labels if 10-20 is chosen
+	if (labeln == 0) { // 10-20 labelling is chosen 
+		if ((subset == "32") || (subset == "32, no AUX")) { // 32 channel
+			if (memory_montage == 1) { // memory montage was chosen
+				for (int k = 1; k <= 32; k++) {
+					channels_.at(k) = thirtytwo_memory[k - 1];
+				}
+			}
+			else { // NOT memory montage
+				for (int k = 1; k <= 32; k++) {
+					channels_.at(k) = thirtytwo[k - 1];
+				}
+			}
+		}
+		else { // 64 channel
+			for (int k = 1; k <= 64; k++) {
+				channels_.at(k) = sixtyfour[k - 1];
+			}
+		}
+	}
 }
 
 void BIOSEMIOBJ::save_ui(void)
@@ -1059,6 +1218,28 @@ void BIOSEMIOBJ::save_ui(void)
 	opn[13] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP14), CB_GETCURSEL, 0, 0);
 	opn[14] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP15), CB_GETCURSEL, 0, 0);
 	opn[15] = SendMessage(GetDlgItem(hDlg, IDC_BIOSEMI_OP16), CB_GETCURSEL, 0, 0);
+	labeln = labeln_tmp;
+	memory_montage = memory_montage_tmp;
+}
+
+void BIOSEMIOBJ::reset_output_ui(void)
+{
+	std::string subset = chanset_string;
+	// set new default item - all pointed to the channels_.size (None)
+	// except the first and the last two outputs
+	opn[0] = 1; // A1 or 10-20 equivalent
+	for (int k = 1; k < opn.size(); k++) opn[k] = channels_.size();
+	if ((subset == "32") || (subset == "64") ||
+		(subset == "128") || (subset == "160") ||
+		(subset == "all")) {
+		// these subsets include 16 AUX channel at the end of the channel list
+		opn.at(14) = channels_.size() - 2 - 16; // EX7
+		opn.at(15) = channels_.size() - 1 - 16; // EX8
+	}
+	else {
+		opn.at(14) = channels_.size() - 2; // EX7
+		opn.at(15) = channels_.size() - 1; // EX8
+	}
 }
 
 void BIOSEMIOBJ::clear_ui(void)
@@ -1180,8 +1361,10 @@ void BIOSEMIOBJ::get_chunk(chunk_t& result) // get data from the amp?
 	if (DevActive == 0) return;
 	// get current buffer offset
 	int cur_idx;
-	if (!READ_POINTER(hConn_, (unsigned*)&cur_idx))
+	if (!READ_POINTER(hConn_, (unsigned*)& cur_idx))
+		//release_biosemi(); GLOBAL.biosemi_available = 0;
 		report_error("Reading the updated buffer pointer gave an error.");
+		//return;
 	cur_idx = cur_idx / 4;
 
 	// forget about incomplete sample data

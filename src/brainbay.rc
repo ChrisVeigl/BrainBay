@@ -1989,7 +1989,6 @@ BEGIN
     LTEXT           "...",IDC_BIOSEMI_APPLY_STATUS,89,249,63,8
     LTEXT           "Remember to use 'Expression - Evaluation' box to set online reference!",IDC_STATIC,24,264,139,15
     CONTROL         "Memory Montage",IDC_BIOSEMI_MEM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,97,49,71,10
-    CONTROL         "Max-Min Scale",IDC_BIOSEMI_MAXMIN,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,159,74,59,10
 END
 
 
