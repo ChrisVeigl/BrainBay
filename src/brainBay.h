@@ -385,6 +385,7 @@ typedef struct GLOBALStruct
 	char startdesignpath[256];
 	char ganglionhubpath[256];
 	char gangliondevicename[100];
+	char neurobit_device[100];
 
 	long session_length;
 	long session_start;
