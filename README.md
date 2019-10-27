@@ -53,18 +53,18 @@ Link to Release and other Infos
 
 ## Installing and Using BrainBay under Linux:
 
-* Installation Wine (Windows-Emulator unter LInux)
+* Install Wine (Windows-Emulator):
   `sudo apt install winehq`
-* Installation BrainBay
-   start (doubleclick) `BrainBay_Setup.exe`
-* Display the utilized USB-Port
+* Install BrainBay:
+   doubleclick `BrainBay_Setup.exe`
+* Display the utilized USB-Port:
    `dmesg -w`
-* Configuration of serial interface
+* Configure the serial interface:
    `WINEPREFIX=~/.wine wine regedit`
    Add Item `COM1` with value `/dev/ttyUSB0` (respectively the actual device name for the serial port) under `HKEY_LOCAL_MACHINE\Software\Wine\Ports`
-* Activate configuration
+* Activate configuration:
    `wineserver -k`
-* To get audio (midi) working
+* To get audio (midi) working:
    `timidity -iA -Os -B2,8 &`
 
 
