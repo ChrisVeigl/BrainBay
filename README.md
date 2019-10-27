@@ -11,15 +11,15 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 2.4  (2019-05-17)
+* The current release version is 2.5  (2019-09-03)
 
 * Recent changes for this release:
   * New elements Shadow and Volume allow control of volume and desktop transparency
   * New element OSC-Sender for transfer of live values to other applications via Open Sound Control / UDP
   * Logical elements And, Or and Not got extended modes, increasing flexibility
   * Threshold element improved, increasing flexibility
+  * Improved interface and handling for Neurobit devices
   * user manual updated!
-
 
 * Not-so-recent changes worth mentioning:
   * Support for Neurosky devices
@@ -40,6 +40,7 @@ Link to Release and other Infos
   
 * Useful info if you want to run BrainBay under Linux:
   - http://www.autodidacts.io/use-openbci-with-brainbay-on-ubuntu-linux-and-wine/
+  - see lso new Linux installation tips below!
 
 * Other related infos:
   - https://sites.google.com/site/biofeedbackpages/brainbay-openbci
@@ -48,6 +49,23 @@ Link to Release and other Infos
 
 * If you want to modify or extend the software, the Visual Studio 2010
   project files and all source modules are located in the 'src' folder.
+
+
+## Installing and Using BrainBay under Linux:
+
+* Installation Wine (Windows-Emulator unter LInux)
+  `sudo apt install winehq`
+* Installation BrainBay
+   start (doubleclick) `BrainBay_Setup.exe`
+* Display the utilized USB-Port
+   `dmesg -w`
+* Configuration of serial interface
+   `WINEPREFIX=~/.wine wine regedit`
+   Add Item `COM1` with value `/dev/ttyUSB0` (respectively the actual device name for the serial port) under `HKEY_LOCAL_MACHINE\Software\Wine\Ports`
+* Activate configuration
+   `wineserver -k`
+* To get audio (midi) working
+   `timidity -iA -Os -B2,8 &`
 
 
 Credits
@@ -65,6 +83,7 @@ Credits
 * Stephan Gerhard for the QDS parser
 * William Croft (OpenBCI) for various fixes, enhancements and blog posts
 * Elliot Mebane for valuable feedback and hints for improvements
+* Jan-Hendrik Franz for Wine installation tips
 
 
 Further Information
