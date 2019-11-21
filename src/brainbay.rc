@@ -1829,7 +1829,7 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (USA) resources
+// Englisch (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -1920,7 +1920,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (USA) resources
+#endif    // Englisch (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -2993,17 +2993,11 @@ END
 //
 
 IDC_CURSOR1             CURSOR                  "CURSORS\\dwell_arrow1.cur"
-
 IDC_CURSOR2             CURSOR                  "CURSORS\\dwell_arrow6.cur"
-
 IDC_CURSOR3             CURSOR                  "CURSORS\\dwell_arrow2.cur"
-
 IDC_CURSOR4             CURSOR                  "CURSORS\\dwell_arrow3.cur"
-
 IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
-
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
-
 #endif    // Deutsch (�sterreich) resources
 /////////////////////////////////////////////////////////////////////////////
 
