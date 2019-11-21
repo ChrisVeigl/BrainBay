@@ -16,7 +16,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// German (Germany) resources
+// Deutsch (Deutschland) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
@@ -30,9 +30,7 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_SMALL               ICON                    "small.ico"
-
 IDI_MYEEG               ICON                    "icon1.ico"
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -199,7 +197,7 @@ CAPTION "Info"
 FONT 8, "System", 0, 0, 0x0
 BEGIN
     ICON            107,IDC_MYICON,14,9,20,20
-    LTEXT           "BrainBay  --  Version 2.4  (05/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
+    LTEXT           "BrainBay  --  Version 2.5  (07/2019)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
     LTEXT           "The OpenEEG-Project:                                     http://www.openeeg.sf.net",IDC_STATIC,52,40,118,19
     LTEXT           "Christoph Veigl, Jeremy Wilkerson, Lester John,               Jim Peters, Rudi Cilibrasi, Joerg Hansmann, Stephan Gerhard, Robert Anessi, Raymond Nguyen, Franz Strobl, William Croft, Elliot Mebane",IDC_STATIC,67,75,195,35
     LTEXT           " BrainBay-Contributors:",IDC_STATIC,53,65,77,8
@@ -1826,12 +1824,12 @@ BEGIN
     IDS_STRING1             "rc.bottom-rc.top"
 END
 
-#endif    // German (Germany) resources
+#endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// English (USA) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -1922,7 +1920,7 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (United States) resources
+#endif    // English (USA) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -2026,7 +2024,7 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// German (Austria) resources
+// Deutsch (�sterreich) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
@@ -3006,7 +3004,7 @@ IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
 
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
 
-#endif    // German (Austria) resources
+#endif    // Deutsch (�sterreich) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
