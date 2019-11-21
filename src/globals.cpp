@@ -800,7 +800,7 @@ void GlobalInitialize()
 	GLOBAL.dialog_interval=DIALOG_UPDATETIME;
 	GLOBAL.draw_interval=DRAW_UPDATETIME;
 	GLOBAL.neurobit_available=0;
-	strcpy(GLOBAL.neurobit_device, DEFAULT_NEUROBIT_DEVICE);
+	strcpy(GLOBAL.neurobit_device,DEFAULT_NEUROBIT_DEVICE);
 	GLOBAL.emotiv_available=0;
 	GLOBAL.biosemi_available = 0;
 	GLOBAL.ganglion_available=0;
