@@ -96,6 +96,7 @@
 #define IDD_EVALBOX_ML                  259
 #define IDD_SHADOWBOX                   260
 #define IDD_OSC_SENDERBOX               261
+#define IDD_BIOSEMIBOX                  262
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -661,24 +662,41 @@
 #define IDC_NB_DEVICECOMBO              1479
 #define IDC_USERID_COMBO                1479
 #define IDC_USE_VIDEOINPUT              1480
+#define IDC_CHANSET                     1480
 #define IDC_USE_CVCAPTURE               1481
+#define IDC_BIOSEMI_OP1                 1481
+#define IDC_BIOSEMI_OP2                 1482
 #define IDC_RADIO2                      1483
+#define IDC_BIOSEMI_OP3                 1483
 #define IDC_CHNLABEL                    1484
+#define IDC_BIOSEMI_OP4                 1484
 #define IDC_RESLABEL                    1485
+#define IDC_BIOSEMI_OP5                 1485
 #define IDC_RESLABEL2                   1486
+#define IDC_BIOSEMI_OP6                 1486
 #define IDC_CHNFROMPORT                 1487
+#define IDC_BIOSEMI_OP7                 1487
+#define IDC_BIOSEMI_OP8                 1488
+#define IDC_BIOSEMI_OP9                 1489
 #define IDC_DELAYTIME                   1490
+#define IDC_BIOSEMI_OP10                1490
 #define IDC_LOWERLIMIT                  1491
+#define IDC_BIOSEMI_OP11                1491
 #define IDC_UPPERLIMIT                  1492
+#define IDC_BIOSEMI_OP12                1492
 #define IDC_APPEND                      1493
+#define IDC_BIOSEMI_OP13                1493
 #define IDC_PLAY_ONCE                   1494
 #define IDC_ADD_DATE                    1494
+#define IDC_BIOSEMI_OP14                1494
 #define IDC_PLAY_ONCE2                  1495
 #define IDC_VALUES                      1495
 #define IDC_AUTOCREATE                  1495
+#define IDC_BIOSEMI_OP15                1495
 #define IDC_AUTOSTART                   1496
 #define IDC_DEVICETYPE                  1496
 #define IDC_SEMICOLON                   1496
+#define IDC_BIOSEMI_OP16                1496
 #define IDC_EMOTIV_ARCHIVE_NAME         1497
 #define IDC_SBT2STATUS                  1497
 #define IDC_OPEN_EMOTIV_ARCHIVE         1498
@@ -763,6 +781,18 @@
 #define IDC_UPPERMODE_COMBO             1534
 #define IDC_UPPERMODE_COMBO2            1535
 #define IDC_LOWERMODE_COMBO             1535
+#define IDC_BIOSEMI_UPDATEBOX           1557
+#define IDC_BIOSEMI_UPDATE_STATUS       1559
+#define IDC_BUTTON1                     1560
+#define IDC_BIOSEMI_CANCEL              1560
+#define IDC_BIOSEMI_TenTwenty           1561
+#define IDC_BIOSEMI_ABC                 1562
+#define IDC_BIOSEMI_APPLY_SELECTION     1563
+#define IDC_BIOSEMI_UPDATE_STATUS2      1564
+#define IDC_BIOSEMI_APPLY_STATUS        1564
+#define IDC_BIOSEMI_MEM                 1565
+#define IDC_BIOSEMI_MEM2                1566
+#define IDC_BIOSEMI_MAXMIN              1566
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -926,15 +956,20 @@
 #define IDM_INSERTVOLUME                32956
 #define ID_TARGET_THRESHOLD             32957
 #define IDM_INSERT_THRESHOLD            32958
+#define ID_Menu                         32959
+#define ID_SOURCE_BIOSEMIACTIVETWO      32960
+#define ID_BIOSIGNAL_BIOSEMIACTIVETWO   32961
+#define IDM_BIOSIGNAL_BIOSEMIACTIVETWO  32962
+#define IDM_INSERT_EEG_BIOSEMI          32963
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        255
-#define _APS_NEXT_COMMAND_VALUE         32959
-#define _APS_NEXT_CONTROL_VALUE         1533
+#define _APS_NEXT_RESOURCE_VALUE        266
+#define _APS_NEXT_COMMAND_VALUE         32964
+#define _APS_NEXT_CONTROL_VALUE         1566
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

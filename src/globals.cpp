@@ -93,6 +93,7 @@
 #include "ob_shadow.h"
 #include "ob_volume.h"
 #include "ob_osc_sender.h"
+#include "ob_biosemi.h"
 
 //
 // GLOBAL VARIABLES
@@ -298,6 +299,7 @@ void create_object(int type)
 							 actobject->object_size=sizeof(VOLUMEOBJ);break;
 		case OB_OSC_SENDER:  actobject=new OSC_SENDEROBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(OSC_SENDEROBJ);break;
+		case OB_BIOSEMI:	 actobject = new BIOSEMIOBJ(GLOBAL.objects); break;
 
 
 	}
@@ -800,6 +802,7 @@ void GlobalInitialize()
 	GLOBAL.neurobit_available=0;
 	strcpy(GLOBAL.neurobit_device,DEFAULT_NEUROBIT_DEVICE);
 	GLOBAL.emotiv_available=0;
+	GLOBAL.biosemi_available = 0;
 	GLOBAL.ganglion_available=0;
 	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;

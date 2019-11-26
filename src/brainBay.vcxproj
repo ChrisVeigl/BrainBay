@@ -69,7 +69,7 @@
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\lib;..\lib\ComputerVision\opencv\include;..\lib\ComputerVision;..\lib\neurobit_api</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib\BioSemi\release;..\lib;..\lib\ComputerVision\opencv\include;..\lib\ComputerVision;..\lib\neurobit_api;..\lib\BioSemi\DLL\Win64;..\lib\BioSemi</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -95,7 +95,7 @@
       </PreventDllBinding>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) ..\bin</Command>
+      <Command>copy "$(TargetPath)" ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,7 +144,7 @@
       <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib</IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) ..\bin</Command>
+      <Command>copy "$(TargetPath)" ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -227,6 +227,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="ob_biosemi.cpp" />
     <ClCompile Include="ob_buffer.cpp" />
     <ClCompile Include="ob_button.cpp" />
     <ClCompile Include="ob_cam.cpp">
@@ -573,6 +574,7 @@
     <ClInclude Include="ob_average.h" />
     <ClInclude Include="ob_avi.h" />
     <ClInclude Include="ob_ballgame.h" />
+    <ClInclude Include="ob_biosemi.h" />
     <ClInclude Include="ob_buffer.h" />
     <ClInclude Include="ob_button.h" />
     <ClInclude Include="ob_cam.h" />
@@ -640,6 +642,7 @@
     <ClInclude Include="SDL_sound.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Toolbox\BioSemi\ActiView707-Laptop\USB Drivers\Windows 64bit\Developers_kit\C-code\Labview_DLL.dll" />
     <None Include="brainBay.ico" />
     <None Include="ClassDiagram1.cd" />
     <None Include="ClassDiagram2.cd" />
