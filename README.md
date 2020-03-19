@@ -55,17 +55,22 @@ Link to Release and other Infos
 
 * Install Wine (Windows-Emulator):
   `sudo apt install winehq`
+  If this does not work: see installation guide for your OS, e.g. https://wiki.winehq.org/Debian
 * Install BrainBay:
-   doubleclick `BrainBay_Setup.exe`
-* Display the utilized USB-Port:
-   `dmesg -w`
-* Configure the serial interface:
-   `WINEPREFIX=~/.wine wine regedit`
-   Add Item `COM1` with value `/dev/ttyUSB0` (respectively the actual device name for the serial port) under `HKEY_LOCAL_MACHINE\Software\Wine\Ports`
+  doubleclick `BrainBay_Setup.exe`, extract the files to a folder
+* Determint the Serial interface:
+  Connect the EEG/serial device, use `dmesg -w` to display the device file (e.g. /dev/ttyUSB0) 
+* Configure the serial interface as COM Port in Wine:
+  `WINEPREFIX=~/.wine wine regedit`
+  Add Item `COM1` with correct string value for eh device file, e.g. `/dev/ttyUSB0` (respectively the actual device name for the serial port) under `HKEY_LOCAL_MACHINE\Software\Wine\Ports`
 * Activate configuration:
-   `wineserver -k`
+  `wineserver -k`
 * To get audio (midi) working:
-   `timidity -iA -Os -B2,8 &`
+  `sudo apt install timidity`
+* Start Brainbay with midi support:
+  `timidity -iA -Os -B2,8 &`
+  `wine brainbay.exe`
+  
 
 
 Credits
