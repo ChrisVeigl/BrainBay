@@ -6,7 +6,7 @@
   Author: Chris Veigl, contact: chris@shifz.org
   
   Co-Authors:
-		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORELLATION, EVALUATOR)
+		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORRELATION, EVALUATOR)
 		 Lester John (Module MATLAB-transfer)
 		 Stephan Gerhard (QDS parser)
 		 Raymond Nguyen (Vector ports)
@@ -227,7 +227,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	 case WM_COMMAND:
 			wmId    = LOWORD(wParam); 
 			wmEvent = HIWORD(wParam); 
-			// Menüauswahlen analysieren:
+			// Menï¿½auswahlen analysieren:
 			switch( wmId ) 
 			{
 
@@ -288,7 +288,7 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 						   else
 						   {
 							  char * d_name,new_name[80];
-		  	 		   	      write_logfile("configruation saved.");
+		  	 		   	      write_logfile("configuration saved.");
 
 							  d_name=configfilename;
 							  while (strstr(d_name,"\\")) d_name=strstr(d_name,"\\")+1;
