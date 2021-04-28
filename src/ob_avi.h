@@ -10,7 +10,7 @@
   input port. Sound of the AVI-File is not processed.
 
   Inspired by   Jeff Molofee's Lesson 35: Playing AVI-Files with OpenGl
-  http://nehe.gamedev.net   
+  http://nehe.gamedev.net
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -51,7 +51,7 @@ protected:
 	GLUquadricObj *quadratic;										// Storage For Our Quadratic Objects
 
 	HDRAWDIB hdd;													// Handle For Our Dib
-	HBITMAP hBitmap;												// Handle To A Device Dependant Bitmap
+	HBITMAP hBitmap;												// Handle To A Device Dependent Bitmap
 	HDC hdc;								// Creates A Compatible Device Context
 	unsigned char* data;										// Pointer To Our Resized Image
 

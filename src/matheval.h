@@ -85,7 +85,7 @@ extern          "C" {
 
 	/*
 	 * Calculate length of textual representation of evaluator. This
-	 * procedure is inteded to be used along with evaluator_write()
+	 * procedure is intended to be used along with evaluator_write()
 	 * procedure that follows.
 	 */
 	extern int      evaluator_calculate_length(void *evaluator);

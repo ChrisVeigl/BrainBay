@@ -24,7 +24,7 @@ BIG CREDITS go to:
 
   
 Find further documentation on the Project hompage http://brainbay.lo-res.org
-and in the user and devloper manuals (.pdf)
+and in the user and developer manuals (.pdf)
 
 
 

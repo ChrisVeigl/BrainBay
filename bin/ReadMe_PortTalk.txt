@@ -24,7 +24,7 @@ install the driver and then start it.
 Allowio - Grants programs access to IO Ports.
 _____________________________________________
 
-Usage : AllowIO <executable.exe> <Hex Addresse(s)> <Switches>
+Usage : AllowIO <executable.exe> <Hex Address(es)> <Switches>
 
 eg. Using allowio to grant access to IO ports 0x42, 0x43 and 0x61
 

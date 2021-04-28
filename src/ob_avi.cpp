@@ -295,7 +295,7 @@ void AVIOBJ::GrabAVIFrame(int frame,HDC nhdc)									// Grabs A Frame From The 
 void AVIOBJ::CloseAVI(void)												// Properly Closes The Avi File
 {
 	
-	DeleteObject(hBitmap);										// Delete The Device Dependant Bitmap Object
+	DeleteObject(hBitmap);										// Delete The Device Dependent Bitmap Object
 	if (hdd) DrawDibClose(hdd);											// Closes The DrawDib Device Context
 	if (pgf)
 	{

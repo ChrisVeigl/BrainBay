@@ -6,7 +6,7 @@
   Author: Chris Veigl, contact: chris@shifz.org
   
   Co-Authors:
-		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORELLATION, EVALUATOR)
+		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORRELATION, EVALUATOR)
 		 Lester John (Module MATLAB-transfer)
 		 Stephan Gerhard (QDS parser)
 		 Franz Stobl ( NIA support )

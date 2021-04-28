@@ -35,7 +35,7 @@ Input buffers:
 3. The entire buffer of all the variables (A-J) is passed to Matlab.
 4. The input buffer is initially set to all zeroes. 
 5. The first sample is copied to the first element. 
-6. Sucessive samples are copied to the 2nd, 3rd ... element etc.
+6. Successive samples are copied to the 2nd, 3rd ... element etc.
 7. Once the buffer is full, the buffer is shifted down and each new sample is copied to the top (ie. last element) of the buffer.
 
 Additional variables:

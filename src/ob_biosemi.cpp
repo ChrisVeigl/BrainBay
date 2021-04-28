@@ -5,7 +5,7 @@
   MODULE: OB_BIOSEMI.CPP:  contains the interface to
 		  BIOSEMI Active Two devices (Mk1 and Mk2)
   Author: Denny Yi-Jhong Han (the codes are extensively referenced and copied from
-		  Lab Straming Layer (LSL) projects, https://github.com/sccn/labstreaminglayer
+		  Lab Streaming Layer (LSL) projects, https://github.com/sccn/labstreaminglayer
 		  credits also goes to them!)
 
   This program is free software; you can redistribute it and/or
@@ -58,7 +58,7 @@ int last_idx_;
 const int send_interval_ms = 13;
 //const int send_interval_ms = 100;
 
-// the age of each chunk received (in seconds) is anywhere between 0 and send_interval_ms miliseconds old, and is on average half of the maximum
+// the age of each chunk received (in seconds) is anywhere between 0 and send_interval_ms milliseconds old, and is on average half of the maximum
 const double buffer_lag = (send_interval_ms / 2000.0);
 
 // allocate temp data & resamplers...
