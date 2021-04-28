@@ -1239,11 +1239,11 @@ void edfchannels_to_physical(CHANNELStruct * fromchn,char * to,int channels)
 		szdata[80]=0; strcat(to,szdata);	}
 	actchn=fromchn;	
 	for (t=0;t<channels ;t++,actchn++)   //  samples per data record
-	{   sprintf(szdata,"%d",PACKETSPERSECOND); 
+	{   sprintf(szdata,"%d",PACKETSPERSECOND);
 		for (i=strlen(szdata);i<8;i++) szdata[i]=' ';
 		szdata[8]=0; strcat(to,szdata);	}
-	for (t=0;t<channels;t++)   // reseverd
-	{   strcpy(szdata," ");   
+	for (t=0;t<channels;t++)   // reserved
+	{   strcpy(szdata," ");
 		for (i=strlen(szdata);i<32;i++) szdata[i]=' ';
 		szdata[32]=0; strcat(to,szdata);	}
 

@@ -5,9 +5,9 @@
   MODULE: OB_COUNTER.CPP:  contains functions for the COUTNER-Object
   Author: Chris Veigl
 
-  This Object outputs a counter value at it's port and displays the value in a 
-  seperate Window. It can count transistions of the input to or from INVALID_VALUE
-  or use the input direclty (without counting)
+  This Object outputs a counter value at it's port and displays the value in a
+  seperate Window. It can count transitions of the input to or from INVALID_VALUE
+  or use the input directly (without counting)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -34,7 +34,7 @@ void draw_counter(COUNTEROBJ * st)
 
 	SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc,st->fontcolor);
-    
+
     SelectObject(hdc, st->font);
 
 	actbrush=CreateSolidBrush(st->bkcolor);
@@ -77,13 +77,13 @@ void draw_counter(COUNTEROBJ * st)
 
 
 
-	
 
 
 
 
 
-	
+
+
 LRESULT CALLBACK CounterDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	static int init;
@@ -305,7 +305,7 @@ COUNTEROBJ::COUNTEROBJ(int num) : BASE_CL()
 		showcounter=TRUE;
 
 	//	color=RGB(0,0,100);
-        
+
 		if (!(font = CreateFont(-MulDiv(fontsize, GetDeviceCaps(GetDC(NULL), LOGPIXELSY), 72), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
 			report_error("Font creation failed!");
 

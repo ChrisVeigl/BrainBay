@@ -5,7 +5,7 @@
   Author: Chris Veigl, contact: chris@shifz.org
   
   Co-Authors:
-		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORELLATION, EVALUATOR)
+		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORRELATION, EVALUATOR)
 		 Lester John (Module MATLAB-transfer)
 		 Stephan Gerhard (QDS parser)
 
@@ -50,7 +50,7 @@
   process_packets:  calls the worker-functions of all existing objects.
   parse_byte_P2: parses a ModEEG-P2 datastream and 
 			stores channel values into the packetstructure
-  parse_byte_P21: parses a P21 datastream (by Jarek Foltynski, modified by Reiner Münch)
+  parse_byte_P21: parses a P21 datastream (by Jarek Foltynski, modified by Reiner Mï¿½nch)
 			     P21 is a bidirectional protocol
   parse_byte_P3: parses a ModEEG-P3 datastream and stores channel values 
   parse_byte_raw: parses a 1 channel-raw datastream and stores channel values
@@ -94,7 +94,7 @@
 #define VINFO_SAMPLE_RATE 6     	// sample rate
 #define VINFO_RUNEEG 7          	// start/stop EEG function                  0:stop, 1:run
 #define VINFO_DEVICE 8          	// what kind of EEG is online (read only)   answer 0:modEEG, 1:MonolithEEG
-#define VINFO_PROTOCOL_SUBNUMBER 9 	// view sub version of protocoll 21 (read only)
+#define VINFO_PROTOCOL_SUBNUMBER 9 	// view sub-version of protocol 21 (read only)
 
 
   char devicetypes[][40]   = {"ModularEEG P2","ModularEEG P3","1 Channel Raw Data","MonolithEEG P21","SmartBrainGames 4Chn","1Chn of 8bit values", "Pendant EEG v3", "QDS NFB 256", "NIA USB HDI Ver 1.4","IBVA 4-chn","SBT 2 Channel BT", "OpenBCI 8 Channels", "OPI TrueSense Exploration Kit", "OpenBCI 16 Channels", "Neurosky MindWave","\0"};
@@ -206,11 +206,11 @@ void parse_byte_P2(unsigned char actbyte)
     Note that the '1' sync bit is in the last byte of the packet,
     regardless of how many channels are in the packet.
   p = 6-bit packet counter
-  x = auxillary channel byte
+  x = auxiliary channel byte
   a - f = 10-bit samples from ADC channels 0 - 5
   - = unused, must be zero
  
-  There are 8 auxillary channels that are transmitted in sequence.
+  There are 8 auxiliary channels that are transmitted in sequence.
   The 3 least significant bits of the packet counter determine what
   channel is transmitted in the current packet.
  
@@ -277,7 +277,7 @@ void parse_byte_P3(unsigned char actbyte)
 
   16 bit Raw binary Data Format:
    
-	 1 channel, ´given in two byte (low byte first)
+	 1 channel, ï¿½given in two byte (low byte first)
 
  **********************************************************************/
 
@@ -320,7 +320,7 @@ void parse_byte_raw_8bit(unsigned char actbyte)
 
 /*********************************************************************************
 
-  Modular EEG Protocol P21 with add-on ( by Jarek Foltynski and Reiner Münch)
+  Modular EEG Protocol P21 with add-on ( by Jarek Foltynski and Reiner Mï¿½nch)
 
   Packet has variable length, it depends on how many channels we want to receive
   Each channel can be set via backward communication
@@ -597,7 +597,7 @@ void parse_byte_PendantV3(unsigned char actbyte)
 
     Byte 0      1st Sync byte    = 0xcc
     Byte 1      2nd Sync byte    = 0x33
-    Byte 2      3nd Sync byte    = 0xcc
+    Byte 2      3rd Sync byte    = 0xcc
     Byte 3      Unknown meaning  = 0x00
     Byte 4/5    Channel 1 data
     Byte 6/7    Channel 2 data
@@ -930,12 +930,12 @@ Byte:Example // [CODE] Explanation
 [ 0]:0xAA // [SYNC] 
 [ 1]:0xAA // [SYNC] 
 [ 2]:0x04 // [PLENGTH] (payload length) of 4 bytes 
-[ 3]:0x80 // [RAW_WAVE_VALUE] Single Big-endian 16 bit two's compliment singed value 
+[ 3]:0x80 // [RAW_WAVE_VALUE] Single Big-endian 16 bit two's compliment signed value 
 [ 4]:0x02 // [VLENGTH] 
 [ 5]:0x00 // Raw Value High Byte 
 [ 6]:0x05 // Raw Value Low Byte 
 [ 7]:0x78 // [CHKSUM] 
- 
+
 Analyzed Packet 
 Byte:Example // [CODE] Explanation 
 [ 0]:0xAA // [SYNC] 

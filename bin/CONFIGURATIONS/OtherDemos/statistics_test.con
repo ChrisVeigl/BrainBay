@@ -258,5 +258,5 @@ ypos=47
 inputports=0
 outputports=0
 tag=INFO
-text=---------   Design Documentation   --------/#/#/# This design shows a way to print long-term statistics with the oscilloscope./#/# Use the "Fly through" button on the right bottom of the status bar/# to calculate the selected area of the archve file as quick as possible./#/#  Note: The averager-modules before the inputs of the oscilloscope are necessary/#            to lower the bandwith of the connected signals.
+text=---------   Design Documentation   --------/#/#/# This design shows a way to print long-term statistics with the oscilloscope./#/# Use the "Fly through" button on the right bottom of the status bar/# to calculate the selected area of the archve file as quick as possible./#/#  Note: The averager-modules before the inputs of the oscilloscope are necessary/#            to lower the bandwidth of the connected signals.
 end object

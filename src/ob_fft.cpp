@@ -11,12 +11,12 @@
   To do: 3-d view. selectable bins/sampling - rate, ..
 
   IsPowerOfTwo, NumberOfBitsNeeded, 
-  ReverseBits, Index_to_Freqeuncy: fft-float - assisting functions
+  ReverseBits, Index_to_Frequency: fft-float - assisting functions
   fft_float:  does the fast fourier transform of a given time-buffer
   Create_FFT_GL: initializes an openGl- Drawing context, creates a drawable font
   create_FFT_window: creates the FFT-drawing window for displaying the spectral data
   BK_Color: set the background color
-  Draw_FFT_GL: draws the current magnitude/freqeuncy - display 
+  Draw_FFT_GL: draws the current magnitude/frequency - display 
   FFTDlgHandler: processes the events for the FFT-toolbox window
   FFTWndHandler: processes the events for the FFT-drawing window
 

@@ -97,7 +97,7 @@ LRESULT CALLBACK EdfReaderDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LP
 				 else if (st->header.channels==0) 
 				 {
 					SendMessage(hDlg,WM_COMMAND,IDC_CLOSE,0);
-					report("EDF-File contained no channel inforamtion, file closed.");
+					report("EDF-File contained no channel information, file closed.");
 					st->state=0;
 				 }
 				 else st->state=1;

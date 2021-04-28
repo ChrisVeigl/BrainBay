@@ -1,12 +1,12 @@
 /* -----------------------------------------------------------------------------
 
     BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
-  
+
   OB_MOUSE.H:  contains the Mouse-Object
   Author: Chris Veigl
 
   This Objects proveds a control for the Mouse position and clicking functions.
-  the vaules for x/y-positions and clicks are received by the input ports.
+  the values for x/y-positions and clicks are received by the input ports.
 
   the object's propertries are declared and the
   constructor-, make_dialog-, load-, save-, incoming_data-, work-, and destructor-
@@ -17,7 +17,7 @@
   as published by the Free Software Foundation; See the
   GNU General Public License for more details.
 
-  
+
 -----------------------------------------------------------------------------*/
 
 #include "brainBay.h"
