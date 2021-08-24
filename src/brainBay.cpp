@@ -598,6 +598,10 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case IDM_INSERTGANGLION:
 					if ((!count_objects(OB_GANGLION)) && (!count_objects(OB_EEG))) create_object(OB_GANGLION);
 					break;
+				case IDM_TEST_BRAINFLOW:
+					test_brainflow();
+					break;
+
 				case IDM_COPY:
 					if (actobject)
 					{

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by brainbay.rc
+// Von Microsoft Visual C++ generierte Includedatei.
+// Verwendet durch brainbay.rc
 //
 #define IDS_STRING1                     1
 #define IDC_MYICON                      2
@@ -961,6 +961,9 @@
 #define ID_BIOSIGNAL_BIOSEMIACTIVETWO   32961
 #define IDM_BIOSIGNAL_BIOSEMIACTIVETWO  32962
 #define IDM_INSERT_EEG_BIOSEMI          32963
+#define ID_TOOLS_TESTBRAINFLOW          32964
+#define IDM_TESTBRAINFLOW               32965
+#define IDM_TEST_BRAINFLOW              32966
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -968,7 +971,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        266
-#define _APS_NEXT_COMMAND_VALUE         32964
+#define _APS_NEXT_COMMAND_VALUE         32967
 #define _APS_NEXT_CONTROL_VALUE         1566
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

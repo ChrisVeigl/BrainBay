@@ -662,6 +662,11 @@ BOOL   BreakDownCommPort( void );
 DWORD  WINAPI ReaderProc( LPVOID );
 DWORD  WINAPI WriterProc( LPVOID );
  
+// Brainflow functions
+
+int test_brainflow();
+
+
 //	NIA functions
 
 BOOL	ConnectNIA(HWND);

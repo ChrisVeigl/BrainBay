@@ -12,17 +12,20 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{34F51DF4-A039-4D04-8D61-B36367314750}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -61,7 +64,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>.\Debug/brainBay.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
       <ObjectFileName>.\Debug/</ObjectFileName>
@@ -69,7 +72,7 @@
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>..\lib\BioSemi\release;..\lib;..\lib\ComputerVision\opencv\include;..\lib\ComputerVision;..\lib\neurobit_api;..\lib\BioSemi\DLL\Win64;..\lib\BioSemi</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib\BioSemi\release;..\lib;..\lib\ComputerVision\opencv\include;..\lib\ComputerVision;..\lib\neurobit_api;..\lib\BioSemi\DLL\Win64;..\lib\BioSemi;..\lib\Brainflow\inc</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -77,10 +80,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Brainflow32.lib;MLModule32.lib;DataHandler32.lib;BoardController32.lib;odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/brainBay.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\opencv\lib;..\lib\ComputerVision\videoInput\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\opencv\lib;..\lib\ComputerVision\videoInput\lib;..\lib\Brainflow\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcd.lib;libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/brainBay.pdb</ProgramDatabaseFile>
@@ -93,6 +96,7 @@
 /NODEFAULTLIB:"LIBCMT" %(AdditionalOptions)</AdditionalOptions>
       <PreventDllBinding>
       </PreventDllBinding>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" ..\bin</Command>
@@ -123,7 +127,7 @@
       <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalIncludeDirectories>..\lib;..\lib\ComputerVision;..\lib\ComputerVision\opencv\include;..\lib\neurobit_api;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\lib;..\lib\ComputerVision;..\lib\ComputerVision\opencv\include;..\lib\neurobit_api;..\lib\Brainflow\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
@@ -139,9 +143,10 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\videoInput\lib;..\lib\ComputerVision\opencv\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib</IgnoreSpecificDefaultLibraries>
+      <AdditionalDependencies>Brainflow32.lib;MLModule32.lib;DataHandler32.lib;BoardController32.lib;odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\videoInput\lib;..\lib\ComputerVision\opencv\lib;..\lib\Brainflow\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib;LIBCMTD.lib</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(TargetPath)" ..\bin</Command>
@@ -544,6 +549,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MaxSpeed</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="brainflow.cpp" />
     <ClCompile Include="timer.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -652,12 +658,6 @@
     <None Include="CURSORS\dwell_arrow4.cur" />
     <None Include="CURSORS\dwell_arrow5.cur" />
     <None Include="CURSORS\dwell_arrow6.cur" />
-    <None Include="debug\CURSORS\dwell_arrow1.cur" />
-    <None Include="debug\CURSORS\dwell_arrow2.cur" />
-    <None Include="debug\CURSORS\dwell_arrow3.cur" />
-    <None Include="debug\CURSORS\dwell_arrow4.cur" />
-    <None Include="debug\CURSORS\dwell_arrow5.cur" />
-    <None Include="debug\CURSORS\dwell_arrow6.cur" />
     <None Include="icon1.ico" />
     <None Include="small.ico" />
   </ItemGroup>

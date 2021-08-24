@@ -56,6 +56,13 @@ GNU General Public License for more details.
 #include "ob_evaluator.h"
 #include "matheval.h"
 
+#if _MSC_VER < 1900
+  #pragma comment(lib, "matheval_v100.lib")
+#else
+  #pragma comment(lib, "matheval.lib")
+#endif
+
+
 EVALOBJ::EVALOBJ(int num) : BASE_CL()
 {
 	outports = 1;

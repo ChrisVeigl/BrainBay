@@ -206,7 +206,7 @@ LRESULT CALLBACK ButtonWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 			   float actdist,mindist;
 			   actx=(int)LOWORD(lParam);
 			   acty=(int)HIWORD(lParam);
-			   printf("button pressed in wnd %ld at: %ld, %ld\n",hWnd, actx,acty);
+			   printf("button pressed in wnd %ld at: %ld, %ld\n",(long) hWnd, (long) actx, (long)acty);
 			   // if (distance (actx, acty, NAVI_X+170, NAVI_Y+33) < NAVI_SELECTDISTANCE) SendMessage(hWnd, WM_KEYDOWN, KEY_BACKSPACE,0); 
 			   switch (st->buttonfunction) {
 				   case BUTTONFUNCTION_PLAYSESSION:

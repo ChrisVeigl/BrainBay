@@ -68,7 +68,7 @@ EVALEXPRTKOBJ::EVALEXPRTKOBJ(int num) : BASE_CL()
 	width = 70;
 	
 	for (int i = 0; i < NUMINPUTS; i++) {
-		char name[] = { 'A' + i, 0 };
+		char name[] = { 'A' + (char)i, 0 };
 
 		input[i] = 0;
 		strcpy(in_ports[i].in_name, name);

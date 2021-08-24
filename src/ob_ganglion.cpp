@@ -512,7 +512,7 @@ void establish_ganglionconnection() {
 
 
 	if (GLOBAL.ganglion_available) {
-		printf("\nConnected to OpenBCIHub, socket=%d\n",sock);
+		printf("\nConnected to OpenBCIHub, socket=%d\n",(int) sock);
 		printf("\nStarting Reader Thread!\n");
 		CreateThread( NULL, 1000, (LPTHREAD_START_ROUTINE) TcpReaderProc, 0, 0, &tcpReadStatId);
 	}
