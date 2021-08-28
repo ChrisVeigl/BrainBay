@@ -89,8 +89,6 @@ int bf_releaseBoard() {
 
 int bf_createBoard(int bid) {
 
-    BoardShim::enable_dev_board_logger();
-
     if (board != NULL) bf_releaseBoard();
 
     try {
@@ -411,6 +409,10 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     board_id = -1;  // default: SYNTHETIC_BOARD, id -1
     sync = -1;      // first sync packet number will be 0
 
+    BoardShim::enable_dev_board_logger();
+    // BoardShim::set_log_file("brainflow_error_log.log");
+
+
     bf_createBoard(board_id);
     update_channelinfo();
     
@@ -624,6 +626,7 @@ void BRAINFLOWOBJ::session_start(void)
         cout << "Brainflow: Exception handler triggered." << std::endl;   
         BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what()); 
         GLOBAL.brainflow_available = 0;
+        MessageBox(NULL, err.what(), "Brainflow error", MB_OK);
     }
 }
 void BRAINFLOWOBJ::session_stop(void)
