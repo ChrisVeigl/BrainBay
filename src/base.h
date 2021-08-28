@@ -43,9 +43,9 @@
 -----------------------------------------------------------------------------*/
 
 // array bounds for objects and connections
-#define MAX_CONNECTS 50
-#define MAX_PORTS 32
-#define MAX_EEG_CHANNELS  32
+#define MAX_CONNECTS 150
+#define MAX_PORTS 100
+#define MAX_EEG_CHANNELS  100
 #define MAX_OBJECTS 150
 #define MAX_VECTOR_SIZE 2000
 

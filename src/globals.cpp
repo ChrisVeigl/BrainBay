@@ -94,6 +94,7 @@
 #include "ob_volume.h"
 #include "ob_osc_sender.h"
 #include "ob_biosemi.h"
+#include "ob_brainflow.h"
 
 //
 // GLOBAL VARIABLES
@@ -131,7 +132,7 @@ char objnames[OBJECT_COUNT][20]      = { OBJNAMES };
 char dimensions[10][10]      = {"uV","mV","V","Hz","%","DegC","DegF","uS","kOhm","BPM" };
 int  fft_bin_values[10]    = { 32,64,128,256,512,1024,2048,4096,0 };
 
-int singletonObjects [] = {OB_EEG,OB_WAV,OB_CAM,OB_SKINDIALOG,OB_NEUROBIT,OB_GANGLION,OB_SESSIONMANAGER,-1};
+int singletonObjects [] = {OB_EEG,OB_WAV,OB_CAM,OB_SKINDIALOG,OB_NEUROBIT,OB_GANGLION,OB_SESSIONMANAGER,OB_BRAINFLOW,-1};
 	
 
 //
@@ -299,8 +300,10 @@ void create_object(int type)
 							 actobject->object_size=sizeof(VOLUMEOBJ);break;
 		case OB_OSC_SENDER:  actobject=new OSC_SENDEROBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(OSC_SENDEROBJ);break;
-		case OB_BIOSEMI:	 actobject = new BIOSEMIOBJ(GLOBAL.objects); break;
-
+		case OB_BIOSEMI:	 actobject = new BIOSEMIOBJ(GLOBAL.objects); 
+				 			 actobject->object_size = sizeof(BIOSEMIOBJ); break;
+		case OB_BRAINFLOW:	 actobject = new BRAINFLOWOBJ(GLOBAL.objects);
+							 actobject->object_size = sizeof(BRAINFLOWOBJ); break;
 
 	}
 	if (actobject)
@@ -804,6 +807,7 @@ void GlobalInitialize()
 	GLOBAL.emotiv_available=0;
 	GLOBAL.biosemi_available = 0;
 	GLOBAL.ganglion_available=0;
+	GLOBAL.brainflow_available = 0;
 	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;
 	strcpy(GLOBAL.emotivpath,"C:\\Program Files (x86)\\Emotiv Development Kit_v1.0.0.3-PREMIUM");

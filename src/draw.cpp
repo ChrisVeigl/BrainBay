@@ -92,25 +92,27 @@ void draw_connections(HDC hdc, WORD t)
 		SelectObject (hdc, DRAW.pen_red);
 		for (i=0;objects[t]->out[i].from_port!=-1;i++)
 		{
-			  MoveToEx(hdc,SX+objects[t]->xPos+objects[t]->width-4, SY+objects[t]->yPos+CON_START+objects[t]->out[i].from_port*CON_HEIGHT,NULL);	
-			  k=objects[t]->out[i].to_object;
-			  if ((GLOBAL.objects>k))
-			  {
-				if (objects[t]->out[i].to_port!=-1)
-				   LineTo(hdc,SX+objects[k]->xPos+4, SY+objects[k]->yPos+CON_START+objects[t]->out[i].to_port*CON_HEIGHT);
-				else LineTo(hdc,SX+GLOBAL.tx,SY+GLOBAL.ty);
-			  }
-			  if (&(objects[t]->out[i])==actconnect)
-			  {
-				   MoveToEx(hdc,SX+objects[t]->xPos+objects[t]->width-4, SY+objects[t]->yPos+CON_START+objects[t]->out[i].from_port*CON_HEIGHT+1,NULL);	
-				   LineTo(hdc,SX+objects[k]->xPos+4, SY+objects[k]->yPos+CON_START+objects[t]->out[i].to_port*CON_HEIGHT+1);
+			if (objects[t]->outports > objects[t]->out[i].from_port) {
+				MoveToEx(hdc, SX + objects[t]->xPos + objects[t]->width - 4, SY + objects[t]->yPos + CON_START + objects[t]->out[i].from_port * CON_HEIGHT, NULL);
+				k = objects[t]->out[i].to_object;
+				if ((GLOBAL.objects > k))
+				{
+					if (objects[t]->out[i].to_port != -1)
+						LineTo(hdc, SX + objects[k]->xPos + 4, SY + objects[k]->yPos + CON_START + objects[t]->out[i].to_port * CON_HEIGHT);
+					else LineTo(hdc, SX + GLOBAL.tx, SY + GLOBAL.ty);
+				}
+				if (&(objects[t]->out[i]) == actconnect)
+				{
+					MoveToEx(hdc, SX + objects[t]->xPos + objects[t]->width - 4, SY + objects[t]->yPos + CON_START + objects[t]->out[i].from_port * CON_HEIGHT + 1, NULL);
+					LineTo(hdc, SX + objects[k]->xPos + 4, SY + objects[k]->yPos + CON_START + objects[t]->out[i].to_port * CON_HEIGHT + 1);
 
-				   MoveToEx(hdc,SX+objects[t]->xPos+objects[t]->width-3, SY+objects[t]->yPos+CON_START+objects[t]->out[i].from_port*CON_HEIGHT,NULL);	
-				   LineTo(hdc,SX+objects[k]->xPos+5, SY+objects[k]->yPos+CON_START+objects[t]->out[i].to_port*CON_HEIGHT);
+					MoveToEx(hdc, SX + objects[t]->xPos + objects[t]->width - 3, SY + objects[t]->yPos + CON_START + objects[t]->out[i].from_port * CON_HEIGHT, NULL);
+					LineTo(hdc, SX + objects[k]->xPos + 5, SY + objects[k]->yPos + CON_START + objects[t]->out[i].to_port * CON_HEIGHT);
 
-				   MoveToEx(hdc,SX+objects[t]->xPos+objects[t]->width-3, SY+objects[t]->yPos+CON_START+objects[t]->out[i].from_port*CON_HEIGHT+1,NULL);	
-				   LineTo(hdc,SX+objects[k]->xPos+5, SY+objects[k]->yPos+CON_START+objects[t]->out[i].to_port*CON_HEIGHT+1);
-			  }		
+					MoveToEx(hdc, SX + objects[t]->xPos + objects[t]->width - 3, SY + objects[t]->yPos + CON_START + objects[t]->out[i].from_port * CON_HEIGHT + 1, NULL);
+					LineTo(hdc, SX + objects[k]->xPos + 5, SY + objects[k]->yPos + CON_START + objects[t]->out[i].to_port * CON_HEIGHT + 1);
+				}
+			}
 		}
 }
 

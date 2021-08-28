@@ -62,6 +62,8 @@ BEGIN
                 MENUITEM "generic (1 Channel raw data 8 bit)", IDM_INSERT_EEG_GENERIC8
                 MENUITEM "generic (1 Channel raw data 16 Bit)", IDM_INSERT_EEG_GENERIC16
                 MENUITEM SEPARATOR
+                MENUITEM "BioSemi Active Two",          IDM_INSERT_EEG_BIOSEMI
+                MENUITEM "BrainFlow-Compatible (OpenBCI, Brainbit, Unicorn, Muse, Ant, Enophone etc.)", IDM_INSERT_BRAINFLOW
                 MENUITEM "Emotiv Epoc (14 Channels, raw EEG data)", IDM_INSERTEMOTIV
                 MENUITEM "IBVA (2 Channel EEG)",        IDM_INSERT_EEG_IBVA
                 MENUITEM "MonolithEEG (P21 Packetformat)", IDM_INSERT_EEG_P21
@@ -78,7 +80,6 @@ BEGIN
                 MENUITEM "QDS NFK (2/4 Channels)",      IDM_INSERT_EEG_QDS
                 MENUITEM "SmartBrainTechnologies (4 Channel EEG)", IDM_INSERT_EEG_SBT4
                 MENUITEM "SmartBrainTechnologies (2 Channel Bluetooth EEG)", IDM_INSERT_EEG_SBT2
-                MENUITEM "BioSemi Active Two",          IDM_INSERT_EEG_BIOSEMI
             END
             MENUITEM "Camera",                      IDM_INSERTCAM
             MENUITEM "Com-Reader",                  IDM_INSERTCOMREADER
@@ -173,7 +174,6 @@ BEGIN
     BEGIN
         MENUITEM "Edit Color Palettes",         IDM_EDITCOLORS
         MENUITEM "Edit Tone Scales",            IDM_EDITSCALES
-        MENUITEM "Test Brainflow",              IDM_TEST_BRAINFLOW
     END
     POPUP "Options"
     BEGIN
@@ -1465,6 +1465,33 @@ BEGIN
     CONTROL         "send only changing values",IDC_ONLY_CHANGING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,100,133,96,10
 END
 
+IDD_BRAINFLOWBOX DIALOGEX 0, 0, 323, 170
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "Brainflow-Compatible Biosignal Device"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Apply Device Configuration",IDC_BF_APPLY_DEVICE,195,60,101,21,BS_FLAT
+    GROUPBOX        "Brainflow-Compatible Device Selection and Configuration",-1,6,3,310,99
+    PUSHBUTTON      "Open",IDC_OPEN_BF_ARCHIVE,73,140,39,14,BS_FLAT
+    PUSHBUTTON      "Create Archive",IDC_REC_BF_ARCHIVE,151,140,70,14,BS_FLAT
+    PUSHBUTTON      "Close ",IDC_CLOSE_BF_ARCHIVE,115,140,34,14,BS_FLAT
+    EDITTEXT        IDC_BF_ARCHIVEFILE,72,118,214,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Filename",-1,36,120,29,8
+    GROUPBOX        "Archive File",-1,6,105,310,58
+    PUSHBUTTON      "End Recording",IDC_END_BF_RECORDING,224,140,62,14,BS_FLAT
+    COMBOBOX        IDC_BF_DEVICECOMBO,69,22,221,84,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Device:",-1,40,24,26,8
+    EDITTEXT        IDC_BF_SERIALPORT,242,42,48,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_BF_IPADDRESS,68,60,48,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_BF_IPPORT,150,60,36,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_BF_MACADDRESS,68,75,48,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Serial Port (e.g. COM5 on Windows or /dev/cu.usbserial-xx on Mac):",-1,29,43,211,8
+    LTEXT           "IP-Address:",-1,27,61,38,8
+    LTEXT           "IP-Port:",-1,123,62,26,8
+    LTEXT           "Mac-Address:",-1,19,78,46,8
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -1813,8 +1840,27 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 185
     END
+
+    IDD_BRAINFLOWBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 316
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 165
+    END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_BRAINFLOWBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
