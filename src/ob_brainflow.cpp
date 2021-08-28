@@ -22,6 +22,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <sstream>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -52,7 +53,7 @@ using namespace std;
 
 BoardShim* board = NULL;
 struct BrainFlowInputParams params;
-
+float current_channelValue[MAX_EEG_CHANNELS] = { 0.0 };
 BRAINFLOWOBJ* bf;
 
 // bool parse_args(int argc, char* argv[], struct BrainFlowInputParams* params, int* board_id);
@@ -111,7 +112,6 @@ void bf_setparams(BRAINFLOWOBJ* st) {
     params.ip_address = std::string(st->ipaddress);
     params.mac_address = std::string(st->macaddress);
     params.ip_port = st->ipport;
-
 }
 
 
@@ -205,7 +205,7 @@ void updateDialog(HWND hDlg, BRAINFLOWOBJ* st)
         EnableWindow(GetDlgItem(hDlg, IDC_BF_SERIALPORT), FALSE);
     }
 
-    if (st->board_id == 37) {
+    if ((st->board_id == 1) || (st->board_id == 18) || (st->board_id == 37)) {
         EnableWindow(GetDlgItem(hDlg, IDC_BF_MACADDRESS), TRUE);
     } else {
         EnableWindow(GetDlgItem(hDlg, IDC_BF_MACADDRESS), FALSE);
@@ -310,10 +310,11 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
             break;
 
         case IDC_BF_APPLY_DEVICE:
-            GetDlgItemText(hDlg, IDC_BF_SERIALPORT, st->serialport, sizeof(st->serialport - 1));
-            GetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress, sizeof(st->ipaddress - 1));
+            GetDlgItemText(hDlg, IDC_BF_SERIALPORT, st->serialport, sizeof(st->serialport)-1);
+            GetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress, sizeof(st->ipaddress)-1);
             GetDlgItemInt(hDlg, IDC_BF_IPPORT, &st->ipport, false);
-            GetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress, sizeof(st->macaddress - 1));
+            GetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress, sizeof(st->macaddress)-1);
+
             bf_setparams(st);
             break;
 
@@ -403,14 +404,17 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     strcpy(serialport, "COM4");
     strcpy(ipaddress, "192.168.4.1");
     ipport = 4567;
-    strcpy(macaddress, "00:11:22:33:FF:EE");
+    strcpy(macaddress, "");
+
     strcpy(archivefile, "none");
+    filehandle = INVALID_HANDLE_VALUE;
+    filemode = 0;
 
     board_id = -1;  // default: SYNTHETIC_BOARD, id -1
     sync = -1;      // first sync packet number will be 0
 
     BoardShim::enable_dev_board_logger();
-    // BoardShim::set_log_file("brainflow_error_log.log");
+    BoardShim::set_log_file("brainflow_error_log.log");
 
 
     bf_createBoard(board_id);
@@ -425,8 +429,20 @@ void BRAINFLOWOBJ::make_dialog(void)
 void BRAINFLOWOBJ::load(HANDLE hFile)
 {
 	load_object_basics(this);
-    load_property("archivefile", P_STRING, archivefile);
     load_property("board_id", P_INT, &board_id);
+    load_property("serialport", P_STRING, serialport);
+    load_property("ipaddress", P_STRING, ipaddress);
+    load_property("ipport", P_INT, &ipport);
+    load_property("macaddress", P_STRING, macaddress);
+
+    load_property("archivefile", P_STRING, archivefile);
+    load_property("filemode", P_INT, &filemode);
+    if (filemode == FILE_READING) {
+        prepare_fileRead(this);
+    }
+    else if (filemode == FILE_WRITING) {
+        prepare_fileWrite(this);
+    }
 
     bf_createBoard(board_id);
     update_channelinfo();
@@ -436,8 +452,13 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
 void BRAINFLOWOBJ::save(HANDLE hFile)
 {
 	save_object_basics(hFile, this);
-    save_property(hFile, "archivefile", P_STRING, archivefile);
     save_property(hFile, "board_id", P_INT, &board_id);
+    save_property(hFile, "serialport", P_STRING, serialport);
+    save_property(hFile, "ipaddress", P_STRING, ipaddress);
+    save_property(hFile, "ipport", P_INT, &ipport);
+    save_property(hFile, "macaddress", P_STRING, macaddress);
+    save_property(hFile, "archivefile", P_STRING, archivefile);
+    save_property(hFile, "filemode", P_INT, &filemode);
 }
 
 
@@ -509,16 +530,7 @@ void BRAINFLOWOBJ::update_channelinfo(void)
 
     json desc = BoardShim::get_board_descr(board_id);
 
-    // for (auto it = desc.begin(); it != desc.end(); it++) {
-    //    std::cout << "key: " << it.key() << " : " << it.value() << std::endl;
-    // }
-
-    // auto it_eeg = desc.find("eeg_channels");
-    // std::cout << std::boolalpha;
-    // std::cout << "eeg_channels was found: " << (it_eeg != desc.end());
-    // std::cout << ", value: " << *it_eeg << '\n';
-
-
+    // log general device info (just for debugging)
     try {
         cout << "Update channels for Device ID " << board_id;
         cout << ", device name = " << BoardShim::get_device_name(board_id) << std::endl;
@@ -529,6 +541,7 @@ void BRAINFLOWOBJ::update_channelinfo(void)
     }
     catch (const BrainFlowException& err) { cout << "Brainflow: Exception handler triggered." << std::endl;   BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what()); }
 
+    // build the output ports according to available channels
     try {
 
         if ((desc.find("eeg_channels") != desc.end()) || (desc.find("emg_channels") != desc.end()) || 
@@ -573,7 +586,30 @@ void BRAINFLOWOBJ::update_channelinfo(void)
 
     cout << "Added total number of " << channels << " data channels!" << std::endl;
 
-    char tmp[40];
+    // if available, use EEG channel names for description of the output ports
+    auto it_names = desc.find("eeg_names");
+    if (it_names != desc.end()) {
+        auto it_eegChannels = desc.find("eeg_channels");
+        vector <int> channelList = *it_eegChannels;
+        std::stringstream names((std::string)(*it_names));
+        vector<string> result;
+        while (names.good()) {
+            string substr;
+            getline(names, substr, ',');
+            result.push_back(substr);
+        }
+
+        int pos = 0;
+        for (std::vector<int>::iterator it = channelList.begin(); it != channelList.end(); ++it) {
+            int actChn = *it;
+            cout << "  EEG Channel " << actChn << " has name " << result.at(pos) << std::endl;
+            strcpy(out_ports[actChn].out_name, result.at(pos).c_str());
+            strcpy(out_ports[actChn].out_desc, result.at(pos).c_str());
+            pos++;
+        }
+    }
+
+    // assign a new element tag (caption)
     std::string str = BoardShim::get_device_name(board_id) + "(BF)";
     char* cstr = new char[str.length() + 1];
     strcpy(tag, str.c_str());
@@ -600,33 +636,33 @@ void BRAINFLOWOBJ::session_reset(void)
 void BRAINFLOWOBJ::session_start(void)
 {
     short r;
-    if ((filehandle == INVALID_HANDLE_VALUE) || (filemode != FILE_READING))
+    if ( (board != NULL) && ((filehandle == INVALID_HANDLE_VALUE) || (filemode != FILE_READING)))
     {
+        try
+        {
+            cout << "Brainflow: start session." << std::endl;
 
+            if (!board->is_prepared()) {
+                board->prepare_session();
+                cout << "Brainflow: Session prepared." << std::endl;
+            }
+
+            if (GLOBAL.brainflow_available == 0) {
+                board->start_stream();
+                cout << "Brainflow: Stream started." << std::endl;
+            }
+
+            GLOBAL.brainflow_available = 1;
+        }
+        catch (const BrainFlowException& err) {
+            cout << "Brainflow: Exception handler triggered." << std::endl;
+            BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what());
+            GLOBAL.brainflow_available = 0;
+            MessageBox(NULL, err.what(), "Brainflow error", MB_OK);
+        }
     }
     else { 
-        //GLOBAL.neurobit_available = 0; 
-    }
-
-    if (!board) return;
-
-    try
-    {
-        cout << "Brainflow: start session." << std::endl;
-
-        board->prepare_session();
-        cout << "Brainflow: Session prepared." << std::endl;
-
-        board->start_stream();
-        cout << "Brainflow: Stream started." << std::endl;
-
-        GLOBAL.brainflow_available = 1;
-    }
-    catch (const BrainFlowException& err) { 
-        cout << "Brainflow: Exception handler triggered." << std::endl;   
-        BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what()); 
-        GLOBAL.brainflow_available = 0;
-        MessageBox(NULL, err.what(), "Brainflow error", MB_OK);
+        GLOBAL.brainflow_available = 0; 
     }
 }
 void BRAINFLOWOBJ::session_stop(void)
@@ -649,7 +685,7 @@ void BRAINFLOWOBJ::session_pos(long pos)
 {
     if (filehandle == INVALID_HANDLE_VALUE) return;
     if (pos > filelength) pos = filelength;
-    SetFilePointer(filehandle, pos * (sizeof(float)) * 4, NULL, FILE_BEGIN);
+    SetFilePointer(filehandle, pos * (sizeof(float)) * outports, NULL, FILE_BEGIN);
 }
 
 long BRAINFLOWOBJ::session_length(void)
@@ -657,7 +693,7 @@ long BRAINFLOWOBJ::session_length(void)
     if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
     {
         DWORD sav = SetFilePointer(filehandle, 0, NULL, FILE_CURRENT);
-        filelength = SetFilePointer(filehandle, 0, NULL, FILE_END) / (sizeof(float)) / 4;
+        filelength = SetFilePointer(filehandle, 0, NULL, FILE_END) / (sizeof(float)) / outports;
         SetFilePointer(filehandle, sav, NULL, FILE_BEGIN);
         return(filelength);
     }
@@ -679,8 +715,9 @@ void process_brainflow(void) {  // to be called by timer.cpp while GLOBAL.brainf
             bf->sync = actsync;
 
             for (int c = 0; c < bf->channels; c++) {
-                // cout << "\tchn " << c << ":" << unprocessed_data.at(c, i); cout << std::endl;
-                bf->pass_values(c, unprocessed_data.at(c, i));
+                double value = unprocessed_data.at(c, i);
+                bf->pass_values(c, value);
+                current_channelValue[c] = value;
             }
             process_packets();
         }
@@ -695,10 +732,30 @@ void process_brainflow(void) {  // to be called by timer.cpp while GLOBAL.brainf
 void BRAINFLOWOBJ::work(void)
 {
 	
-	if ((!TIMING.dialog_update) && (hDlg == ghWndToolbox))
-	{
-	}
+    DWORD dwWritten, dwRead;
 
+    if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
+    {
+        ReadFile(filehandle, current_channelValue, sizeof(float) * outports, &dwRead, NULL);
+        if (dwRead != sizeof(float) * outports) SendMessage(ghWndStatusbox, WM_COMMAND, IDC_STOPSESSION, 0);
+        else
+        {
+            DWORD x = SetFilePointer(filehandle, 0, NULL, FILE_CURRENT);
+            x = x * 1000 / filelength / TTY.bytes_per_packet;
+            SetScrollPos(GetDlgItem(ghWndStatusbox, IDC_SESSIONPOS), SB_CTL, x, 1);
+        }
+        for (int i = 0; i < outports; i++) {
+            pass_values(i, current_channelValue[i]);
+        }
+    }
+
+    if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING))
+        WriteFile(filehandle, current_channelValue, sizeof(float) * outports, &dwWritten, NULL);
+
+    if ((!TIMING.dialog_update) && (hDlg == ghWndToolbox))
+    {
+        InvalidateRect(hDlg, NULL, FALSE);
+    }
 
 }
 
@@ -709,154 +766,3 @@ BRAINFLOWOBJ::~BRAINFLOWOBJ()
     GLOBAL.brainflow_available = 0;
 
 }
-
-
-
-
-/*
-bool parse_args(int argc, char* argv[], struct BrainFlowInputParams* params, int* board_id)
-{
-    bool board_id_found = false;
-    for (int i = 1; i < argc; i++)
-    {
-        if (std::string(argv[i]) == std::string("--board-id"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                board_id_found = true;
-                *board_id = std::stoi(std::string(argv[i]));
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--ip-address"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->ip_address = std::string(argv[i]);
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--ip-port"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->ip_port = std::stoi(std::string(argv[i]));
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--serial-port"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->serial_port = std::string(argv[i]);
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--ip-protocol"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->ip_protocol = std::stoi(std::string(argv[i]));
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--timeout"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->timeout = std::stoi(std::string(argv[i]));
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--other-info"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->other_info = std::string(argv[i]);
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--mac-address"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->mac_address = std::string(argv[i]);
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--serial-number"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->serial_number = std::string(argv[i]);
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-        if (std::string(argv[i]) == std::string("--file"))
-        {
-            if (i + 1 < argc)
-            {
-                i++;
-                params->file = std::string(argv[i]);
-            }
-            else
-            {
-                std::cerr << "missed argument" << std::endl;
-                return false;
-            }
-        }
-    }
-    if (!board_id_found)
-    {
-        std::cerr << "board id is not provided" << std::endl;
-        return false;
-    }
-    return true;
-}
-
-*/
