@@ -16,6 +16,9 @@
 -----------------------------------------------------------------------------*/
 
 #include "brainBay.h"
+
+#if _MSC_VER >= 1900
+
 #include "ob_brainflow.h"
 
 
@@ -114,47 +117,6 @@ void bf_setparams(BRAINFLOWOBJ* st) {
     params.ip_port = st->ipport;
 }
 
-
-/* Read parameters from given file to new device context.
-    The function returns device context (>=0), and on error it returns negative
-    value. */
-int ReadCfgFile(BRAINFLOWOBJ* st, const char* fname)
-{
-    DWORD len, n;
-    char* buf;
-    HANDLE cf;
-    int r = 0;
-
-    cf = CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
-    if (cf == INVALID_HANDLE_VALUE)
-        return -1;
-    if ((len = GetFileSize(cf, NULL)) == -1)
-        r = -2;
-    else if (!(buf = (char*)malloc(len)))
-        r = -3;
-    else if (!ReadFile(cf, buf, len, &n, NULL) || len != n)
-        r = -4;
-   
-    CloseHandle(cf);
-    if (buf)
-        free(buf);
-    return r;
-}
-
-/* Write parameters of given device context to given file.
-    The function returns number of written bytes; on error (e.g. too small buffer)
-    it returns 0. */
-int WriteCfgFile( const char* fname)
-{
-    DWORD len, n = 0;
-    char* buf;
-    HANDLE cf;
-    int r = 0;
-
-    cf = CreateFile(fname, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, 0, NULL);
-    return n;
-}
-
 int prepare_fileRead(BRAINFLOWOBJ* st) {
 
     st->filehandle = CreateFile(st->archivefile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -164,7 +126,7 @@ int prepare_fileRead(BRAINFLOWOBJ* st) {
     }
 
     get_session_length();
-    GLOBAL.neurobit_available = 0;
+    GLOBAL.brainflow_available = 0;
     st->filemode = FILE_READING;
 
     GLOBAL.addtime = 0;
@@ -312,7 +274,7 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
         case IDC_BF_APPLY_DEVICE:
             GetDlgItemText(hDlg, IDC_BF_SERIALPORT, st->serialport, sizeof(st->serialport)-1);
             GetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress, sizeof(st->ipaddress)-1);
-            GetDlgItemInt(hDlg, IDC_BF_IPPORT, &st->ipport, false);
+            st->ipport = GetDlgItemInt(hDlg, IDC_BF_IPPORT, NULL, false);
             GetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress, sizeof(st->macaddress)-1);
 
             bf_setparams(st);
@@ -752,10 +714,10 @@ void BRAINFLOWOBJ::work(void)
     if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING))
         WriteFile(filehandle, current_channelValue, sizeof(float) * outports, &dwWritten, NULL);
 
-    if ((!TIMING.dialog_update) && (hDlg == ghWndToolbox))
-    {
-        InvalidateRect(hDlg, NULL, FALSE);
-    }
+//    if ((!TIMING.dialog_update) && (hDlg == ghWndToolbox))
+//    {
+//        InvalidateRect(hDlg, NULL, FALSE);
+//    }
 
 }
 
@@ -766,3 +728,5 @@ BRAINFLOWOBJ::~BRAINFLOWOBJ()
     GLOBAL.brainflow_available = 0;
 
 }
+
+#endif

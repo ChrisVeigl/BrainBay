@@ -6,6 +6,8 @@
   
 -----------------------------------------------------------------------------*/
 
+#if _MSC_VER >= 1900
+
 
 #include "brainBay.h"
 #include <vector>
@@ -44,3 +46,5 @@ protected:
     ~BRAINFLOWOBJ();
   
 };
+
+#endif

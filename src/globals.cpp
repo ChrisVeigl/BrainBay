@@ -302,8 +302,13 @@ void create_object(int type)
 							 actobject->object_size=sizeof(OSC_SENDEROBJ);break;
 		case OB_BIOSEMI:	 actobject = new BIOSEMIOBJ(GLOBAL.objects); 
 				 			 actobject->object_size = sizeof(BIOSEMIOBJ); break;
-		case OB_BRAINFLOW:	 actobject = new BRAINFLOWOBJ(GLOBAL.objects);
+		case OB_BRAINFLOW:
+#if _MSC_VER >= 1900
+							 actobject = new BRAINFLOWOBJ(GLOBAL.objects);
 							 actobject->object_size = sizeof(BRAINFLOWOBJ); break;
+#else
+			MessageBox(NULL, "Brainflow element is only supported if BrainBay is compiled with newer version of Visual Studio (Platform toolset V142)", "Error", MB_OK);
+#endif
 
 	}
 	if (actobject)

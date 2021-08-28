@@ -99,7 +99,9 @@ void CALLBACK TimerProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
     if (GLOBAL.neurobit_available) NdProtocolEngine();
 	if (GLOBAL.emotiv_available) process_emotiv();
 	if (GLOBAL.biosemi_available) process_biosemi();
+#if _MSC_VER >= 1900
 	if (GLOBAL.brainflow_available) process_brainflow();
+#endif
 	//	if (GLOBAL.ganglion_available) process_ganglion();
 
 	if ((!TIMING.pause_timer) && (!GLOBAL.loading))
