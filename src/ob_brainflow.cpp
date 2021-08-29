@@ -35,21 +35,69 @@
 
 #include "board_shim.h"
 
-#define BOARD_ID_OFFSET 3   // Board IDs start at -3 (!) 
 
 // see https://brainflow.readthedocs.io/en/stable/SupportedBoards.html
 // and https://brainflow.readthedocs.io/en/stable/UserAPI.html
 
-char supported_boards[][40] = { "PLAYBACK_FILE_BOARD", "STREAMING_BOARD", "SYNTHETIC_BOARD",
-    "CYTON_BOARD", "GANGLION_BOARD", "CYTON_DAISY_BOARD","GALEA_BOARD","GANGLION_WIFI_BOARD","CYTON_WIFI_BOARD","CYTON_DAISY_WIFI_BOARD",
-    "BRAINBIT_BOARD", "UNICORN_BOARD", "CALLIBRI_EEG_BOARD", "CALLIBRI_EMG_BOARD", "CALLIBRI_ECG_BOARD",
-    "FASCIA_BOARD", "NOTION_OSC1_BOARD", "NOTION_2_BOARD", "IRONBCI_BOARD", "GFORCE_PRO_BOARD",
-    "FREEEEG32_BOARD", "BRAINBIT_BLED_BOARD","GFORCE_DUAL_BOARD", "GALEA_SERIAL_BOARD",
-    "MUSE_S_BLED_BOARD", "MUSE_2_BLED_BOARD","CROWN_BOARD","ANT_NEURO_EE_410_BOARD", "ANT_NEURO_EE_411_BOARD",
-    "ANT_NEURO_EE_430_BOARD", "ANT_NEURO_EE_211_BOARD","ANT_NEURO_EE_212_BOARD","ANT_NEURO_EE_213_BOARD",
-    "ANT_NEURO_EE_214_BOARD", "ANT_NEURO_EE_215_BOARD", "ANT_NEURO_EE_221_BOARD", "ANT_NEURO_EE_222_BOARD",
-    "ANT_NEURO_EE_223_BOARD",  "ANT_NEURO_EE_224_BOARD","ANT_NEURO_EE_225_BOARD",
-    "ENOPHONE_BOARD", "" };
+struct board_id {
+    char name[40];
+    int id;
+};
+
+struct board_id supported_boards[] = {
+    { "Synthetic Board (simulated data)" , -1 } ,
+    { "Callibri EEG", 9 },
+    { "Callibri EMG", 10 },
+    { "Callibri ECG", 11 },
+    { "Enophone", 37 },
+    { "Fascia", 12 },
+    { "GTec Unicorn", 8 },
+    { "Iron BCI", 15 },
+    { "Muse S BLED", 21 },
+    { "Muse 2 BLED", 22 },
+    { "Neuroidss FreeEEG32", 17 },
+    { "NeuroMD Brainbit", 7 },
+    { "NeuroMD Brainbit BLED", 18 },
+    { "Neurosity Crown", 23 },
+    { "Neurosity Notion OSC1", 13 },
+    { "Neurosity Notion 2", 14 },
+    { "OpenBCI Cyton", 0 } ,
+    { "OpenBCI Cyton-Daisy", 2 } ,
+    { "OpenBCI Cyton Wifi", 5 } ,
+    { "OpenBCI Cyton-Daisy Wifi ", 6 },
+    { "OpenBCI Ganglion", 1 } ,
+    { "OpenBCI Ganglion Wifi", 4 } ,
+    { "OpenBCI Galea", 3 } ,
+    { "OpenBCI Galea Serial", 20 },
+    { "OYMotion gForce Pro EMG", 16 },
+    { "OYMotion gForce Dual EMG", 19 },
+    { "Ant Neuro EE 410", 24 },
+    { "Ant Neuro EE 411", 25 },
+    { "Ant Neuro EE 430", 26 },
+    { "Ant Neuro EE 211", 27 },
+    { "Ant Neuro EE 212", 28 },
+    { "Ant Neuro EE 213", 29 },
+    { "Ant Neuro EE 214", 30 },
+    { "Ant Neuro EE 215", 31 },
+    { "Ant Neuro EE 221", 32 },
+    { "Ant Neuro EE 222", 33 },
+    { "Ant Neuro EE 223", 34 },
+    { "Ant Neuro EE 224", 35 },
+    { "Ant Neuro EE 225", 36 }
+
+};
+
+
+char s_boards[][40] = { "Synthetic Board (simulated data)",
+    "OpenBCI Cyton", "OpenBCI Ganglion", "OpenBCI Cyton-Daisy","OpenBCI Galea","OpenBCI Ganglion Wifi","OpenBCI Cyton Wifi","OpenBCI Cyton-Daisy Wifi ",
+    "NeuroMD Brainbit", "GTec Unicorn", "Callibri EEG", "Callibri EMG", "Callibri ECG",
+    "Fascia", "Neurosity Notion OSC1", "Neurosity Notion2", "Iron BCI", "OYMotion gForce Pro EMG",
+    "Neuroidss FreeEEG32", "NeuroMD Brainbit BLED","OYMotion gForce Dual EMG", "OpenBCI Galea Serial",
+    "Muse S BLED", "Muse 2 BLED","Neurosity Crown","Ant Neuro EE 410", "Ant Neuro EE 411",
+    "Ant Neuro EE 430", "Ant Neuro EE 211","Ant Neuro EE 212","Ant Neuro EE 213",
+    "Ant Neuro EE 214", "Ant Neuro EE 215", "Ant Neuro EE 221", "Ant Neuro EE 222",
+    "Ant Neuro EE 223",  "Ant Neuro EE 224","Ant Neuro EE 225",
+    "Enophone", "" };
 
 
 using namespace std;
@@ -228,11 +276,12 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
     case WM_INITDIALOG:
     {
         int i = 0;
-        while (strlen(supported_boards[i]) > 0)  {
-        SendDlgItemMessage(hDlg, IDC_BF_DEVICECOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)supported_boards[i]); i++; }
+        while (i < sizeof (supported_boards) / sizeof (struct board_id))  {
+            SendDlgItemMessage(hDlg, IDC_BF_DEVICECOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)supported_boards[i].name); i++; 
+        }
 
-        SendDlgItemMessage(hDlg, IDC_BF_DEVICECOMBO, CB_SETCURSEL, st->board_id + BOARD_ID_OFFSET, 0L);
-        SetDlgItemText(hDlg, IDC_BF_DEVICECOMBO, supported_boards[st->board_id + BOARD_ID_OFFSET]);
+        SendDlgItemMessage(hDlg, IDC_BF_DEVICECOMBO, CB_SETCURSEL, st->board_selection, 0L);
+        SetDlgItemText(hDlg, IDC_BF_DEVICECOMBO, supported_boards[st->board_selection].name);
 
         SetDlgItemText(hDlg, IDC_BF_SERIALPORT, st->serialport);
         SetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress);
@@ -240,8 +289,8 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
         SetDlgItemInt(hDlg, IDC_BF_IPPORT, st->ipport,FALSE);
 
         SetDlgItemText(hDlg, IDC_BF_ARCHIVEFILE, st->archivefile);
-
         updateDialog(hDlg, st);
+
     }
     return TRUE;
 
@@ -255,29 +304,23 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
         case IDC_BF_DEVICECOMBO:
             if (HIWORD(wParam) == CBN_SELCHANGE)
             {
-                int sel = SendDlgItemMessage(hDlg, IDC_BF_DEVICECOMBO, CB_GETCURSEL, 0, 0) - BOARD_ID_OFFSET;  // this is quite hacky ... fits device name/selection to board IDs!
-
-                if (sel < -1) {
-                    MessageBox(NULL, "The Playback- and Streaming- board types are not supported by now, please select another board/device ...", "Information", MB_OK);
-                    return true;
-                }
-                st->board_id = sel;
+                st->board_selection = SendDlgItemMessage(hDlg, IDC_BF_DEVICECOMBO, CB_GETCURSEL, 0, 0);
+                st->board_id = supported_boards[st->board_selection].id;
                 cout << "Brainflow: Device ID selected: " << st->board_id << std::endl;
-
-                bf_createBoard(st->board_id);
-                st->update_channelinfo();
                 updateDialog(hDlg, st);
-                // InvalidateRect(hDlg,NULL,FALSE);
             }
             break;
 
         case IDC_BF_APPLY_DEVICE:
+
             GetDlgItemText(hDlg, IDC_BF_SERIALPORT, st->serialport, sizeof(st->serialport)-1);
             GetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress, sizeof(st->ipaddress)-1);
             st->ipport = GetDlgItemInt(hDlg, IDC_BF_IPPORT, NULL, false);
             GetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress, sizeof(st->macaddress)-1);
 
             bf_setparams(st);
+            bf_createBoard(st->board_id);
+            st->update_channelinfo();
             break;
 
         case IDC_OPEN_BF_ARCHIVE:
@@ -391,6 +434,7 @@ void BRAINFLOWOBJ::make_dialog(void)
 void BRAINFLOWOBJ::load(HANDLE hFile)
 {
 	load_object_basics(this);
+    load_property("board_selection", P_INT, &board_selection);
     load_property("board_id", P_INT, &board_id);
     load_property("serialport", P_STRING, serialport);
     load_property("ipaddress", P_STRING, ipaddress);
@@ -414,6 +458,7 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
 void BRAINFLOWOBJ::save(HANDLE hFile)
 {
 	save_object_basics(hFile, this);
+    save_property(hFile,"board_selection", P_INT, &board_selection);
     save_property(hFile, "board_id", P_INT, &board_id);
     save_property(hFile, "serialport", P_STRING, serialport);
     save_property(hFile, "ipaddress", P_STRING, ipaddress);

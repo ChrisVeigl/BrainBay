@@ -1480,7 +1480,7 @@ BEGIN
     LTEXT           "Filename",-1,36,141,29,8
     GROUPBOX        "Archive File",-1,6,126,310,58
     PUSHBUTTON      "End Recording",IDC_END_BF_RECORDING,224,161,62,14,BS_FLAT
-    COMBOBOX        IDC_BF_DEVICECOMBO,69,22,213,84,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_BF_DEVICECOMBO,69,22,213,191,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Device:",-1,40,24,26,8
     EDITTEXT        IDC_BF_SERIALPORT,69,40,48,12,ES_AUTOHSCROLL | WS_DISABLED
     EDITTEXT        IDC_BF_IPADDRESS,115,58,53,12,ES_AUTOHSCROLL | WS_DISABLED
@@ -1490,7 +1490,7 @@ BEGIN
     LTEXT           "IP-Address:",-1,73,60,38,8
     LTEXT           "IP-Port:",-1,180,59,26,8
     LTEXT           "Mac-Address (eg. 00:11:22:33:FF:EE):",-1,59,76,123,8
-    LTEXT           "(e.g. COM5 on Windows or /dev/cu.usbserial-xx on Mac)",-1,120,41,174,8
+    LTEXT           "(e.g. COM5 on Windows or /dev/ttyUSB0 on Linux)",-1,120,41,178,8
 END
 
 

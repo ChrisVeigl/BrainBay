@@ -23,7 +23,7 @@ protected:
 
   public: 
     char  archivefile[256];
-	int  board_id,channels;
+	int  board_selection,board_id,channels;
 	char ipaddress[40], macaddress[40], serialport[40];
 	int ipport;
 	HANDLE filehandle;
