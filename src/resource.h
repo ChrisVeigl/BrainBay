@@ -649,6 +649,7 @@
 #define IDC_LOAD_DEVCTX                 1469
 #define IDC_DISPLAYSETTINGS             1470
 #define IDC_SETTINGSFILE                1471
+#define IDC_SHOW_EXTRACHANNELS          1471
 #define IDC_QCHN1                       1472
 #define IDC_QCHN2                       1473
 #define IDC_NB_ARCHIVE_FILENAME         1474
@@ -805,6 +806,8 @@
 #define IDC_BF_IPADDRESS                1574
 #define IDC_BF_IPPORT                   1575
 #define IDC_BF_MACADDRESS               1577
+#define IDC_SHOW_POSITIONS2             1578
+#define IDC_SHOW_POSITION               1578
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -980,7 +983,6 @@
 #define IDM_BRAINFLOW                   32968
 #define IDM_INSERT_BRAINFLOW            32969
 #define IDC_STATIC                      -1
-#define IDC_BF_MACADDRESS_LABEL         65535
 
 // Next default values for new objects
 // 
@@ -988,7 +990,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        268
 #define _APS_NEXT_COMMAND_VALUE         32970
-#define _APS_NEXT_CONTROL_VALUE         1574
+#define _APS_NEXT_CONTROL_VALUE         1577
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

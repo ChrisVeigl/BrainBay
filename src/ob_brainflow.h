@@ -24,7 +24,11 @@ protected:
   public: 
     char  archivefile[256];
 	int  board_selection,board_id,channels;
+	int show_position, show_extrachannels;
 	char ipaddress[40], macaddress[40], serialport[40];
+	int  channelMap[MAX_PORTS];
+	int bf_channels;
+
 	int ipport;
 	HANDLE filehandle;
 	int  filemode;

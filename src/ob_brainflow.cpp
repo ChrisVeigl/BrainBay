@@ -288,6 +288,9 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
         SetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress);
         SetDlgItemInt(hDlg, IDC_BF_IPPORT, st->ipport,FALSE);
 
+        CheckDlgButton(hDlg, IDC_SHOW_POSITION, st->show_position);
+        CheckDlgButton(hDlg, IDC_SHOW_EXTRACHANNELS, st->show_extrachannels);
+
         SetDlgItemText(hDlg, IDC_BF_ARCHIVEFILE, st->archivefile);
         updateDialog(hDlg, st);
 
@@ -309,6 +312,14 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
                 cout << "Brainflow: Device ID selected: " << st->board_id << std::endl;
                 updateDialog(hDlg, st);
             }
+            break;
+
+        case IDC_SHOW_POSITION:
+            st->show_position = IsDlgButtonChecked(hDlg, IDC_SHOW_POSITION);
+            break;
+
+        case IDC_SHOW_EXTRACHANNELS:
+            st->show_extrachannels = IsDlgButtonChecked(hDlg, IDC_SHOW_EXTRACHANNELS);
             break;
 
         case IDC_BF_APPLY_DEVICE:
@@ -343,6 +354,7 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
                 updateDialog(hDlg, st);
             }
             break;
+
         case IDC_CLOSE_BF_ARCHIVE:
             if (st->filehandle != INVALID_HANDLE_VALUE)
             {
@@ -356,6 +368,7 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
             get_session_length();
             updateDialog(hDlg, st);
             break;
+
         case IDC_REC_BF_ARCHIVE:
             strcpy(st->archivefile, GLOBAL.resourcepath);
             strcat(st->archivefile, "ARCHIVES\\*.bfa");
@@ -366,6 +379,7 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
             }
             updateDialog(hDlg, st);
             break;
+
         case IDC_END_BF_RECORDING:
             if (st->filehandle != INVALID_HANDLE_VALUE)
             {
@@ -406,6 +420,8 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     channels = 0;
 	width = 90;
 
+    bf_channels = 0;
+
     strcpy(serialport, "COM4");
     strcpy(ipaddress, "192.168.4.1");
     ipport = 4567;
@@ -414,6 +430,10 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     strcpy(archivefile, "none");
     filehandle = INVALID_HANDLE_VALUE;
     filemode = 0;
+
+    show_extrachannels = 1;
+    show_position = 0;
+
 
     board_id = -1;  // default: SYNTHETIC_BOARD, id -1
     sync = -1;      // first sync packet number will be 0
@@ -440,6 +460,8 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
     load_property("ipaddress", P_STRING, ipaddress);
     load_property("ipport", P_INT, &ipport);
     load_property("macaddress", P_STRING, macaddress);
+    load_property("show_position", P_INT, &show_position);
+    load_property("show_extrachannels", P_INT, &show_extrachannels);
 
     load_property("archivefile", P_STRING, archivefile);
     load_property("filemode", P_INT, &filemode);
@@ -464,6 +486,9 @@ void BRAINFLOWOBJ::save(HANDLE hFile)
     save_property(hFile, "ipaddress", P_STRING, ipaddress);
     save_property(hFile, "ipport", P_INT, &ipport);
     save_property(hFile, "macaddress", P_STRING, macaddress);
+    save_property(hFile, "show_position", P_INT, &show_position);
+    save_property(hFile, "show_extrachannels", P_INT, &show_extrachannels);
+
     save_property(hFile, "archivefile", P_STRING, archivefile);
     save_property(hFile, "filemode", P_INT, &filemode);
 }
@@ -534,6 +559,10 @@ int BRAINFLOWOBJ::add_channels(vector <int> channelList, char* type)
 void BRAINFLOWOBJ::update_channelinfo(void)
 {
     channels = 0;
+    for (int i = 0; i < MAX_PORTS; i++) {
+        strcpy(out_ports[i].out_name, "unused");
+        channelMap[i] = i;
+    }
 
     json desc = BoardShim::get_board_descr(board_id);
 
@@ -544,9 +573,12 @@ void BRAINFLOWOBJ::update_channelinfo(void)
         cout << "  Board description = " << BoardShim::get_board_descr(board_id) << std::endl;
         cout << "  the package number is at channel " << BoardShim::get_package_num_channel(board_id) << std::endl;
         cout << "  the sampling rate is " << BoardShim::get_sampling_rate(board_id) << std::endl;
+        cout << "  Number of rows:"<< BoardShim::get_num_rows(board_id) << std::endl;
         cout << "  available channels are as follows:" << std::endl;
     }
     catch (const BrainFlowException& err) { cout << "Brainflow: Exception handler triggered." << std::endl;   BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what()); }
+
+    bf_channels = BoardShim::get_num_rows(board_id);
 
     // build the output ports according to available channels
     try {
@@ -562,28 +594,32 @@ void BRAINFLOWOBJ::update_channelinfo(void)
         if (desc.find("gyro_channels") != desc.end()) channels += add_channels(BoardShim::get_gyro_channels(board_id), "gyro");
         if (desc.find("ppg_channels") != desc.end()) channels += add_channels(BoardShim::get_ppg_channels(board_id), "ppg");
         if (desc.find("analog_channels") != desc.end()) channels += add_channels(BoardShim::get_analog_channels(board_id), "analog");
-        if (desc.find("other_channels") != desc.end()) channels += add_channels(BoardShim::get_other_channels(board_id), "other");
 
-        if (desc.find("package_num_channel") != desc.end()) {
-            std::vector<int> vec;
-            vec.push_back(BoardShim::get_package_num_channel(board_id));
-            channels += add_channels(vec, "pcount");
-        }
+        if (show_extrachannels) {
 
-        if (desc.find("battery_channel") != desc.end()) {
-            std::vector<int> vec;
-            vec.push_back(BoardShim::get_battery_channel(board_id));
-            channels += add_channels(vec, "batt");
-        }
-        if (desc.find("timestamp_channel") != desc.end()) {
-            std::vector<int> vec;
-            vec.push_back(BoardShim::get_timestamp_channel(board_id));
-            channels += add_channels(vec, "time");
-        }
-        if (desc.find("marker_channel") != desc.end()) {
-            std::vector<int> vec;
-            vec.push_back(BoardShim::get_marker_channel(board_id));
-            channels += add_channels(vec, "marker");
+            if (desc.find("other_channels") != desc.end()) channels += add_channels(BoardShim::get_other_channels(board_id), "other");
+
+            if (desc.find("package_num_channel") != desc.end()) {
+                std::vector<int> vec;
+                vec.push_back(BoardShim::get_package_num_channel(board_id));
+                channels += add_channels(vec, "pcount");
+            }
+
+            if (desc.find("battery_channel") != desc.end()) {
+                std::vector<int> vec;
+                vec.push_back(BoardShim::get_battery_channel(board_id));
+                channels += add_channels(vec, "batt");
+            }
+            if (desc.find("timestamp_channel") != desc.end()) {
+                std::vector<int> vec;
+                vec.push_back(BoardShim::get_timestamp_channel(board_id));
+                channels += add_channels(vec, "time");
+            }
+            if (desc.find("marker_channel") != desc.end()) {
+                std::vector<int> vec;
+                vec.push_back(BoardShim::get_marker_channel(board_id));
+                channels += add_channels(vec, "marker");
+            }
         }
     }
     catch (const BrainFlowException& err) { 
@@ -593,28 +629,48 @@ void BRAINFLOWOBJ::update_channelinfo(void)
 
     cout << "Added total number of " << channels << " data channels!" << std::endl;
 
-    // if available, use EEG channel names for description of the output ports
-    auto it_names = desc.find("eeg_names");
-    if (it_names != desc.end()) {
-        auto it_eegChannels = desc.find("eeg_channels");
-        vector <int> channelList = *it_eegChannels;
-        std::stringstream names((std::string)(*it_names));
-        vector<string> result;
-        while (names.good()) {
-            string substr;
-            getline(names, substr, ',');
-            result.push_back(substr);
-        }
+    if (show_position) {
+        // if available, use EEG channel names for description of the output ports
+        auto it_names = desc.find("eeg_names");
+        if (it_names != desc.end()) {
+            auto it_eegChannels = desc.find("eeg_channels");
+            vector <int> channelList = *it_eegChannels;
+            std::stringstream names((std::string)(*it_names));
+            vector<string> result;
+            while (names.good()) {
+                string substr;
+                getline(names, substr, ',');
+                result.push_back(substr);
+            }
 
-        int pos = 0;
-        for (std::vector<int>::iterator it = channelList.begin(); it != channelList.end(); ++it) {
-            int actChn = *it;
-            cout << "  EEG Channel " << actChn << " has name " << result.at(pos) << std::endl;
-            strcpy(out_ports[actChn].out_name, result.at(pos).c_str());
-            strcpy(out_ports[actChn].out_desc, result.at(pos).c_str());
-            pos++;
+            int pos = 0;
+            for (std::vector<int>::iterator it = channelList.begin(); it != channelList.end(); ++it) {
+                int actChn = *it;
+                cout << "  EEG Channel " << actChn << " has name " << result.at(pos) << std::endl;
+                strcpy(out_ports[actChn].out_name, result.at(pos).c_str());
+                strcpy(out_ports[actChn].out_desc, result.at(pos).c_str());
+                pos++;
+            }
         }
     }
+
+    // collapse unused channels if necessary 
+    if (!show_extrachannels) {
+        int activeChannel = 0;
+        for (int i = 0; i < bf_channels; i++) {
+            if (strcmp(out_ports[i].out_name, "unused")) {
+                channelMap[i] = activeChannel;
+                cout << " Using OUT PORT " << activeChannel << " for BF-Channel " << i << std::endl;
+                memcpy(&out_ports[activeChannel], &out_ports[i], sizeof(out_ports[0]));
+                activeChannel++;
+            }
+            else {
+                channelMap[i] = -1;
+                cout << " skipping Channel " << i <<  std::endl;
+            }
+        }
+    }
+
 
     // assign a new element tag (caption)
     std::string str = BoardShim::get_device_name(board_id) + "(BF)";
@@ -692,7 +748,7 @@ void BRAINFLOWOBJ::session_pos(long pos)
 {
     if (filehandle == INVALID_HANDLE_VALUE) return;
     if (pos > filelength) pos = filelength;
-    SetFilePointer(filehandle, pos * (sizeof(float)) * outports, NULL, FILE_BEGIN);
+    SetFilePointer(filehandle, pos * (sizeof(float)) * bf_channels, NULL, FILE_BEGIN);
 }
 
 long BRAINFLOWOBJ::session_length(void)
@@ -700,7 +756,7 @@ long BRAINFLOWOBJ::session_length(void)
     if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
     {
         DWORD sav = SetFilePointer(filehandle, 0, NULL, FILE_CURRENT);
-        filelength = SetFilePointer(filehandle, 0, NULL, FILE_END) / (sizeof(float)) / outports;
+        filelength = SetFilePointer(filehandle, 0, NULL, FILE_END) / (sizeof(float)) / bf_channels;
         SetFilePointer(filehandle, sav, NULL, FILE_BEGIN);
         return(filelength);
     }
@@ -721,9 +777,10 @@ void process_brainflow(void) {  // to be called by timer.cpp while GLOBAL.brainf
             }
             bf->sync = actsync;
 
-            for (int c = 0; c < bf->channels; c++) {
+            for (int c = 0; c < bf->bf_channels; c++) {
                 double value = unprocessed_data.at(c, i);
-                bf->pass_values(c, value);
+                if (bf->channelMap[c] != -1) 
+                    bf->pass_values(bf->channelMap[c], value);
                 current_channelValue[c] = value;
             }
             process_packets();
@@ -743,21 +800,22 @@ void BRAINFLOWOBJ::work(void)
 
     if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_READING))
     {
-        ReadFile(filehandle, current_channelValue, sizeof(float) * outports, &dwRead, NULL);
-        if (dwRead != sizeof(float) * outports) SendMessage(ghWndStatusbox, WM_COMMAND, IDC_STOPSESSION, 0);
+        ReadFile(filehandle, current_channelValue, sizeof(float) * bf_channels, &dwRead, NULL);
+        if (dwRead != sizeof(float) * bf_channels) SendMessage(ghWndStatusbox, WM_COMMAND, IDC_STOPSESSION, 0);
         else
         {
             DWORD x = SetFilePointer(filehandle, 0, NULL, FILE_CURRENT);
             x = x * 1000 / filelength / TTY.bytes_per_packet;
             SetScrollPos(GetDlgItem(ghWndStatusbox, IDC_SESSIONPOS), SB_CTL, x, 1);
         }
-        for (int i = 0; i < outports; i++) {
-            pass_values(i, current_channelValue[i]);
+        for (int i = 0; i < bf_channels; i++) {
+            if (channelMap[i]!=-1)
+                pass_values(channelMap[i], current_channelValue[i]);
         }
     }
 
     if ((filehandle != INVALID_HANDLE_VALUE) && (filemode == FILE_WRITING))
-        WriteFile(filehandle, current_channelValue, sizeof(float) * outports, &dwWritten, NULL);
+        WriteFile(filehandle, current_channelValue, sizeof(float) * bf_channels, &dwWritten, NULL);
 
 //    if ((!TIMING.dialog_update) && (hDlg == ghWndToolbox))
 //    {
