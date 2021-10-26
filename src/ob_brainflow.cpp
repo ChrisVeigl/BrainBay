@@ -45,59 +45,47 @@ struct board_id {
 };
 
 struct board_id supported_boards[] = {
-    { "Synthetic Board (simulated data)" , -1 } ,
-    { "Callibri EEG", 9 },
-    { "Callibri EMG", 10 },
-    { "Callibri ECG", 11 },
-    { "Enophone", 37 },
-    { "Fascia", 12 },
-    { "GTec Unicorn", 8 },
-    { "Iron BCI", 15 },
-    { "Muse S BLED", 21 },
-    { "Muse 2 BLED", 22 },
-    { "Neuroidss FreeEEG32", 17 },
-    { "NeuroMD Brainbit", 7 },
-    { "NeuroMD Brainbit BLED", 18 },
-    { "Neurosity Crown", 23 },
-    { "Neurosity Notion OSC1", 13 },
-    { "Neurosity Notion 2", 14 },
-    { "OpenBCI Cyton", 0 } ,
-    { "OpenBCI Cyton-Daisy", 2 } ,
-    { "OpenBCI Cyton Wifi", 5 } ,
-    { "OpenBCI Cyton-Daisy Wifi ", 6 },
-    { "OpenBCI Ganglion", 1 } ,
-    { "OpenBCI Ganglion Wifi", 4 } ,
-    { "OpenBCI Galea", 3 } ,
-    { "OpenBCI Galea Serial", 20 },
-    { "OYMotion gForce Pro EMG", 16 },
-    { "OYMotion gForce Dual EMG", 19 },
-    { "Ant Neuro EE 410", 24 },
-    { "Ant Neuro EE 411", 25 },
-    { "Ant Neuro EE 430", 26 },
-    { "Ant Neuro EE 211", 27 },
-    { "Ant Neuro EE 212", 28 },
-    { "Ant Neuro EE 213", 29 },
-    { "Ant Neuro EE 214", 30 },
-    { "Ant Neuro EE 215", 31 },
-    { "Ant Neuro EE 221", 32 },
-    { "Ant Neuro EE 222", 33 },
-    { "Ant Neuro EE 223", 34 },
-    { "Ant Neuro EE 224", 35 },
-    { "Ant Neuro EE 225", 36 }
+    { "Synthetic Board (simulated data)", -1 } ,
+    { "Callibri EEG"                    , 9 },
+    { "Callibri EMG"                    , 10 },
+    { "Callibri ECG"                    , 11 },
+    { "Enophone"                        , 37 },
+    { "GTec Unicorn"                    , 8 },
+    { "Iron BCI"                        , 15 },
+    { "Muse S BLED"                     , 21 },
+    { "Muse 2 BLED"                     , 22 },
+    { "Neuroidss FreeEEG32"             , 17 },
+    { "NeuroMD Brainbit"                , 7 },
+    { "NeuroMD Brainbit BLED"           , 18 },
+    { "Neurosity Crown"                 , 23 },
+    { "Neurosity Notion OSC1"           , 13 },
+    { "Neurosity Notion 2"              , 14 },
+    { "OpenBCI Cyton"                   , 0 } ,
+    { "OpenBCI Cyton-Daisy"             , 2 } ,
+    { "OpenBCI Cyton Wifi"              , 5 } ,
+    { "OpenBCI Cyton-Daisy Wifi "       , 6 },
+    { "OpenBCI Ganglion"                , 1 } ,
+    { "OpenBCI Ganglion Wifi"           , 4 } ,
+//    { "OpenBCI Galea", 3 } ,
+//    { "OpenBCI Galea Serial", 20 },
+//    { "Fascia", 12 },
+    { "OYMotion gForce Pro EMG"         , 16 },
+    { "OYMotion gForce Dual EMG"        , 19 },
+    { "Ant Neuro EE 410"                , 24 },
+    { "Ant Neuro EE 411"                , 25 },
+    { "Ant Neuro EE 430"                , 26 },
+    { "Ant Neuro EE 211"                , 27 },
+    { "Ant Neuro EE 212"                , 28 },
+    { "Ant Neuro EE 213"                , 29 },
+    { "Ant Neuro EE 214"                , 30 },
+    { "Ant Neuro EE 215"                , 31 },
+    { "Ant Neuro EE 221"                , 32 },
+    { "Ant Neuro EE 222"                , 33 },
+    { "Ant Neuro EE 223"                , 34 },
+    { "Ant Neuro EE 224"                , 35 },
+    { "Ant Neuro EE 225"                , 36 }
 
 };
-
-
-char s_boards[][40] = { "Synthetic Board (simulated data)",
-    "OpenBCI Cyton", "OpenBCI Ganglion", "OpenBCI Cyton-Daisy","OpenBCI Galea","OpenBCI Ganglion Wifi","OpenBCI Cyton Wifi","OpenBCI Cyton-Daisy Wifi ",
-    "NeuroMD Brainbit", "GTec Unicorn", "Callibri EEG", "Callibri EMG", "Callibri ECG",
-    "Fascia", "Neurosity Notion OSC1", "Neurosity Notion2", "Iron BCI", "OYMotion gForce Pro EMG",
-    "Neuroidss FreeEEG32", "NeuroMD Brainbit BLED","OYMotion gForce Dual EMG", "OpenBCI Galea Serial",
-    "Muse S BLED", "Muse 2 BLED","Neurosity Crown","Ant Neuro EE 410", "Ant Neuro EE 411",
-    "Ant Neuro EE 430", "Ant Neuro EE 211","Ant Neuro EE 212","Ant Neuro EE 213",
-    "Ant Neuro EE 214", "Ant Neuro EE 215", "Ant Neuro EE 221", "Ant Neuro EE 222",
-    "Ant Neuro EE 223",  "Ant Neuro EE 224","Ant Neuro EE 225",
-    "Enophone", "" };
 
 
 using namespace std;
@@ -436,6 +424,7 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
 
 
     board_id = -1;  // default: SYNTHETIC_BOARD, id -1
+    board_selection = 0;
     sync = -1;      // first sync packet number will be 0
 
     BoardShim::enable_dev_board_logger();
@@ -444,6 +433,8 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
 
     bf_createBoard(board_id);
     update_channelinfo();
+    updateDialog(hDlg, this);
+
     
     bf = this;
 }
@@ -480,7 +471,7 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
 void BRAINFLOWOBJ::save(HANDLE hFile)
 {
 	save_object_basics(hFile, this);
-    save_property(hFile,"board_selection", P_INT, &board_selection);
+    save_property(hFile, "board_selection", P_INT, &board_selection);
     save_property(hFile, "board_id", P_INT, &board_id);
     save_property(hFile, "serialport", P_STRING, serialport);
     save_property(hFile, "ipaddress", P_STRING, ipaddress);
