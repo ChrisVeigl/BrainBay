@@ -8,10 +8,10 @@
 
 <body style="font-family: Arial; margin-left: 7%; margin-right: 9%; 
   margin-top: 5%; margin-bottom: 5%; font-size: 11pt; ">
-<h1 align="center">Neurobit Driver 4.6</h1>
+<h1 align="center">Neurobit Driver 4.9</h1>
 <p align="center" style="font-size: 160%; font-weight: bold;">Device window</p>
 <div style="line-height: 135%; ">
-<p align="center"><i>&copy; Copyright by Neurobit Systems 2010-2019</i><br>
+<p align="center"><i>&copy; Copyright by Neurobit Systems 2010-2021</i><br>
 <a href="http://www.neurobitsystems.com/">http://www.neurobitsystems.com</a></p>
 
 <p><b>Neurobit Driver</b> enables applications to communicate with biofeedback and 
@@ -48,13 +48,12 @@ The driver is running under Microsoft Windows 10/8/7/Vista/XP systems.
     Pairing code for Neurobit Optima[+] is 0000. You can learn more about Bluetooth pairing 
     in Windows help.</p>
   <li><p><u>Neurobit Optima[+] USB</u> devices:<br>
-  	A cable with full size USB type A plug on one end and micro USB type B 
-		plug on the other end (the same as for typical cell phone chargers) is 
-		required. Connect the computer to the device and turn it on. The computer will
-		detect the device and install necessary drivers for its USB module. The setup
-		is automatic in recent Windows systems. Older ones may require manual setup 
-		of drivers from the <a href="http://www.ftdichip.com/FTDrivers.htm">FTDI 
-		website </a>.
+  	A cable with full size USB 2.0 male A connector on one end and micro B male
+		connector on the other end (the same as for typical cell phone chargers) is 
+		required. Install driver software for USB chip by FTDI, as described in the 
+		device quick start guide. Connect the computer to the device and turn it on. 
+		The computer should detect the device and install the driver necessary for 
+		its USB module.
   	</p>
   <li><p><u>Neurobit Lite</u> devices:<br>
     Infrared (IR) communication port (built-in into a computer or in form of a USB adapter) 
@@ -81,7 +80,7 @@ available settings.</p>
 <ul>
 	<li><p><b>Device model</b> - a specific device type within the Neurobit Optima 
 		subfamily (selected in BioExplorer's device manager). 
-		<u>ONLY for BioExplorer v. 1.7.0.665 or older</u>. In other cases, 
+		<u>ONLY for BioExplorer v. 1.*</u>. In other cases, 
 		the complete device type is selected in an application window (outside 
 		the device settings window described here).</p>
 	
@@ -129,7 +128,7 @@ available settings.</p>
     (The option is insignificant on the devices without sound transducer.)</p>
 
   <li><p><b>Device services</b> button - opens the application that provides device service functions, 
-    especially firmware upgrades.</p>
+    especially firmware updates.</p>
 </ul>
 
 <h3><a name="chans">Chan A tab</a></h3>
@@ -188,8 +187,8 @@ available settings.</p>
   	the signal is measured. Lower values enable slower signals to be measured, whereas higher 
   	values reduce low frequency noise and shorten transient states after sensor 
   	(dis)connection.</p>
-  	<p>Value 0 (DC coupling), if available, should be used with care, as electrode offset, 
-  	amplifier input offset and similar DC voltages are not removed for such a setting.</p>
+  	<p>Value 0 (DC coupling), if available, should be used with care, as electrode DC offset 
+		is not removed for such a setting and could saturate the amplifier.</p>
   <li><p><b>Power interference filter</b> - turns on or off the device's mains 
   	power interference filter.<br>
     (The filter notch frequency is set by the <b>Mains power frequency</b>
@@ -372,12 +371,12 @@ for individual measurement channels:
 
 <h2><a name="remarks">3. Remarks</a></h2>
 <ul>
-	<li><p><u>For BioExplorer v. 1.7.0.665 or earlier</u>, only Neurobit Optima subfamily 
+	<li><p><u>For BioExplorer v. 1.*</u>, only Neurobit Optima subfamily 
 		(2 or 4-channel) is chosen in the device manager of the application, whereas 
 		a specific device model is selected on the <a href="#general">General tab</a> 
 		in the device settings window.</p>
 	
-  <li><p>For interoperation with the <u>BioExplorer</u> application (v. 1.7 or earlier), which 
+  <li><p>For interoperation with the <u>BioExplorer</u> application (v. 1.*), which 
     does not store Neurobit device settings along with a design, there are two additional 
     buttons at the bottom of the window to facilitate device configuration:
     <ul>
