@@ -463,9 +463,9 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
         prepare_fileWrite(this);
     }
 
+    bf_setparams(this);
     bf_createBoard(board_id);
     update_channelinfo();
-    bf_setparams(this);
 }
 
 void BRAINFLOWOBJ::save(HANDLE hFile)
