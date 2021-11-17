@@ -558,7 +558,7 @@ LRESULT CALLBACK SCALEDlgHandler( HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				break;
 			case IDC_SAVEHARMONIC:
 				{
-					char temp[100];
+					char temp[260];
 					strcpy(szFileName,GLOBAL.resourcepath);
 					strcat(szFileName,"TONESCALES\\");
 					GetDlgItemText(hDlg, IDC_HARMONICNAME, temp, MAX_PATH);

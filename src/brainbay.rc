@@ -30,7 +30,9 @@ LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_SMALL               ICON                    "small.ico"
+
 IDI_MYEEG               ICON                    "icon1.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -60,6 +62,8 @@ BEGIN
                 MENUITEM "generic (1 Channel raw data 8 bit)", IDM_INSERT_EEG_GENERIC8
                 MENUITEM "generic (1 Channel raw data 16 Bit)", IDM_INSERT_EEG_GENERIC16
                 MENUITEM SEPARATOR
+                MENUITEM "BioSemi Active Two",          IDM_INSERT_EEG_BIOSEMI
+                MENUITEM "BrainFlow-Compatible (OpenBCI, Brainbit, Unicorn, Muse, Ant, Enophone etc.)", IDM_INSERT_BRAINFLOW
                 MENUITEM "Emotiv Epoc (14 Channels, raw EEG data)", IDM_INSERTEMOTIV
                 MENUITEM "IBVA (2 Channel EEG)",        IDM_INSERT_EEG_IBVA
                 MENUITEM "MonolithEEG (P21 Packetformat)", IDM_INSERT_EEG_P21
@@ -76,7 +80,6 @@ BEGIN
                 MENUITEM "QDS NFK (2/4 Channels)",      IDM_INSERT_EEG_QDS
                 MENUITEM "SmartBrainTechnologies (4 Channel EEG)", IDM_INSERT_EEG_SBT4
                 MENUITEM "SmartBrainTechnologies (2 Channel Bluetooth EEG)", IDM_INSERT_EEG_SBT2
-                MENUITEM "BioSemi Active Two",          IDM_INSERT_EEG_BIOSEMI
             END
             MENUITEM "Camera",                      IDM_INSERTCAM
             MENUITEM "Com-Reader",                  IDM_INSERTCOMREADER
@@ -1462,6 +1465,36 @@ BEGIN
     CONTROL         "send only changing values",IDC_ONLY_CHANGING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,100,133,96,10
 END
 
+IDD_BRAINFLOWBOX DIALOGEX 0, 0, 323, 208
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "Brainflow-Compatible Biosignal Device"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Apply Configuration",IDC_BF_APPLY_DEVICE,72,114,184,15,BS_FLAT
+    GROUPBOX        "Brainflow-Compatible Device Selection and Configuration",-1,6,3,310,135
+    PUSHBUTTON      "Open",IDC_OPEN_BF_ARCHIVE,73,180,39,14,BS_FLAT
+    PUSHBUTTON      "Create Archive",IDC_REC_BF_ARCHIVE,151,180,70,14,BS_FLAT
+    PUSHBUTTON      "Close ",IDC_CLOSE_BF_ARCHIVE,115,180,34,14,BS_FLAT
+    EDITTEXT        IDC_BF_ARCHIVEFILE,72,158,214,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Filename",-1,36,160,29,8
+    GROUPBOX        "Archive File",-1,6,145,310,58
+    PUSHBUTTON      "End Recording",IDC_END_BF_RECORDING,224,180,62,14,BS_FLAT
+    COMBOBOX        IDC_BF_DEVICECOMBO,69,22,213,191,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Device:",-1,40,24,26,8
+    EDITTEXT        IDC_BF_SERIALPORT,69,59,48,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_BF_IPADDRESS,115,77,53,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_BF_IPPORT,207,77,38,12,ES_AUTOHSCROLL | WS_DISABLED
+    EDITTEXT        IDC_BF_MACADDRESS,184,93,72,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "Serial Port:",-1,29,62,37,8
+    LTEXT           "IP-Address:",-1,73,79,38,8
+    LTEXT           "IP-Port:",-1,180,83,26,8
+    LTEXT           "Mac-Address (eg. 00:11:22:33:FF:EE):",-1,59,95,123,8
+    LTEXT           "(e.g. COM5 on Windows or /dev/ttyUSB0 on Linux)",-1,120,60,178,8
+    CONTROL         "show extra channels",IDC_SHOW_EXTRACHANNELS,"Button",BS_AUTOCHECKBOX,188,37,94,15
+    CONTROL         "show electrode positions",IDC_SHOW_POSITION,"Button",BS_AUTOCHECKBOX,70,37,94,15
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -1810,8 +1843,27 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 185
     END
+
+    IDD_BRAINFLOWBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 316
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 203
+    END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_BRAINFLOWBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1925,7 +1977,7 @@ END
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United Kingdom) resources
+// Englisch (Vereinigtes Königreich) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
@@ -2019,12 +2071,12 @@ BEGIN
     0
 END
 
-#endif    // English (United Kingdom) resources
+#endif    // Englisch (Vereinigtes Königreich) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (ï¿½sterreich) resources
+// Deutsch (Österreich) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
@@ -2993,12 +3045,18 @@ END
 //
 
 IDC_CURSOR1             CURSOR                  "CURSORS\\dwell_arrow1.cur"
+
 IDC_CURSOR2             CURSOR                  "CURSORS\\dwell_arrow6.cur"
+
 IDC_CURSOR3             CURSOR                  "CURSORS\\dwell_arrow2.cur"
+
 IDC_CURSOR4             CURSOR                  "CURSORS\\dwell_arrow3.cur"
+
 IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
+
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
-#endif    // Deutsch (ï¿½sterreich) resources
+
+#endif    // Deutsch (Österreich) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

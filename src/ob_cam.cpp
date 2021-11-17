@@ -17,41 +17,47 @@
   
 -----------------------------------------------------------------------------*/
 // #define DEBUG_OUTPUT
- 
+
+
 #include "brainbay.h"
 #include "ob_cam.h"
 #include <stdio.h>
 #include <ctype.h>
+
+#if _MSC_VER < 1900
 #include <videoinput\include\videoInput.h>  
 #include <opencv2\opencv.hpp>
-
 #define cimg_plugin1 "CImg\plugins\cimgIPL.h"
 #include "CImg\CImg.h"
 
-#define OPENCV_LIB_VER "242"
-#if defined(_DEBUG)
-#define OPENCV_LIB_SUFFIX "d.lib"
-#else
-#define OPENCV_LIB_SUFFIX ".lib"
+	#define OPENCV_LIB_VER "242"
+	#if defined(_DEBUG)
+	#define OPENCV_LIB_SUFFIX "d.lib"
+	#else
+	#define OPENCV_LIB_SUFFIX ".lib"
+	#endif
+
+	#pragma comment(lib, "opencv_core" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
+	#pragma comment(lib, "opencv_highgui" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
+	#pragma comment(lib, "opencv_objdetect" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
+	#pragma comment(lib, "opencv_imgproc" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
+	#pragma comment(lib, "opencv_video" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
+	#pragma comment(lib, "opencv_features2d" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
+	#pragma comment(lib, "zlib")
+	#pragma comment(lib, "libjasper")
+	#pragma comment(lib, "libpng")
+	#pragma comment(lib, "libtiff")
+	#pragma comment(lib, "libjpeg") 
+	#pragma comment(lib, "comctl32")
+	#pragma comment(lib, "Vfw32")
+
+	static CvVideoWriter* video_writer = 0;
+	videoInput* VI;
+
 #endif
 
-#pragma comment(lib, "opencv_core" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
-#pragma comment(lib, "opencv_highgui" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
-#pragma comment(lib, "opencv_objdetect" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
-#pragma comment(lib, "opencv_imgproc" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
-#pragma comment(lib, "opencv_video" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
-#pragma comment(lib, "opencv_features2d" OPENCV_LIB_VER OPENCV_LIB_SUFFIX)
-#pragma comment(lib, "zlib")
-#pragma comment(lib, "libjasper")
-#pragma comment(lib, "libpng")
-#pragma comment(lib, "libtiff")
-#pragma comment(lib, "libjpeg") 
-#pragma comment(lib, "comctl32")
-#pragma comment(lib, "Vfw32")
- 
-videoInput *VI; 
+
 CAMOBJ * camobj = 0;
-static CvVideoWriter * video_writer =0;
 
 int framerate=0;
 int MAX_COUNT = 2;
@@ -79,6 +85,9 @@ HANDLE mutex;
 #define CAM_CONNECT_TIMEOUT 5000
 #define ERR_THRESHOLD 500
 
+
+
+
 //////////////  C - facetracking functions  /////////////////////////////////////////
 
 int facetracker_work(void );
@@ -87,38 +96,42 @@ int facetracker_exit(void );
 int detect_face (void);
 int check_jitter(int mode);
 
+int win_size = 11;
+int paintcnt = 0;
+int paintperiod = 5;
+HWND drawing_window = 0;
+
+static float x_move = 0, y_move = 0, x_click = 0, y_click = 0;
+static float x_moved = 0, y_moved = 0, x_clicked = 0, y_clicked = 0;
+
+
+char* status = 0;
+int need_to_init = 1;
+int flags = 0;
+int initstatus = STATUS_IDLE;
+
+#if _MSC_VER < 1900
 
 //////////////  C - global variables for facetracking, used from tread  //////////////
 
 #define LK_NUM_POINTS 2
 const char* cascade_name = "ComputerVision\\haarcascade_frontalface_alt.xml";
 
+
 static CvMemStorage* storage = 0;
 static CvHaarClassifierCascade* cascade = 0;
 CvCapture* capture = 0;
-static float x_move=0,y_move=0,x_click=0,y_click=0;
-static float x_moved=0,y_moved=0,x_clicked=0,y_clicked=0;
+IplImage* image = 0, * grey = 0, * prev_grey = 0,
+* pyramid = 0, * prev_pyramid = 0, * swap_temp = 0,
+* frame = 0, * frame_copy = 0;
+CvPoint2D32f* points[2] = { 0,0 }, * swap_points = 0;
+
+
 
 //VidFormat vidFmt = {320, 240, 30.0 };
 
-IplImage *image = 0, *grey = 0, *prev_grey = 0, 
-         *pyramid = 0, *prev_pyramid = 0, *swap_temp=0,
-		 *frame = 0, *frame_copy = 0;
 unsigned char* frame_buffer =0 ;
 
-
-
-int win_size = 11;
-int paintcnt=0;
-int paintperiod=5;
-HWND drawing_window=0;
-
-
-CvPoint2D32f* points[2] = {0,0}, *swap_points=0;
-char* status = 0;
-int need_to_init=1;
-int flags = 0;
-int initstatus=STATUS_IDLE;
 
 DWORD dwCamStatId;
 HANDLE CAMTHREAD=0;
@@ -201,6 +214,7 @@ int allocate_resources(void)
 	strcpy(c_name,GLOBAL.resourcepath);
 	strcat(c_name,cascade_name);
 
+
 	cascade = (CvHaarClassifierCascade*)cvLoad( c_name, 0, 0, 0 );
 	if( !cascade )  
 	{		
@@ -277,6 +291,7 @@ void free_resources(void )
 		delete VI; 
 		VI=0;
 	} 
+
 	if (frame)   { cvReleaseImage( &frame ); frame=0;}			
 
 	if (cascade) { cvFree((void**)&cascade); cascade =0;}
@@ -704,7 +719,12 @@ int facetracker_work(void)
 }
 
 
+#else
 
+int facetracker_init(CAMOBJ* st) { MessageBox(NULL, "The Camera/OpenCV Functions are only supported if BrainBay is compiled with VisualStudio 2010 (Platform Toolset V100).\n Please recompile Brainbay or use another binary version ...", "Error", MB_OK);  return (0); }
+int facetracker_exit(void) { return (0); }
+
+#endif
 
 
 LRESULT CALLBACK CamDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -862,7 +882,9 @@ void CAMOBJ::work(void)
 	{ 
 		if (mode==MODE_VIDEOFILE_READING)  SetDlgItemText(hDlg,IDC_CAMSTATUS,"Reading from Videofile");
 		else if (mode==MODE_VIDEOFILE_WRITING)  SetDlgItemText(hDlg,IDC_CAMSTATUS,"Writing to Videofile");
+#if _MSC_VER < 1900
 		else if (capture)  SetDlgItemText(hDlg,IDC_CAMSTATUS,"Displaying live images from Camera");
+#endif
 		else SetDlgItemText(hDlg,IDC_CAMSTATUS,"Waiting for Video Source");
 	    SetDlgItemInt(hDlg,IDC_CUR_RATE,framerate,0);
 	}

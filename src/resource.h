@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by brainbay.rc
+// Von Microsoft Visual C++ generierte Includedatei.
+// Verwendet durch brainbay.rc
 //
 #define IDS_STRING1                     1
 #define IDC_MYICON                      2
@@ -97,6 +97,7 @@
 #define IDD_SHADOWBOX                   260
 #define IDD_OSC_SENDERBOX               261
 #define IDD_BIOSEMIBOX                  262
+#define IDD_BRAINFLOWBOX                266
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -648,6 +649,7 @@
 #define IDC_LOAD_DEVCTX                 1469
 #define IDC_DISPLAYSETTINGS             1470
 #define IDC_SETTINGSFILE                1471
+#define IDC_SHOW_EXTRACHANNELS          1471
 #define IDC_QCHN1                       1472
 #define IDC_QCHN2                       1473
 #define IDC_NB_ARCHIVE_FILENAME         1474
@@ -793,6 +795,19 @@
 #define IDC_BIOSEMI_MEM                 1565
 #define IDC_BIOSEMI_MEM2                1566
 #define IDC_BIOSEMI_MAXMIN              1566
+#define IDC_BF_DEVICECOMBO              1566
+#define IDC_BF_APPLY_DEVICE             1567
+#define IDC_BF_ARCHIVEFILE              1568
+#define IDC_OPEN_BF_ARCHIVE             1569
+#define IDC_CLOSE_BF_ARCHIVE            1570
+#define IDC_REC_BF_ARCHIVE              1571
+#define IDC_END_BF_RECORDING            1572
+#define IDC_BF_SERIALPORT               1573
+#define IDC_BF_IPADDRESS                1574
+#define IDC_BF_IPPORT                   1575
+#define IDC_BF_MACADDRESS               1577
+#define IDC_SHOW_POSITIONS2             1578
+#define IDC_SHOW_POSITION               1578
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -961,15 +976,21 @@
 #define ID_BIOSIGNAL_BIOSEMIACTIVETWO   32961
 #define IDM_BIOSIGNAL_BIOSEMIACTIVETWO  32962
 #define IDM_INSERT_EEG_BIOSEMI          32963
+#define ID_TOOLS_TESTBRAINFLOW          32964
+#define IDM_TESTBRAINFLOW               32965
+#define IDM_TEST_BRAINFLOW              32966
+#define ID_BIOSIGNAL_BRAINFLOW          32967
+#define IDM_BRAINFLOW                   32968
+#define IDM_INSERT_BRAINFLOW            32969
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        266
-#define _APS_NEXT_COMMAND_VALUE         32964
-#define _APS_NEXT_CONTROL_VALUE         1566
+#define _APS_NEXT_RESOURCE_VALUE        268
+#define _APS_NEXT_COMMAND_VALUE         32970
+#define _APS_NEXT_CONTROL_VALUE         1577
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

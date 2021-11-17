@@ -142,8 +142,9 @@ extern "C" {
 #define OB_VOLUME       67
 #define OB_OSC_SENDER   68
 #define OB_BIOSEMI		69
+#define OB_BRAINFLOW	70
 
-#define OBJECT_COUNT 	70
+#define OBJECT_COUNT 	71
 
 
 
@@ -161,7 +162,7 @@ extern "C" {
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
 				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK", \
-				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI"
+				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI", "BRAINFLOW"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)
@@ -194,6 +195,7 @@ extern "C" {
 #define FT_NB_ARCHIVE   12
 #define FT_MCI          13
 #define FT_GANGLION_ARCHIVE 14
+#define FT_BF_ARCHIVE   15
 
 
 #define MAX_COMPORT				150
@@ -367,6 +369,8 @@ typedef struct GLOBALStruct
 	int emotiv_available;
 	int biosemi_available;
 	int ganglion_available;
+	int brainflow_available;
+
 	int ganglion_bledongle;
 
 	int P3ALC1;
@@ -662,6 +666,8 @@ BOOL   BreakDownCommPort( void );
 DWORD  WINAPI ReaderProc( LPVOID );
 DWORD  WINAPI WriterProc( LPVOID );
  
+
+
 //	NIA functions
 
 BOOL	ConnectNIA(HWND);
