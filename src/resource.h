@@ -808,6 +808,7 @@
 #define IDC_BF_MACADDRESS               1577
 #define IDC_SHOW_POSITIONS2             1578
 #define IDC_SHOW_POSITION               1578
+#define IDC_BF_CONFIG                   1579
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -990,7 +991,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        268
 #define _APS_NEXT_COMMAND_VALUE         32970
-#define _APS_NEXT_CONTROL_VALUE         1577
+#define _APS_NEXT_CONTROL_VALUE         1580
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

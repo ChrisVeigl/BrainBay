@@ -1465,21 +1465,20 @@ BEGIN
     CONTROL         "send only changing values",IDC_ONLY_CHANGING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,100,133,96,10
 END
 
-IDD_BRAINFLOWBOX DIALOGEX 0, 0, 323, 208
+IDD_BRAINFLOWBOX DIALOGEX 0, 0, 323, 234
 STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
 CAPTION "Brainflow-Compatible Biosignal Device"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Apply Configuration",IDC_BF_APPLY_DEVICE,72,114,184,15,BS_FLAT
-    GROUPBOX        "Brainflow-Compatible Device Selection and Configuration",-1,6,3,310,135
-    PUSHBUTTON      "Open",IDC_OPEN_BF_ARCHIVE,73,180,39,14,BS_FLAT
-    PUSHBUTTON      "Create Archive",IDC_REC_BF_ARCHIVE,151,180,70,14,BS_FLAT
-    PUSHBUTTON      "Close ",IDC_CLOSE_BF_ARCHIVE,115,180,34,14,BS_FLAT
-    EDITTEXT        IDC_BF_ARCHIVEFILE,72,158,214,14,ES_AUTOHSCROLL | ES_READONLY
-    LTEXT           "Filename",-1,36,160,29,8
-    GROUPBOX        "Archive File",-1,6,145,310,58
-    PUSHBUTTON      "End Recording",IDC_END_BF_RECORDING,224,180,62,14,BS_FLAT
+    PUSHBUTTON      "Apply Configuration",IDC_BF_APPLY_DEVICE,70,137,211,15,BS_FLAT
+    GROUPBOX        "Brainflow-Compatible Device Selection and Configuration",-1,6,3,310,155
+    PUSHBUTTON      "Open",IDC_OPEN_BF_ARCHIVE,70,204,39,14,BS_FLAT
+    PUSHBUTTON      "Create Archive",IDC_REC_BF_ARCHIVE,148,204,70,14,BS_FLAT
+    PUSHBUTTON      "Close ",IDC_CLOSE_BF_ARCHIVE,112,204,34,14,BS_FLAT
+    LTEXT           "Filename:",-1,29,186,36,8
+    GROUPBOX        "Archive File",-1,6,168,310,61
+    PUSHBUTTON      "End Recording",IDC_END_BF_RECORDING,221,204,62,14,BS_FLAT
     COMBOBOX        IDC_BF_DEVICECOMBO,69,22,213,191,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Device:",-1,40,24,26,8
     EDITTEXT        IDC_BF_SERIALPORT,69,59,48,12,ES_AUTOHSCROLL | WS_DISABLED
@@ -1488,11 +1487,14 @@ BEGIN
     EDITTEXT        IDC_BF_MACADDRESS,184,93,72,12,ES_AUTOHSCROLL | WS_DISABLED
     LTEXT           "Serial Port:",-1,29,62,37,8
     LTEXT           "IP-Address:",-1,73,79,38,8
-    LTEXT           "IP-Port:",-1,180,83,26,8
+    LTEXT           "IP-Port:",-1,180,79,26,8
     LTEXT           "Mac-Address (eg. 00:11:22:33:FF:EE):",-1,59,95,123,8
     LTEXT           "(e.g. COM5 on Windows or /dev/ttyUSB0 on Linux)",-1,120,60,178,8
-    CONTROL         "show extra channels",IDC_SHOW_EXTRACHANNELS,"Button",BS_AUTOCHECKBOX,188,37,94,15
+    CONTROL         "show extra channels",IDC_SHOW_EXTRACHANNELS,"Button",BS_AUTOCHECKBOX,189,36,94,15
     CONTROL         "show electrode positions",IDC_SHOW_POSITION,"Button",BS_AUTOCHECKBOX,70,37,94,15
+    EDITTEXT        IDC_BF_ARCHIVEFILE,70,185,212,12,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Config-String (optional, advanced use):",-1,21,116,124,8
+    EDITTEXT        IDC_BF_CONFIG,147,114,133,12,ES_AUTOHSCROLL
 END
 
 
@@ -1849,7 +1851,7 @@ BEGIN
         LEFTMARGIN, 6
         RIGHTMARGIN, 316
         TOPMARGIN, 6
-        BOTTOMMARGIN, 203
+        BOTTOMMARGIN, 229
     END
 END
 #endif    // APSTUDIO_INVOKED

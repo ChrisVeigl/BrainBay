@@ -26,6 +26,7 @@ protected:
 	int  board_selection,board_id,channels;
 	int show_position, show_extrachannels;
 	char ipaddress[40], macaddress[40], serialport[40];
+	char bfConfigString[250];
 	int  channelMap[MAX_PORTS];
 	int bf_channels;
 

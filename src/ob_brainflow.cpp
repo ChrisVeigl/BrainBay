@@ -276,6 +276,8 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
         SetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress);
         SetDlgItemInt(hDlg, IDC_BF_IPPORT, st->ipport,FALSE);
 
+        SetDlgItemText(hDlg, IDC_BF_CONFIG, st->bfConfigString);
+
         CheckDlgButton(hDlg, IDC_SHOW_POSITION, st->show_position);
         CheckDlgButton(hDlg, IDC_SHOW_EXTRACHANNELS, st->show_extrachannels);
 
@@ -317,8 +319,24 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
             st->ipport = GetDlgItemInt(hDlg, IDC_BF_IPPORT, NULL, false);
             GetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress, sizeof(st->macaddress)-1);
 
-            bf_setparams(st);
-            bf_createBoard(st->board_id);
+            GetDlgItemText(hDlg, IDC_BF_CONFIG, st->bfConfigString, sizeof(st->bfConfigString) - 1);
+
+            try
+            {
+                bf_setparams(st);
+                bf_createBoard(st->board_id);
+
+                if (strlen(st->bfConfigString) > 0) {
+                    cout << "Brainflow: Send Config-String " << st->bfConfigString << std::endl;
+                    board->config_board(st->bfConfigString);
+                }
+            }
+            catch (const BrainFlowException& err) {
+                cout << "Brainflow: Exception handler triggered." << std::endl;
+                BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what());
+                MessageBox(NULL, err.what(), "Brainflow error", MB_OK);
+            }
+
             st->update_channelinfo();
             break;
 
@@ -414,6 +432,7 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     strcpy(ipaddress, "192.168.4.1");
     ipport = 4567;
     strcpy(macaddress, "");
+    strcpy(bfConfigString, "");
 
     strcpy(archivefile, "none");
     filehandle = INVALID_HANDLE_VALUE;
@@ -453,6 +472,8 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
     load_property("macaddress", P_STRING, macaddress);
     load_property("show_position", P_INT, &show_position);
     load_property("show_extrachannels", P_INT, &show_extrachannels);
+    load_property("bfConfigString", P_STRING, bfConfigString);
+
 
     load_property("archivefile", P_STRING, archivefile);
     load_property("filemode", P_INT, &filemode);
@@ -479,6 +500,7 @@ void BRAINFLOWOBJ::save(HANDLE hFile)
     save_property(hFile, "macaddress", P_STRING, macaddress);
     save_property(hFile, "show_position", P_INT, &show_position);
     save_property(hFile, "show_extrachannels", P_INT, &show_extrachannels);
+    save_property(hFile, "bfConfigString", P_STRING, bfConfigString);
 
     save_property(hFile, "archivefile", P_STRING, archivefile);
     save_property(hFile, "filemode", P_INT, &filemode);
@@ -699,6 +721,11 @@ void BRAINFLOWOBJ::session_start(void)
             if (!board->is_prepared()) {
                 board->prepare_session();
                 cout << "Brainflow: Session prepared." << std::endl;
+            }
+            
+            if (strlen(bfConfigString) > 0) {
+                cout << "Brainflow: Send Config-String " << bfConfigString << std::endl;
+                board->config_board(bfConfigString);
             }
 
             if (GLOBAL.brainflow_available == 0) {
