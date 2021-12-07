@@ -326,10 +326,10 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
                 bf_setparams(st);
                 bf_createBoard(st->board_id);
 
-                if (strlen(st->bfConfigString) > 0) {
-                    cout << "Brainflow: Send Config-String " << st->bfConfigString << std::endl;
-                    board->config_board(st->bfConfigString);
-                }
+               // if (strlen(st->bfConfigString) > 0) {
+               //     cout << "Brainflow: Send Config-String " << st->bfConfigString << std::endl;
+               //     board->config_board(st->bfConfigString);
+               // }
             }
             catch (const BrainFlowException& err) {
                 cout << "Brainflow: Exception handler triggered." << std::endl;
