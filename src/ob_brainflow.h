@@ -29,6 +29,7 @@ protected:
 	char bfConfigString[250];
 	int  channelMap[MAX_PORTS];
 	int bf_channels;
+	int syncChannel;
 
 	int ipport;
 	HANDLE filehandle;

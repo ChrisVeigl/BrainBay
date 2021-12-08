@@ -305,6 +305,7 @@ void create_object(int type)
 		case OB_BRAINFLOW:
 #if _MSC_VER >= 1900
 							 actobject = new BRAINFLOWOBJ(GLOBAL.objects);
+							 deviceobject = actobject;
 							 actobject->object_size = sizeof(BRAINFLOWOBJ); break;
 #else
 			MessageBox(NULL, "Brainflow element is only supported if BrainBay is compiled with newer version of Visual Studio (Platform toolset V142)", "Error", MB_OK);

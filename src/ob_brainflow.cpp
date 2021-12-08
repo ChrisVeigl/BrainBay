@@ -440,6 +440,7 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
 
     show_extrachannels = 1;
     show_position = 0;
+    syncChannel = -1;
 
 
     board_id = -1;  // default: SYNTHETIC_BOARD, id -1
@@ -616,6 +617,10 @@ void BRAINFLOWOBJ::update_channelinfo(void)
                 std::vector<int> vec;
                 vec.push_back(BoardShim::get_package_num_channel(board_id));
                 channels += add_channels(vec, "pcount");
+                syncChannel = BoardShim::get_package_num_channel(board_id);
+            }
+            else {
+                syncChannel = -1;
             }
 
             if (desc.find("battery_channel") != desc.end()) {
@@ -734,6 +739,7 @@ void BRAINFLOWOBJ::session_start(void)
             }
 
             GLOBAL.brainflow_available = 1;
+            sync = 255;
         }
         catch (const BrainFlowException& err) {
             cout << "Brainflow: Exception handler triggered." << std::endl;
@@ -788,17 +794,21 @@ void process_brainflow(void) {  // to be called by timer.cpp while GLOBAL.brainf
 
         for (int i = 0; i < unprocessed_data.get_size(1); i++) {
 
-            int actsync = unprocessed_data.at(0, i);
-            bf->sync = (bf->sync + 1) % 256;
-            if (bf->sync != actsync) {
-                cout << " Sync lost: expected:" << bf->sync << " but got: " << unprocessed_data.at(0, i) << std::endl;
+            if (bf->syncChannel > -1) {
+                int actsync = unprocessed_data.at(bf->syncChannel, i);
+                bf->sync = (bf->sync + 1) % 256;
+                if (bf->sync != actsync) {
+                    cout << " Sync lost: expected:" << bf->sync << " but got: " << unprocessed_data.at(0, i) << std::endl;
+                    GLOBAL.syncloss++;
+                }
+                bf->sync = actsync;
             }
-            bf->sync = actsync;
 
             for (int c = 0; c < bf->bf_channels; c++) {
                 double value = unprocessed_data.at(c, i);
-                if (bf->channelMap[c] != -1) 
+                if (bf->channelMap[c] != -1) {
                     bf->pass_values(bf->channelMap[c], value);
+                }
                 current_channelValue[c] = value;
             }
             process_packets();
