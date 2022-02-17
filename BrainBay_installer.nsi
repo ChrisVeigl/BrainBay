@@ -140,7 +140,7 @@ SectionEnd
 
 ; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
-
+  SetOutPath $INSTDIR
   CreateDirectory "$SMPROGRAMS\BrainBay"
   CreateShortCut "$SMPROGRAMS\BrainBay\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\BrainBay\BrainBay.lnk" "$INSTDIR\brainbay.exe" "" "$INSTDIR\brainbay.exe" 0
