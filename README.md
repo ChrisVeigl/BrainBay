@@ -8,6 +8,9 @@ such as facetracking via webcam, EMG signal pattern recognition or mouse-/keyboa
 All source code is licensed under GPL, for copyright information 
 please have a look at ReadMe_License.txt
 
+*New:* A BrainBay User Forum is now available, see: https://brainbay.iphpbb3.com/
+
+
 Version Info
 ------------
  
