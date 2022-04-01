@@ -43,30 +43,36 @@ int open_textarchive(FILE_READEROBJ * st)
 	 i=0;
 	 if (st->format<5)
 	 {
-	 do 
-	 {
-		 tmp[0]=0;
- 	     ReadFile(st->file,tmp,1,&dwRead,NULL);
-	 }  while ((dwRead!=0) && (tmp[0]!=10));
+		 do 
+		 {
+			 tmp[0]=0;
+ 			 ReadFile(st->file,tmp,1,&dwRead,NULL);
+		 }  while ((dwRead!=0) && (tmp[0]!=10));
 
-	 i=0;tmp[1]=0;tmp1[0]=0;
-	 do 
-	 {
-		 tmp[0]=0;
- 	     ReadFile(st->file,tmp,1,&dwRead,NULL);
-		 if ((tmp[0]!=13)&&(tmp[0]!=10)&&(tmp[0]!=9)&&(tmp[0]!=','))
-			 strcat(tmp1,tmp);
-		 else if ((tmp[0]==9)||(tmp[0]==',')||(tmp[0]==13))
-		 { 
-			 if (strlen(tmp1)>19) tmp1[19]=0;
-			 if (max<strlen(tmp1)) max=strlen(tmp1);
+		 i=0;tmp[1]=0;tmp1[0]=0;
+		 do 
+		 {
+			 tmp[0]=0;
+ 			 ReadFile(st->file,tmp,1,&dwRead,NULL);
+			 if ((tmp[0] != 13) && (tmp[0] != 10) && (tmp[0] != 9) && (tmp[0] != ','))
+			 {
+				 if (strlen(tmp1) < 250) strcat(tmp1, tmp);
+			 }
+			 else if ((tmp[0]==9)||(tmp[0]==',')||(tmp[0]==13))
+			 { 
+				 if (strlen(tmp1)>19) tmp1[19]=0;
+				 if (max<strlen(tmp1)) max=strlen(tmp1);
 
-			 strcpy(st->out_ports[op].out_name,tmp1);
-			 strcpy(st->out_ports[op++].out_desc,tmp1);
-			 tmp1[0]=0;
-		 }
-	 }  while ((dwRead!=0) && (tmp[0]!=10));
-	 if (op>0) st->outports=op;
+				 // strcpy(st->out_ports[op].out_name,tmp1);
+				 // strcpy(st->out_ports[op++].out_desc,tmp1);
+
+				 op++;
+				 sprintf(st->out_ports[op].out_name, "chn%d", op);
+				 sprintf(st->out_ports[op].out_desc, "chn%d", op);
+				 tmp1[0]=0;
+			 }
+		 }  while ((dwRead!=0) && (tmp[0]!=10));
+		 if (op>0) st->outports=op;
 	 }
 	 else
 	 {
@@ -388,10 +394,14 @@ FILE_READEROBJ::FILE_READEROBJ(int num) : BASE_CL()
 			do 
 			{
 				 tmp[0]=0;
- 			     ReadFile(file,tmp,1,&dwRead,NULL);
-				 if (((tmp[0]>='0')&&(tmp[0]<='9'))||(tmp[0]=='.')||(tmp[0]=='-')) 
-					 strcat(tmp1,tmp);
-			}  while ((tmp[0]!=0) && (tmp[0]!=13)&&(tmp[0]!=9)&&(tmp[0]!=','));
+ 			     ReadFile(file,tmp,1,&dwRead,NULL); 
+				 if (tmp[0] == 13) ReadFile(file, tmp, 1, &dwRead, NULL);
+
+				 if (((tmp[0]>='0')&&(tmp[0]<='9'))||(tmp[0]=='.')||(tmp[0]=='-') || (tmp[0] == 'E') || (tmp[0] == 'e'))
+				 {
+					 if (strlen(tmp1) < 250) strcat(tmp1, tmp);
+				 }					 
+			}  while ((tmp[0]!=0) && (tmp[0]!=13) && (tmp[0] != 10) &&(tmp[0]!=9)&&(tmp[0]!=','));
 
 			tmp1[strlen(tmp1)]=0;
 

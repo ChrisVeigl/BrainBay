@@ -73,6 +73,8 @@ Section "Application" SecApp
   File "bin\ARCHIVES\monolith1.arc"
   File "bin\ARCHIVES\ekg_chn1.arc"
   File "bin\ARCHIVES\2_channel_test.arc"
+  File "bin\ARCHIVES\testsignal.txt"
+  File "bin\ARCHIVES\testsignal.csv"
   
   SetOutPath $INSTDIR\CONFIGURATIONS
   File "bin\CONFIGURATIONS\demomenu.con"
