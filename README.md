@@ -8,23 +8,24 @@ such as facetracking via webcam, EMG signal pattern recognition or mouse-/keyboa
 All source code is licensed under GPL, for copyright information 
 please have a look at ReadMe_License.txt
 
-*New:* A BrainBay User Forum is now available, see: https://brainbay.iphpbb3.com/
+*New:* **BrainBay User Forum** available, see: https://brainbay.iphpbb3.com/
 
 
 Version Info
 ------------
  
-* The current release version is 2.5  (2019-09-03)
+* The current release version is 2.7  (2022-08-13)
 
 * Recent changes for this release:
+  * support for new Brainflow version, serveral new compatible EEG amplifiers!
+  * improved element captions
+
+* Not-so-recent changes in recent releases worth mentioning:
   * New elements Shadow and Volume allow control of volume and desktop transparency
   * New element OSC-Sender for transfer of live values to other applications via Open Sound Control / UDP
   * Logical elements And, Or and Not got extended modes, increasing flexibility
   * Threshold element improved, increasing flexibility
   * Improved interface and handling for Neurobit devices
-  * user manual updated!
-
-* Not-so-recent changes worth mentioning:
   * Support for Neurosky devices
   * Cursorkey integration for Oscilloscope and Threshold Windows
   * Oscilloscope features snapshots for training reporting
@@ -93,6 +94,11 @@ Credits
 * Elliot Mebane for valuable feedback and hints for improvements
 * Jan-Hendrik Franz for Wine installation tips
 
+Donate
+------
+
+If you like BrainBay and want to support its development, please consider a donation:
+http://www.shifz.org/brainbay/donate.htm
 
 Further Information
 -------------------
