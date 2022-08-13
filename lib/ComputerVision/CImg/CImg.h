@@ -39056,7 +39056,7 @@ namespace cimg_library {
     //! Value type.
     typedef T value_type;
 
-    // Define common T-dependent types.
+    // Define common T-dependant types.
     typedef typename cimg::superset<T,bool>::type Tbool;
     typedef typename cimg::superset<T,unsigned char>::type Tuchar;
     typedef typename cimg::superset<T,char>::type Tchar;
