@@ -232,8 +232,8 @@ static HMODULE InitEmotivEDKLib(const char * drvLibName)
 			write_logfile("Error getting Function entry points from EDK.dll");
 			return NULL;
 		}
-		std::cout << "INFO: Sucessfully loaded Emotiv EDK dll from " << drvLibName << "\n";
-		write_logfile("INFO: Sucessfully loaded Emotiv EDK dll from %s",drvLibName);
+		std::cout << "INFO: Successfully loaded Emotiv EDK dll from " << drvLibName << "\n";
+		write_logfile("INFO: Successfully loaded Emotiv EDK dll from %s",drvLibName);
 		return drv_lib;
 }
 
