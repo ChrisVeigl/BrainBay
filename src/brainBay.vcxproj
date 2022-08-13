@@ -153,7 +153,7 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\Debug/brainBay.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\opencv\lib;..\lib\ComputerVision\videoInput\lib;..\lib\Brainflow\libd;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\opencv\lib;..\lib\ComputerVision\videoInput\lib;..\lib\Brainflow\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libcd.lib;libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/brainBay.pdb</ProgramDatabaseFile>
