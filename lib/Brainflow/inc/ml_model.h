@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string>
+#include <vector>
 
 // include it here to allow user include only this single file
 #include "brainflow_constants.h"
@@ -33,11 +34,17 @@ public:
     static void enable_dev_ml_logger ();
     /// set log level
     static void set_log_level (int log_level);
+    /// write user defined string to BrainFlow logger
+    static void log_message (int log_level, const char *format, ...);
+    /// release all currently prepared classifiers
+    static void release_all ();
+    /// get brainflow version
+    static std::string get_version ();
 
     /// initialize classifier, should be called first
     void prepare ();
     /// calculate metric from data
-    double predict (double *data, int data_len);
+    std::vector<double> predict (double *data, int data_len);
     /// release classifier
     void release ();
 };
