@@ -55,7 +55,7 @@ void init_draw(void)
 
     hdc = GetDC(NULL);
 	if (GLOBAL.os_version==1)  DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 90);
-	else DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 85);
+	else DRAW.scaleFontHeight = -MulDiv(7, GetDeviceCaps(hdc, LOGPIXELSY), 75);
 
     ReleaseDC(NULL, hdc);
     if (!(DRAW.scaleFont = CreateFont(DRAW.scaleFontHeight, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Arial")))
@@ -150,8 +150,10 @@ void draw_captions(HDC hdc, WORD t)
 
 		ExtTextOut(hdc, SX+objects[t]->xPos+3,SY+objects[t]->yPos+2, 0, NULL,szdata, strlen(szdata), NULL ) ;
 
-		SetBkColor (hdc, PALETTERGB(0,128,128));
-		SetTextColor (hdc, PALETTERGB(100,255,200));
+//		SetBkColor (hdc, PALETTERGB(0,128,128));
+//		SetTextColor (hdc, PALETTERGB(100,255,200));
+		SetBkColor(hdc, PALETTERGB(0, 80, 80));
+		SetTextColor(hdc, PALETTERGB(150, 255, 220));
 		SelectObject (hdc, DRAW.brush_yellow);
 		for (i=0;i<objects[t]->inports;i++)
 		{
