@@ -202,7 +202,7 @@ void updateDialog(HWND hDlg, BRAINFLOWOBJ* st)
     // see https://brainflow.readthedocs.io/en/stable/SupportedBoards.html
 
     if ((st->board_id == 0) || (st->board_id == 1) || (st->board_id == 2) ||
-        (st->board_id == 17) || (st->board_id == 18) || (st->board_id == 21) || (st->board_id == 22)) {
+        (st->board_id == 17) || (st->board_id == 18) || (st->board_id == 21) || (st->board_id == 22) || (st->board_id == 42)) {
         EnableWindow(GetDlgItem(hDlg, IDC_BF_SERIALPORT), TRUE);
     } else {
         EnableWindow(GetDlgItem(hDlg, IDC_BF_SERIALPORT), FALSE);
