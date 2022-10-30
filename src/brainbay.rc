@@ -1495,7 +1495,7 @@ BEGIN
     EDITTEXT        IDC_BF_ARCHIVEFILE,70,203,212,12,ES_AUTOHSCROLL | ES_READONLY
     LTEXT           "Config-String (optional, advanced use):",-1,21,136,124,8
     EDITTEXT        IDC_BF_CONFIG,147,134,133,12,ES_AUTOHSCROLL
-    LTEXT           "Timeout (optional, advanced use):",-1,34,119,104,8
+    LTEXT           "Timeout:  ",-1,110,119,32,8
     EDITTEXT        IDC_BF_TIMEOUT,147,117,59,12,ES_AUTOHSCROLL
 END
 
