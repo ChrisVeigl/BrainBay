@@ -162,6 +162,7 @@ void bf_setparams(BRAINFLOWOBJ* st) {
     params.serial_port = std::string(st->serialport);
     params.ip_address = std::string(st->ipaddress);
     params.mac_address = std::string(st->macaddress);
+    params.timeout = st->timeout;
     params.ip_port = st->ipport;
 }
 
@@ -287,6 +288,7 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
         SetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress);
         SetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress);
         SetDlgItemInt(hDlg, IDC_BF_IPPORT, st->ipport,FALSE);
+        SetDlgItemInt(hDlg, IDC_BF_TIMEOUT, st->timeout, FALSE);
 
         SetDlgItemText(hDlg, IDC_BF_CONFIG, st->bfConfigString);
 
@@ -330,7 +332,7 @@ LRESULT CALLBACK BrainflowDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPA
             GetDlgItemText(hDlg, IDC_BF_IPADDRESS, st->ipaddress, sizeof(st->ipaddress)-1);
             st->ipport = GetDlgItemInt(hDlg, IDC_BF_IPPORT, NULL, false);
             GetDlgItemText(hDlg, IDC_BF_MACADDRESS, st->macaddress, sizeof(st->macaddress)-1);
-
+            st->timeout = GetDlgItemInt(hDlg, IDC_BF_TIMEOUT, NULL, false);
             GetDlgItemText(hDlg, IDC_BF_CONFIG, st->bfConfigString, sizeof(st->bfConfigString) - 1);
 
             try
@@ -443,6 +445,7 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     strcpy(serialport, "COM4");
     strcpy(ipaddress, "192.168.4.1");
     ipport = 4567;
+    timeout = 0;
     strcpy(macaddress, "");
     strcpy(bfConfigString, "");
 
@@ -485,6 +488,7 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
     load_property("macaddress", P_STRING, macaddress);
     load_property("show_position", P_INT, &show_position);
     load_property("show_extrachannels", P_INT, &show_extrachannels);
+    load_property("timeout", P_INT, &timeout);
     load_property("bfConfigString", P_STRING, bfConfigString);
 
 
@@ -520,6 +524,7 @@ void BRAINFLOWOBJ::save(HANDLE hFile)
     save_property(hFile, "macaddress", P_STRING, macaddress);
     save_property(hFile, "show_position", P_INT, &show_position);
     save_property(hFile, "show_extrachannels", P_INT, &show_extrachannels);
+    save_property(hFile, "timeout", P_INT, &timeout);
     save_property(hFile, "bfConfigString", P_STRING, bfConfigString);
 
     save_property(hFile, "archivefile", P_STRING, archivefile);
