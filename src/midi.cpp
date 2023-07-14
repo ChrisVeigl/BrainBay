@@ -8,7 +8,7 @@
   init_midi:  inits Instrument/Controller Names, opens all available midi-out- Ports
   midi_Instrument: Selects the midi-instrument for a given channel
   midi_ControlChange: sends a control-change - message on a given channel
-  midi_NoteOn: plays a tone with given hieght, volume on a given channel
+  midi_NoteOn: plays a tone with given height, volume on a given channel
   midi_NoteOff: mutes a tone
 
 

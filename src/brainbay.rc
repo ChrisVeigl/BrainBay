@@ -73,7 +73,7 @@ BEGIN
                 MENUITEM "OpenBCI (8 Channel EEG)",     IDM_INSERT_EEG_OPENBCI8
                 MENUITEM "OpenBCI (16 Channel EEG)",    IDM_INSERT_EEG_OPENBCI16
                 MENUITEM "OpenBCI Ganglion",            IDM_INSERTGANGLION
-                MENUITEM "OpenEEG / Olimex SMT EEG (2-6 Channnels, ModularEEG P2 Packetformat)", IDM_INSERT_EEG_P2
+                MENUITEM "OpenEEG / Olimex SMT EEG (2-6 Channels, ModularEEG P2 Packetformat)", IDM_INSERT_EEG_P2
                 MENUITEM "OpenEEG (2-6 Channels, P3 Packetformat)", IDM_INSERT_EEG_P3
                 MENUITEM "OPI TrueSense Exploration Kit", IDM_INSERT_EEG_OPI_EXPLORATION
                 MENUITEM "Pendant EEG (2 Channels)",    IDM_INSERT_EEG_PENDANT
@@ -200,7 +200,7 @@ CAPTION "Info"
 FONT 8, "System", 0, 0, 0x0
 BEGIN
     ICON            107,IDC_MYICON,14,9,20,20
-    LTEXT           "BrainBay  --  Version 2.7  (08/2022)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
+    LTEXT           "BrainBay  --  Version 2.8  (07/2023)        OpenSource Biofeedback Software ",IDC_STATIC,45,15,124,20,SS_NOPREFIX
     LTEXT           "The OpenEEG-Project:                                     http://www.openeeg.sf.net",IDC_STATIC,52,40,118,19
     LTEXT           "Christoph Veigl, Jeremy Wilkerson, Lester John,               Jim Peters, Rudi Cilibrasi, Joerg Hansmann, Stephan Gerhard, Robert Anessi, Raymond Nguyen, Franz Strobl, William Croft, Elliot Mebane",IDC_STATIC,67,75,195,35
     LTEXT           " BrainBay-Contributors:",IDC_STATIC,53,65,77,8
@@ -231,7 +231,7 @@ BEGIN
     CONTROL         "Ch4",IDC_CH4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,153,104,29,10,WS_EX_RIGHT
     CONTROL         "Ch5",IDC_CH5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,183,104,29,10,WS_EX_RIGHT
     CONTROL         "Ch6",IDC_CH6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,214,104,29,10,WS_EX_RIGHT
-    LTEXT           "Archive offest:",IDC_STATIC,66,229,46,8
+    LTEXT           "Archive offset:",IDC_STATIC,66,229,46,8
     EDITTEXT        IDC_OFFSET,115,227,25,12,ES_AUTOHSCROLL
     LTEXT           "seconds",IDC_STATIC,143,229,28,8
     PUSHBUTTON      "apply offset",IDC_APPLYOFFSET,179,227,62,12,BS_FLAT
@@ -386,7 +386,7 @@ BEGIN
     SCROLLBAR       IDC_VALUEBAR,70,72,179,13
     LTEXT           "max",IDC_MAXLABEL,209,89,29,8,NOT WS_GROUP,WS_EX_RIGHT
     COMBOBOX        IDC_PARAMETERCOMBO,70,34,180,150,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Paramter:",IDC_STATIC,31,36,31,8,NOT WS_GROUP
+    LTEXT           "Parameter:",IDC_STATIC,31,36,31,8,NOT WS_GROUP
     COMBOBOX        IDC_REMOTECOMBO,201,53,48,82,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Remote-Control by",IDC_STATIC,137,55,61,8,NOT WS_GROUP
     PUSHBUTTON      "get minimum",IDC_SETMIN,68,102,54,14,BS_FLAT
@@ -1284,7 +1284,7 @@ BEGIN
     GROUPBOX        "Archive File",IDC_STATIC,6,140,276,107
     LTEXT           "Position",IDC_STATIC,30,213,26,8
     PUSHBUTTON      "End Recording",IDC_CLOSE_REC,182,175,62,14,BS_FLAT
-    LTEXT           "Archive offest:",IDC_STATIC,66,229,46,8
+    LTEXT           "Archive offset:",IDC_STATIC,66,229,46,8
     EDITTEXT        IDC_OFFSET,115,227,25,12,ES_AUTOHSCROLL
     LTEXT           "seconds",IDC_STATIC,143,229,28,8
     PUSHBUTTON      "apply offset",IDC_APPLYOFFSET,179,227,62,12,BS_FLAT
@@ -1324,7 +1324,7 @@ BEGIN
     PUSHBUTTON      "End Recording",IDC_CLOSE_REC,182,119,62,14,BS_FLAT
     CONTROL         "Ch1",IDC_CH1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,135,64,29,10,WS_EX_RIGHT
     CONTROL         "Ch2",IDC_CH2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,168,64,29,10,WS_EX_RIGHT
-    LTEXT           "Archive offest:",-1,66,173,46,8
+    LTEXT           "Archive offset:",-1,66,173,46,8
     EDITTEXT        IDC_OFFSET,115,171,25,12,ES_AUTOHSCROLL
     LTEXT           "seconds",-1,143,173,28,8
     PUSHBUTTON      "apply offset",IDC_APPLYOFFSET,179,171,62,12,BS_FLAT
@@ -1352,7 +1352,7 @@ BEGIN
     GROUPBOX        "Archive File",IDC_STATIC,6,95,276,107
     LTEXT           "Position",IDC_STATIC,30,168,26,8
     PUSHBUTTON      "End Recording",IDC_CLOSE_REC,182,130,62,14,BS_FLAT
-    LTEXT           "Archive offest:",IDC_STATIC,66,185,46,8
+    LTEXT           "Archive offset:",IDC_STATIC,66,185,46,8
     EDITTEXT        IDC_OFFSET,115,182,25,12,ES_AUTOHSCROLL
     LTEXT           "seconds",IDC_STATIC,143,184,28,8
     PUSHBUTTON      "apply offset",IDC_APPLYOFFSET,179,182,62,12,BS_FLAT
@@ -1386,7 +1386,7 @@ BEGIN
     GROUPBOX        "Archive File",IDC_STATIC,6,111,276,107
     LTEXT           "Position",IDC_STATIC,30,184,26,8
     PUSHBUTTON      "End Recording",IDC_CLOSE_REC,182,146,62,14,BS_FLAT
-    LTEXT           "Archive offest:",IDC_STATIC,66,200,46,8
+    LTEXT           "Archive offset:",IDC_STATIC,66,200,46,8
     EDITTEXT        IDC_OFFSET,115,198,25,12,ES_AUTOHSCROLL
     LTEXT           "seconds",IDC_STATIC,143,200,28,8
     PUSHBUTTON      "apply offset",IDC_APPLYOFFSET,179,198,62,12,BS_FLAT
@@ -2145,7 +2145,7 @@ BEGIN
     EDITTEXT        IDC_THRESHOLD_TIME,227,23,19,12,ES_AUTOHSCROLL
     LTEXT           "frame",IDC_STATIC,250,25,26,8
     CONTROL         "show live-camera window",IDC_SHOWLIVE,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,180,60,97,10
-    LTEXT           "miliseconds",IDC_STATIC,255,123,38,8
+    LTEXT           "milliseconds",IDC_STATIC,255,123,38,8
 END
 
 IDD_DEBOUNCEBOX DIALOGEX 0, 0, 191, 57
@@ -2234,7 +2234,7 @@ EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
 CAPTION "Counter / Display"
 FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
-    CONTROL         "Count FALSE -> TRUE Transistions",IDC_COUNTFT,"Button",BS_AUTORADIOBUTTON,54,38,128,10
+    CONTROL         "Count FALSE -> TRUE Transitions",IDC_COUNTFT,"Button",BS_AUTORADIOBUTTON,54,38,128,10
     CONTROL         "Count TRUE -> FALSE Transitions",IDC_COUNTTF,"Button",BS_AUTORADIOBUTTON,54,52,125,10
     CONTROL         "Display Value (no counting)",IDC_COUNTIV,"Button",BS_AUTORADIOBUTTON,54,24,102,10
     CONTROL         "Show Counter/Display Window",IDC_SHOWCOUNTER,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,32,133,112,10

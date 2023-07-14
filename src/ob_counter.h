@@ -6,8 +6,8 @@
   Author: Chris Veigl
 
   This Object outputs a counter value at it's port and displays the value in a 
-  seperate Window. It can count transistions of the input to or from INVALID_VALUE
-  or use the input direclty (without counting)
+  seperate Window. It can count transitions of the input to or from INVALID_VALUE
+  or use the input directly (without counting)
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License

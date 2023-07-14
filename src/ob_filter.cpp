@@ -1,10 +1,10 @@
 /* -----------------------------------------------------------------------------
 
     BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
-  
+
   MODULE: OB_FILTER.CPP:  contains assisting functions for the Filter-Object
   Authors: Jim Peters, Chris Veigl
-  
+
 
   This module calls into the fid-lib filter library by Jim Peters to provide
   filter functionalities. The Filter-Type and order can be selected.
@@ -13,8 +13,8 @@
   http://uazu.net/fiview
 
   do_filt_design: Initialises a new filter using the init-String 
-      (for exemple LpBe for a low-pass - bessel filter, see fiview-documentation)
-	  and additional filter-parameters (like order, from-, to-freqeuncy)
+      (for example LpBe for a low-pass - bessel filter, see fiview-documentation)
+	  and additional filter-parameters (like order, from-, to-frequency)
   update_filterdialog:  enables/disables init-parameters according to the filter-type
   FilterBoxDlgHandler: processes events for the filter-toolbox window.
 

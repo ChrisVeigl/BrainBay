@@ -1,6 +1,7 @@
 #pragma once
 
 #include <complex>
+#include <tuple>
 #include <utility>
 #include <vector>
 // include it here to allow user include only this single file
@@ -84,6 +85,12 @@ public:
         int threshold = (int)ThresholdTypes::HARD,
         int extenstion_type = (int)WaveletExtensionTypes::SYMMETRIC,
         int noise_level = (int)NoiseEstimationLevelTypes::FIRST_LEVEL);
+    /// restore data from selected detailed coeffs
+    static void restore_data_from_wavelet_detailed_coeffs (double *data, int data_len, int wavelet,
+        int decomposition_level, int level_to_restore, double *output);
+    /// z score peak detection, more info https://stackoverflow.com/a/22640362
+    static void detect_peaks_z_score (
+        double *data, int data_len, int lag, double threshold, double influence, double *output);
     // clang-format off
     /**
     * calculate filters and the corresponding eigenvalues using the Common Spatial Patterns
@@ -177,7 +184,28 @@ public:
     static std::pair<double *, double *> get_custom_band_powers (
         const BrainFlowArray<double, 2> &data, std::vector<std::pair<double, double>> bands,
         std::vector<int> channels, int sampling_rate, bool apply_filters);
-
+    /**
+     * calculate oxygen level
+     * @param ppg_ir input 1d array
+     * @param ppg_red input 1d array
+     * @param data_len size of array
+     * @param sampling_rate sampling rate
+     * @return oxygen level
+     */
+    static double get_oxygen_level (double *ppg_ir, double *ppg_red, int data_len,
+        int sampling_rate, double coef1 = 1.5958422, double coef2 = -34.6596622,
+        double coef3 = 112.6898759);
+    /**
+     * calculate heart rate
+     * @param ppg_ir input 1d array
+     * @param ppg_red input 1d array
+     * @param data_len size of array
+     * @param sampling_rate sampling rate
+     * @param fft_size recommended 8192
+     * @return heart rate
+     */
+    static double get_heart_rate (
+        double *ppg_ir, double *ppg_red, int data_len, int sampling_rate, int fft_size);
     /// write file, in file data will be transposed
     static void write_file (
         const BrainFlowArray<double, 2> &data, std::string file_name, std::string file_mode);
@@ -185,6 +213,29 @@ public:
     static BrainFlowArray<double, 2> read_file (std::string file_name);
     /// calc stddev
     static double calc_stddev (double *data, int start_pos, int end_pos);
+    /// calc railed percentage
+    static double get_railed_percentage (double *data, int data_len, int gain);
+    /**
+     * calculate ICA
+     * @param data input 2d array, rows are samples
+     * @param num_components number of components to find
+     * @param channels rows to use
+     * @return unmixed signal
+     */
+    static std::tuple<BrainFlowArray<double, 2>, BrainFlowArray<double, 2>,
+        BrainFlowArray<double, 2>, BrainFlowArray<double, 2>>
+    perform_ica (
+        const BrainFlowArray<double, 2> &data, int num_components, std::vector<int> channels);
+    /**
+     * calculate ICA
+     * @param data input 2d array, rows are samples
+     * @param num_components number of components to find
+     * @return unmixed signal
+     */
+    static std::tuple<BrainFlowArray<double, 2>, BrainFlowArray<double, 2>,
+        BrainFlowArray<double, 2>, BrainFlowArray<double, 2>>
+    perform_ica (const BrainFlowArray<double, 2> &data, int num_components);
+
 
     /// get brainflow version
     static std::string get_version ();
