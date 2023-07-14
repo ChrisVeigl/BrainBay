@@ -50,9 +50,11 @@ struct board_id supported_boards[] = {
     { "Callibri EEG"                    , 9 },
     { "Callibri EMG"                    , 10 },
     { "Callibri ECG"                    , 11 },
+    { "EmotiBit Board"                  , 47 },
     { "Enophone"                        , 37 },
     { "GTec Unicorn"                    , 8 },
-    { "Iron BCI"                        , 15 },
+    { "Mentalab Explore 4 Channel"      , 44 },
+    { "Mentalab Explore 8 Channel"      , 45 },
     { "Muse S"                          , 39 },
     { "Muse 2"                          , 38 },
     { "Muse 2016"                       , 41 },
@@ -65,12 +67,16 @@ struct board_id supported_boards[] = {
     { "Neurosity Crown"                 , 23 },
     { "Neurosity Notion OSC1"           , 13 },
     { "Neurosity Notion 2"              , 14 },
+    { "NTL WIFI"                        , 50 },
     { "OpenBCI Cyton"                   , 0 } ,
     { "OpenBCI Cyton-Daisy"             , 2 } ,
     { "OpenBCI Cyton Wifi"              , 5 } ,
     { "OpenBCI Cyton-Daisy Wifi "       , 6 },
     { "OpenBCI Ganglion"                , 1 } ,
+    { "OpenBCI Ganglion Native"         , 46 },
     { "OpenBCI Ganglion Wifi"           , 4 } ,
+    { "OpenBCI Galea Serial V4"         , 49 },
+    { "OpenBCI Galea V4"                , 48 },
 //    { "OpenBCI Galea", 3 } ,
 //    { "OpenBCI Galea Serial", 20 },
 //    { "Fascia", 12 },
@@ -88,7 +94,8 @@ struct board_id supported_boards[] = {
     { "Ant Neuro EE 222"                , 33 },
     { "Ant Neuro EE 223"                , 34 },
     { "Ant Neuro EE 224"                , 35 },
-    { "Ant Neuro EE 225"                , 36 }
+    { "Ant Neuro EE 225"                , 36 },
+    { "Ant Neuro EE 511"                , 51 }
 
 };
 
@@ -452,7 +459,7 @@ BRAINFLOWOBJ::BRAINFLOWOBJ(int num) : BASE_CL()
     board_selection = 0;
     sync = -1;      // first sync packet number will be 0
 
-    BoardShim::enable_dev_board_logger();
+    BoardShim::enable_board_logger();
     BoardShim::set_log_file("brainflow_error_log.log");
 
 
@@ -488,6 +495,13 @@ void BRAINFLOWOBJ::load(HANDLE hFile)
     }
     else if (filemode == FILE_WRITING) {
         prepare_fileWrite(this);
+    }
+
+    // update board selection index if necessary
+    if (supported_boards[board_selection].id != board_id) {
+        for (int i = 0; i < sizeof(supported_boards) / sizeof(struct board_id); i++) {
+            if (supported_boards[i].id == board_id) board_selection = i;
+        }
     }
 
     bf_setparams(this);
