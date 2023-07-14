@@ -14,13 +14,13 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 2.7  (2022-08-13)
+* The current release version is 2.8  (2023-07-14)
 
 * Recent changes for this release:
   * support for new Brainflow version, serveral new compatible EEG amplifiers!
-  * improved element captions
-
+  
 * Not-so-recent changes in recent releases worth mentioning:
+  * improved element captions
   * New elements Shadow and Volume allow control of volume and desktop transparency
   * New element OSC-Sender for transfer of live values to other applications via Open Sound Control / UDP
   * Logical elements And, Or and Not got extended modes, increasing flexibility
