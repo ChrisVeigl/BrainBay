@@ -296,5 +296,5 @@ ypos=204
 inputports=0
 outputports=0
 tag=INFO
-text=    ---------   Design Documentation   --------/#/#This Design shows functions and possible use of a skinned dialog window./#/#The outputs of four mouse-over (radio) - styled buttons and the output of a slider/#are displayed in the oscilloscope window./#/#The slider and the RIGHT-Button are controlled from within the design./#The current value of the slider affects the signal generator that controls the RIGHT-button./#/#If you disconnect the respective inputs of the skindialog-element,/#the slider and the RIGHT-Button could be controlled manually./#/#Please refer to the Help-Pages for a more detailed explaination of the skindialog-element.
+text=    ---------   Design Documentation   --------/#/#This Design shows functions and possible use of a skinned dialog window./#/#The outputs of four mouse-over (radio) - styled buttons and the output of a slider/#are displayed in the oscilloscope window./#/#The slider and the RIGHT-Button are controlled from within the design./#The current value of the slider affects the signal generator that controls the RIGHT-button./#/#If you disconnect the respective inputs of the skindialog-element,/#the slider and the RIGHT-Button could be controlled manually./#/#Please refer to the Help-Pages for a more detailed explanation of the skindialog-element.
 end object

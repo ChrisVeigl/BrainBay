@@ -189,7 +189,7 @@ smalladapt=0
 adaptinterval=200
 barsize=30
 fontsize=10
-wndcaption=Right Treshold
+wndcaption=Right Threshold
 linkport 0-9,0
 linkport 0-12,1
 linkport 0-7,1
@@ -315,7 +315,7 @@ smalladapt=0
 adaptinterval=200
 barsize=30
 fontsize=10
-wndcaption=Left Treshold
+wndcaption=Left Threshold
 linkport 0-11,0
 linkport 0-10,1
 end object

@@ -7,7 +7,7 @@
   Author: Chris Veigl, contact: chris@shifz.org
   
   Co-Authors:
-		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORELLATION, EVALUATOR)
+		 Jeremy Wilkerson (Modules: AND, OR, NOT, WAV, CORRELATION, EVALUATOR)
 		 Lester John (Module MATLAB-transfer)
 
   Credits: Jim Peters (digital filter works), Jeff Molofee (OpenGL-tutorial), John Roark (SkinDialog)

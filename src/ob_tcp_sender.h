@@ -6,7 +6,7 @@
   Based on SDL_net-Code by Jeremy Wilkerson
 
   This object can connect to a running neuroserver and transmit a stream of signals
-  in the EDF-format. the signals are caputred from the object's input ports
+  in the EDF-format. the signals are captured from the object's input ports
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License

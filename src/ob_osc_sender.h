@@ -1,7 +1,7 @@
 /* -----------------------------------------------------------------------------
 
     BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
-  
+
   MODULE: OB_OSC_SENDER.H:  contains functions for sending OSC messages via UDP
 
   special thanks to 
@@ -42,9 +42,9 @@ using namespace std;
 /*******************************************************************************************
 Some things to note about the UDPConnection class.
 
-Init this on both the client and/or server's excutable.  No extra work required. Unless your
-planning on tracking the activity and data between multiple clients (eg: for multiplayer).
-At which point you just memorize and communicate between different ip's manually.
+Init this on both the client and/or server's executable.  No extra work required. Unless
+you're planning on tracking the activity and data between multiple clients (eg: for multi-
+player). At which point you just memorize and communicate between different ip's manually.
 HINT: look at packet->ip;
 
 *******************************************************************************************/
@@ -196,7 +196,7 @@ public:
     {
         std::cout << "Setting IP ( " << ip << " ) " << "and port ( " << port << " )\n";
 
-        // Set IP and port number with correct endianess
+        // Set IP and port number with correct endianness
         if (SDLNet_ResolveHost(&serverIP, ip, port) == -1)
         {
             std::cout << "\tSDLNet_ResolveHost failed : " << SDLNet_GetError() << std::endl;
@@ -210,7 +210,7 @@ public:
     {
         std::cout << "Setting up port ( " << port << " )\n";
 
-        // Set IP and port number with correct endianess
+        // Set IP and port number with correct endianness
         if (SDLNet_ResolveHost(&serverIP, NULL, port) == -1)
         {
             std::cout << "\tSDLNet_ResolveHost failed : " << SDLNet_GetError() << std::endl;

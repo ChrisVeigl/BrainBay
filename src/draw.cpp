@@ -1,6 +1,6 @@
 /* -----------------------------------------------------------------------------
    BrainBay  -  OpenSource Biofeedback Software
-  
+
   MODULE: DRAW.CPP: this Module provides global accessible Drawing - Functions.
 
   init_draw: Creates Pens and Brushes, and a font for GDI-use
@@ -8,7 +8,7 @@
   LoadBMP: load a bitmap from a file to a openGL-surface, using SDL-functions
 
   LoadGLTextures: Converts a bitmap to a texture for GL-use
-  Size_GL:  updates the OGL-viewport wehn a resize has ocurred
+  Size_GL:  updates the OGL-viewport when a resize has occurred
 
   ->OGL-drawing is currently used for the FFT-Specra-Displays and the Animation Window
 
@@ -20,7 +20,7 @@
   as published by the Free Software Foundation; See the
   GNU General Public License for more details.
 
-         
+
  --------------------------------------------------------------------------------------*/
 
 #include "brainBay.h"

@@ -7,7 +7,7 @@
 
   The Magnitude is the frequency activity of a signal in a given passband.
   In contrast to the filtered output, the magnitude does not oscillate at 
-  that frequency, it describes the power in a freqeuncy-band. This parameter is often
+  that frequency, it describes the power in a frequency-band. This parameter is often
   used in neurofeedback, for example when you want to make an alpha-feedback.
   This module calls into the fid-lib filter library by Jim Peters to provide
   magnitude functionalities. The Filter-Type and order can be selected.
