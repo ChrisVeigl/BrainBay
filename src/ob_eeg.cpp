@@ -50,7 +50,7 @@
   process_packets:  calls the worker-functions of all existing objects.
   parse_byte_P2: parses a ModEEG-P2 datastream and 
 			stores channel values into the packetstructure
-  parse_byte_P21: parses a P21 datastream (by Jarek Foltynski, modified by Reiner M�nch)
+  parse_byte_P21: parses a P21 datastream (by Jarek Foltynski, modified by Reiner Münch)
 			     P21 is a bidirectional protocol
   parse_byte_P3: parses a ModEEG-P3 datastream and stores channel values 
   parse_byte_raw: parses a 1 channel-raw datastream and stores channel values
@@ -277,7 +277,7 @@ void parse_byte_P3(unsigned char actbyte)
 
   16 bit Raw binary Data Format:
    
-	 1 channel, �given in two byte (low byte first)
+	 1 channel, given in two byte (low byte first)
 
  **********************************************************************/
 
@@ -320,7 +320,7 @@ void parse_byte_raw_8bit(unsigned char actbyte)
 
 /*********************************************************************************
 
-  Modular EEG Protocol P21 with add-on ( by Jarek Foltynski and Reiner M�nch)
+  Modular EEG Protocol P21 with add-on ( by Jarek Foltynski and Reiner Münch)
 
   Packet has variable length, it depends on how many channels we want to receive
   Each channel can be set via backward communication
