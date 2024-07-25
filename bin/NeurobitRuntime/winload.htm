@@ -6,15 +6,15 @@
 
 <body style="font-family: Arial; margin-left: 7%; margin-right: 9%; 
   margin-top: 5%; margin-bottom: 5%; font-size: 11pt; ">
-<h1 align="center">Neurobit Firmware Loader 5.2</h1>
+<h1 align="center">Neurobit Firmware Loader 5.6</h1>
 <div style="line-height: 135%; ">
-<p align="center"><i>&copy; Copyright by Neurobit Systems 2005-2021</i><br>
+<p align="center"><i>&copy; Copyright by Neurobit Systems 2005-2024</i><br>
 <a href="http://www.neurobitsystems.com/">http://www.neurobitsystems.com</a></p>
 
 <p>This software application enables to upload firmware to Neurobit devices.
 It is also possible to read out information about the hardware and firmware from the device.
 Wireless (Bluetooth or IrDA) or USB communication with the equipment is used.
-The application works under Microsoft&reg; Windows&reg; operating systems: 10/8/7/Vista/XP/2000. </p>
+The application works under Microsoft&reg; Windows&reg; operating systems: 11/10/8/7/Vista/XP. </p>
 
 <h2>Parameters</h2>
 <ul>
@@ -27,8 +27,8 @@ The application works under Microsoft&reg; Windows&reg; operating systems: 10/8/
 		<ul>
 			<li>general description of a communication module:
 				<ul>
-					<li>"<kbd>Neurobit Optima*</kbd>" - for <u>Neurobit Optima+</u> and <u>Neurobit Optima USB/BT</u>,
-					<li>"<kbd>Serial Port Device</kbd>" - for <u>Neurobit Optima</u>,
+					<li>"<kbd>Neurobit Optima*</kbd>" - for <u>Neurobit Optima+</u> and <u>Neurobit Optima USB/BLE/BT</u>,
+					<li>"<kbd>Serial Port Device</kbd>" - for <u>older Neurobit Optima (without link type suffix in the name)</u>,
 				</ul>
 			<li>Bluetooth address or
 			<li>USB module serial number.
@@ -67,39 +67,54 @@ The application works under Microsoft&reg; Windows&reg; operating systems: 10/8/
 
 <h3>Prerequisites</h3>
 <ul>
-  <li><p><u>Neurobit Optima[+] Bluetooth</u> devices:<br>
-    Bluetooth communication port (built-in into a computer or as a USB adapter)
-    compatible with the protocol version 1.1 or newer is required. To install 
-		Bluetooth adapter follow <i>Neurobit Optima Quick Start Guide</i>.<br>
-    Neurobit Optima device should be set in wireless communication range (usually 
-    a few meters). Before the use a Bluetooth device should be paired with your computer. 
-    Pairing code for Neurobit Optima[+] is 0000. You can learn more about Bluetooth pairing 
-    in Windows help.</p>
-  <li><p><u>Neurobit Optima[+] USB</u> devices:<br>
-  	A cable with full size USB 2.0 male A connector on one end and micro B male
-		connector on the other end (the same as for typical cell phone chargers) is 
-		required. Install driver software for USB chip by FTDI, as described in the 
-		device quick start guide. Connect the computer to the device and turn it on. 
-		The computer should detect the device and install the driver necessary for 
-		its USB module.
-  	</p>
-  <li><p><u>Neurobit Lite</u> devices:<br>
-    Infrared (IR) communication port (built-in into a computer or in form of a USB adapter) 
-    compatible with IrDA standard v. 1.0 or newer is required. To install IrDA adapter
-    follow an instruction delivered in its package.<br>
-    The Neurobit Lite device should be set with IR port oriented towards IR port 
-    of your computer, no more than 0.5m from it, without physical obstructions 
-    between both entities, preferably on the same axis. There should be no other 
-    active IrDA devices nearby.</p> 
+	<li>
+		<p><u>Neurobit Optima[+] USB</u> devices:<br>
+			A cable with full size USB 2.0 type A plug on one end and micro B plug
+			on the other end (the same as for typical cell phone chargers) is
+			required. Install driver software for USB chip by FTDI, as described in the
+			device quick start guide. Connect the device to the computer and turn it on.
+			The computer should detect the device and install necessary USB driver.
+		</p>
+	<li>
+		<p><u>Neurobit Optima[+] BLE</u> devices:<br>
+			Windows 8.1 or newer system is required.
+			Bluetooth Low Energy communication port (built-in into a computer or as a USB adapter)
+			compatible with the protocol version 4.2 or newer is necessary.
+			To install Bluetooth adapter follow <i>Neurobit Optima Quick Start Guide</i>.<br>
+			Neurobit Optima device should be set in wireless communication range (usually
+			a few meters). Before the use a BLE device should be paired with your computer.
+			Pairing code for Neurobit Optima[+] is 000000. You can learn more about Bluetooth pairing
+			in Windows help.
+		</p>
+	<li>
+		<p><u>Neurobit Optima[+] BT and older Neurobit Optima (without link type suffix) </u> devices:<br>
+			Bluetooth communication port (built-in into a computer or as a USB adapter)
+			compatible with the protocol version 2.0 or newer is required. To install
+			Bluetooth adapter follow <i>Neurobit Optima Quick Start Guide</i>.<br>
+			Neurobit Optima device should be set in wireless communication range (usually
+			a few meters). Before the use a BT device should be paired with your computer.
+			Pairing code for Neurobit Optima[+] is 0000. You can learn more about Bluetooth pairing
+			in Windows help.
+		</p>
+	<li>
+		<p><u>Neurobit Lite</u> devices:<br>
+			Infrared (IR) communication port (built-in into a computer or in form of a USB adapter)
+			compatible with IrDA standard v. 1.0 or newer is required. To install IrDA adapter
+			follow an instruction delivered in its package.<br>
+			The Neurobit Lite device should be set with IR port oriented towards IR port
+			of your computer, no more than 0.5m from it, without physical obstructions
+			between both entities, preferably on the same axis. There should be no other
+			active IrDA devices nearby.
+		</p>
 </ul>
 
 <h3>Typical firmware update</h3>
 <ol>
   <li><p>Download the latest firmware binary:
 		<ul>
-			<li><a href="http://www.neurobitsystems.com/download/Neurobit_Optima_Plus-firmware.htm">Neurobit Optima+ models and Neurobit Optima 2 BT / USB devices</a>,
-			<li><a href="http://www.neurobitsystems.com/download/Neurobit_Optima-firmware.htm">older Neurobit Optima 2 / 4 models</a>,
-			<li><a href="http://www.neurobitsystems.com/download/nl2_9.exe">Neurobit Lite</a>.			
+			<li><a href="https://www.neurobitsystems.com/download/Neurobit_Optima_Plus-firmware.htm">Neurobit Optima+ models and Neurobit Optima USB/BLE/BT devices</a>,
+			<li><a href="https://www.neurobitsystems.com/download/Neurobit_Optima-firmware.htm">older Neurobit Optima 2 / 4 models  (without link type suffix)</a>,
+			<li><a href="https://www.neurobitsystems.com/download/nl2_9.exe">Neurobit Lite</a>.			
 		</ul>
 		</p>
   <li><p>Run Winload program:
