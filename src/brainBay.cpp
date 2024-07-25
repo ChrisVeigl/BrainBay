@@ -440,6 +440,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTCORR:create_object(OB_CORR);
 					break;
+				case IDM_INSERTCOHERENCE:create_object(OB_COHERENCE);
+					break;
 				case IDM_INSERTEDFWRITER:create_object(OB_EDF_WRITER);
 					break;
 				case IDM_INSERTTCPSENDER:create_object(OB_TCP_SENDER);

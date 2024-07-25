@@ -43,6 +43,7 @@
 #include "ob_doku.h"
 #include "ob_average.h"
 #include "ob_correlation.h"
+#include "ob_coherence.h"
 #include "ob_edf_reader.h"
 #include "ob_edf_writer.h"
 #include "ob_tcp_sender.h"
@@ -199,7 +200,9 @@ void create_object(int type)
 							 actobject->object_size=sizeof(AVERAGEOBJ);break;
 		case OB_CORR:		 actobject=new CORRELATIONOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(CORRELATIONOBJ);break;
-		case OB_EDF_READER:	 actobject=new EDF_READEROBJ(GLOBAL.objects); 
+		case OB_COHERENCE:	 actobject = new COHERENCEOBJ(GLOBAL.objects);
+							 actobject->object_size = sizeof(COHERENCEOBJ); break;
+		case OB_EDF_READER:	 actobject=new EDF_READEROBJ(GLOBAL.objects);
 							 actobject->object_size=sizeof(EDF_READEROBJ);break;
 		case OB_EDF_WRITER:	 actobject=new EDF_WRITEROBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(EDF_WRITEROBJ);break;

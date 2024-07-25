@@ -98,6 +98,8 @@
 #define IDD_OSC_SENDERBOX               261
 #define IDD_BIOSEMIBOX                  262
 #define IDD_BRAINFLOWBOX                266
+#define IDD_CORRBOX1                    267
+#define IDD_COHERENCEBOX                267
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -811,6 +813,8 @@
 #define IDC_BF_CONFIG                   1579
 #define IDC_BF_CONFIG2                  1580
 #define IDC_BF_TIMEOUT                  1580
+#define IDC_COHERENCEINTERVALBAR        1580
+#define IDC_COHERENCEINTERVAL           1581
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -985,15 +989,17 @@
 #define ID_BIOSIGNAL_BRAINFLOW          32967
 #define IDM_BRAINFLOW                   32968
 #define IDM_INSERT_BRAINFLOW            32969
+#define ID_PROCESSING_COHERENCE         32970
+#define IDM_INSERTCOHERENCE             32971
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        270
-#define _APS_NEXT_COMMAND_VALUE         32970
-#define _APS_NEXT_CONTROL_VALUE         1580
+#define _APS_NEXT_RESOURCE_VALUE        271
+#define _APS_NEXT_COMMAND_VALUE         32972
+#define _APS_NEXT_CONTROL_VALUE         1582
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
