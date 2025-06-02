@@ -5,7 +5,7 @@
   MODULE: OB_LSL_READER.H:  contains the LSL Stream Reader-Object
   org arch. MODULE from : ob_tcp_receive.cpp
   lib from : https://github.com/sccn/liblsl  
-  Author: Keum, D.S.
+  Author: Keum D.S., Chris Veigl
 
 
   This Object reads data from an LSL stream and feeds the signals to 
