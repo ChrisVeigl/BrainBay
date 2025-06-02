@@ -428,6 +428,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTTCPRECEIVER:create_object(OB_TCP_RECEIVER);
 					break;
+				case IDM_INSERTLSLRECEIVER:create_object(OB_LSL_RECEIVER);  // KDS 240829
+					break;					
 				case IDM_INSERTDOKU:create_object(OB_DOKU);
 					break;
                 case IDM_INSERTEVAL:create_object(OB_EVAL);

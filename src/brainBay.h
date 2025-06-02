@@ -143,8 +143,9 @@ extern "C" {
 #define OB_OSC_SENDER   68
 #define OB_BIOSEMI		69
 #define OB_BRAINFLOW	70
+#define OB_LSL_RECEIVER 71
 
-#define OBJECT_COUNT 	71
+#define OBJECT_COUNT 	72
 
 
 
@@ -162,7 +163,7 @@ extern "C" {
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
 				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK", \
-				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI", "BRAINFLOW"
+				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI", "BRAINFLOW", "LSL"
 //
 // use the main menu handler in brainbay.cpp 
 // to call the 'create_object'-function (located in in gloabals.cpp)

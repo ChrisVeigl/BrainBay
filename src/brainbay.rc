@@ -16,7 +16,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (Deutschland) resources
+// GERMAN(GERMANY) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
@@ -90,6 +90,7 @@ BEGIN
             MENUITEM "Signal-Generator",            IDM_INSERTSIGNAL
             MENUITEM "Skindialog",                  IDM_INSERTSKINDIALOG
             MENUITEM "TCP-Receiver",                IDM_INSERTTCPRECEIVER
+            MENUITEM "LSL-Receiver",                IDM_INSERTLSLRECEIVER
         END
         POPUP "Processing"
         BEGIN
@@ -1499,6 +1500,26 @@ BEGIN
     EDITTEXT        IDC_BF_TIMEOUT,147,117,59,12,ES_AUTOHSCROLL
 END
 
+IDD_LSLBOX DIALOGEX 0, 0, 289, 209
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "LSL Receive"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Filetype",IDC_STATIC,24,165,25,8
+    LTEXT           "Filename",IDC_STATIC,23,146,29,8
+    GROUPBOX        "Archive File",IDC_STATIC,6,121,276,82
+    LTEXT           "Position",IDC_STATIC,25,177,26,8
+    LTEXT           "Available Stream",IDC_STATIC,29,42,55,8
+    LTEXT           "Device / Protocol:",IDC_STATIC,10,10,60,8
+    CHECKBOX        "connected:",IDC_CONNECTED,200,39,49,15,BS_LEFTTEXT | WS_DISABLED | NOT WS_TABSTOP
+    COMBOBOX        IDC_STREAMCOMBO,29,55,95,204,CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Connect / Disconnect",IDC_CONNECT,134,54,116,20,BS_FLAT
+    LTEXT           "Statisch",IDC_DEVICETYPE,69,10,109,11,0,WS_EX_STATICEDGE
+    GROUPBOX        "Communication",IDC_STATIC,6,27,276,85
+    PUSHBUTTON      "Refresh",IDC_REFRESH,134,81,116,20,BS_FLAT
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -1855,6 +1876,14 @@ BEGIN
         TOPMARGIN, 6
         BOTTOMMARGIN, 247
     END
+
+    IDD_LSLBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 282
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 202
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1879,6 +1908,16 @@ BEGIN
     0
 END
 
+IDD_LSLBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_EEGBOX_GENERIC AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1890,12 +1929,12 @@ BEGIN
     IDS_STRING1             "rc.bottom-rc.top"
 END
 
-#endif    // Deutsch (Deutschland) resources
+#endif    // 독일어(독일) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (USA) resources
+// 영어(미국) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -1986,12 +2025,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // Englisch (USA) resources
+#endif    // 영어(미국) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Englisch (Vereinigtes K�nigreich) resources
+// 영어(영국) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
@@ -2085,12 +2124,12 @@ BEGIN
     0
 END
 
-#endif    // Englisch (Vereinigtes K�nigreich) resources
+#endif    // 영어(영국) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// Deutsch (�sterreich) resources
+// 독일어(오스트리아) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
@@ -3070,7 +3109,7 @@ IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
 
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
 
-#endif    // Deutsch (�sterreich) resources
+#endif    // 독일어(오스트리아) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
