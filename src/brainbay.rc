@@ -16,7 +16,7 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// µ∂¿œæÓ(µ∂¿œ) resources
+// GERMAN(GERMANY) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
@@ -1929,12 +1929,12 @@ BEGIN
     IDS_STRING1             "rc.bottom-rc.top"
 END
 
-#endif    // µ∂¿œæÓ(µ∂¿œ) resources
+#endif    // ÎèÖÏùºÏñ¥(ÎèÖÏùº) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// øµæÓ(πÃ±π) resources
+// ÏòÅÏñ¥(ÎØ∏Íµ≠) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -2025,12 +2025,12 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-#endif    // øµæÓ(πÃ±π) resources
+#endif    // ÏòÅÏñ¥(ÎØ∏Íµ≠) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// øµæÓ(øµ±π) resources
+// ÏòÅÏñ¥(ÏòÅÍµ≠) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
@@ -2124,12 +2124,12 @@ BEGIN
     0
 END
 
-#endif    // øµæÓ(øµ±π) resources
+#endif    // ÏòÅÏñ¥(ÏòÅÍµ≠) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// µ∂¿œæÓ(ø¿Ω∫∆Æ∏Ææ∆) resources
+// ÎèÖÏùºÏñ¥(Ïò§Ïä§Ìä∏Î¶¨ÏïÑ) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEA)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN
@@ -3109,7 +3109,7 @@ IDC_CURSOR5             CURSOR                  "CURSORS\\dwell_arrow4.cur"
 
 IDC_CURSOR6             CURSOR                  "CURSORS\\dwell_arrow5.cur"
 
-#endif    // µ∂¿œæÓ(ø¿Ω∫∆Æ∏Ææ∆) resources
+#endif    // ÎèÖÏùºÏñ¥(Ïò§Ïä§Ìä∏Î¶¨ÏïÑ) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
