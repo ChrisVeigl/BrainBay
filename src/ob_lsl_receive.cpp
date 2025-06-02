@@ -2,13 +2,14 @@
 
     BrainBay  -  OpenSource Biofeedback Software, contact: chris@shifz.org
     
-  MODULE: OB_LSL_READER.CPP:  contains the LSL Stream Reader-Object
-  Author: Chris Veigl
+  MODULE: OB_LSL_READER.H:  contains the LSL Stream Reader-Object
+  Author: Keum, D.S.
 
 
   This Object reads data from an LSL stream and feeds the signals to 
   the output ports.
 
+  lib from : https://github.com/sccn/liblsl
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
