@@ -53,11 +53,14 @@ public:                // public variables that can be accessed from Dialog Hand
 
 	std::vector<lsl::stream_info> m_streams;
 	lsl::stream_inlet* m_inlet;
+	
 	int select_stream;
 	lsl::stream_info m_current_stream;
 	int m_numChannels;
 	std::vector<double> m_xData;
 	std::vector<std::vector<float>> m_yData;
+
+	bool LSL_CONNECTED;
 
 	
 

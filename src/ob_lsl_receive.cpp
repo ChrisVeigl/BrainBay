@@ -24,68 +24,15 @@
 #include "brainBay.h"
 #include "ob_lsl_receive.h"
 
-int open_textarchive(LSL_RECEIVEOBJ * st)
+int open_current_stream(LSL_RECEIVEOBJ* st)
 {
-	char tmp1[256],tmp[2];
-	int i,op=0;
-	unsigned int max=0;
-	DWORD dwRead;
+	unsigned int max = 0;
 
-    /*
-	st->file=CreateFile(st->filename, GENERIC_READ,  FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	st->height = CON_START + st->outports * CON_HEIGHT + 5;
+	if (max < 10) max = 0; else max -= 10;
+	st->width = 70 + max * 5;
 
-	 if (st->file==INVALID_HANDLE_VALUE) 
-	 {
-		 strcpy(st->filename,"none");
-		 st->state=0;
-		 return(0);
-	 }
-
-	 i=0;
-	 if (st->format<5)
-	 {
-		 do 
-		 {
-			 tmp[0]=0;
- 			 ReadFile(st->file,tmp,1,&dwRead,NULL);
-		 }  while ((dwRead!=0) && (tmp[0]!=10));
-
-		 i=0;tmp[1]=0;tmp1[0]=0;
-		 do 
-		 {
-			 tmp[0]=0;
- 			 ReadFile(st->file,tmp,1,&dwRead,NULL);
-			 if ((tmp[0] != 13) && (tmp[0] != 10) && (tmp[0] != 9) && (tmp[0] != ','))
-			 {
-				 if (strlen(tmp1) < 250) strcat(tmp1, tmp);
-			 }
-			 else if ((tmp[0]==9)||(tmp[0]==',')||(tmp[0]==13))
-			 { 
-				 if (strlen(tmp1)>19) tmp1[19]=0;
-				 if (max<strlen(tmp1)) max=strlen(tmp1);
-
-				 // strcpy(st->out_ports[op].out_name,tmp1);
-				 // strcpy(st->out_ports[op++].out_desc,tmp1);
-
-				 op++;
-				 sprintf(st->out_ports[op].out_name, "chn%d", op);
-				 sprintf(st->out_ports[op].out_desc, "chn%d", op);
-				 tmp1[0]=0;
-			 }
-		 }  while ((dwRead!=0) && (tmp[0]!=10));
-		 if (op>0) st->outports=op;
-	 }
-	 else
-	 {
-		 st->outports=1;
-		 strcpy(st->out_ports[0].out_name,"chn1");
-	 }
-
-	 st->height=CON_START+st->outports*CON_HEIGHT+5;
-	 if (max<10) max=0; else max-=10;
-	 st->width=70+max*5;
-	 */
-	 return(1);
+	return(1);
 }
 
 
@@ -108,31 +55,29 @@ LRESULT CALLBACK LSLReceiveDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
 		
 			SCROLLINFO lpsi;
 
-			st->m_streams = lsl::resolve_streams();
-
-			for (t = 0; t < st->m_streams.size(); t++)
+			//st->m_streams = lsl::resolve_streams();
+			
+			if (st->LSL_CONNECTED)
 			{
-				wsprintf(szBuffer, "%s", st->m_streams[t]);
-				SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)szBuffer);
+				for (t = 0; t < st->m_streams.size(); t++)
+				{
+					wsprintf(szBuffer, "%s", st->m_streams[t]);
+					SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)szBuffer);
+				}
 			}
-			/*
-		    for (t = 0; t < MAX_COMPORT; t++) 
-			{
-				wsprintf( szBuffer, "COM%d", t + 1 ) ;
-				SendDlgItemMessage( hDlg, IDC_STREAMCOMBO, CB_ADDSTRING, 0,(LPARAM) (LPSTR) szBuffer ) ;
-			}
-			*/
-			//if (TTY.PORT) SendDlgItemMessage( hDlg, IDC_STREAMCOMBO, CB_SETCURSEL, (WPARAM) (TTY.PORT - 1), 0L ) ;
-			//else SetDlgItemText( hDlg, IDC_STREAMCOMBO, "none") ;
-			SetDlgItemText(hDlg, IDC_STREAMCOMBO, "none");
+			
+			if (st->select_stream > 0) SendDlgItemMessage( hDlg, IDC_STREAMCOMBO, CB_SETCURSEL, (WPARAM) (st->select_stream-1), 0L ) ;
+			else SetDlgItemText( hDlg, IDC_STREAMCOMBO, "none") ;
+			//SetDlgItemText(hDlg, IDC_STREAMCOMBO, "none");
 
-			SetDlgItemText(hDlg,IDC_DEVICETYPE,devicetypes[TTY.devicetype]);
+			SetDlgItemText(hDlg,IDC_DEVICETYPE,"LSL");
 
 			lpsi.cbSize=sizeof(SCROLLINFO);
 			lpsi.fMask=SIF_RANGE|SIF_POS;
 			lpsi.nMin=0; lpsi.nMax=1000;
 
-			CheckDlgButton(hDlg, IDC_CONNECTED, TTY.CONNECTED);
+			
+			CheckDlgButton(hDlg, IDC_CONNECTED, st->LSL_CONNECTED);
 
 			return TRUE;
 
@@ -144,49 +89,62 @@ LRESULT CALLBACK LSLReceiveDlgHandler( HWND hDlg, UINT message, WPARAM wParam, L
             switch (LOWORD(wParam)) 
 			{
 				case IDC_STREAMCOMBO:
+					//st->select_stream = SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_GETCURSEL, 0, 0) + 1;
 					st->select_stream = SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_GETCURSEL, 0, 0) + 1;
+					// KDS 240901 Get list COMBO index
 					//st->m_current_stream = st->m_streams[st->select_stream];
 					break;
 				case IDC_REFRESH:
-					st->m_streams = lsl::resolve_streams();
+					
+					st->m_streams = lsl::resolve_streams();  // KDS 240901 get available list
 
-					for (t = 0; t < st->m_streams.size(); t++)
+					if (st->m_streams.size() == 0)
 					{
-						wsprintf(szBuffer, "%s", st->m_streams[t]);
-						SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)szBuffer);
+						//SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)szBuffer);
+						SetDlgItemText(hDlg, IDC_STREAMCOMBO, "none");
+						st->LSL_CONNECTED = FALSE;
+					}
+					else
+					{
+						SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_RESETCONTENT, 0, 0);
+						for (t = 0; t < st->m_streams.size(); t++)
+						{
+							wsprintf(szBuffer, "%s", st->m_streams[t]);
+							SendDlgItemMessage(hDlg, IDC_STREAMCOMBO, CB_ADDSTRING, 0, (LPARAM)(LPSTR)szBuffer);
+							// KDS 240901 ADD streams to COMBO list
+						}
 					}
 					break;
 				case IDC_CONNECT:
-					/*
-					if (TTY.CONNECTED) {
-							if (TTY.devicetype == DEV_NIA){		
-								DisconnectNIA(); 
-								TTY.CONNECTED=FALSE;			
-							} else {
-								BreakDownCommPort();
-							}
-							CheckDlgButton(hDlg, IDC_CONNECTED, FALSE);
-						} else {
-							if (TTY.devicetype == DEV_NIA){		
-								if (TTY.COMDEV!=INVALID_HANDLE_VALUE)
-									DisconnectNIA();								
-								if ((TTY.CONNECTED = ConnectNIA(hDlg)) == FALSE) {
-									report_error("No NIA found!");
-									break;
-								}
-							} else {
-								if (TTY.COMDEV!=INVALID_HANDLE_VALUE) 
-									BreakDownCommPort();								
-								TTY.CONNECTED=SetupCommPort(TTY.PORT);
-								if ((TTY.COMDEV!=INVALID_HANDLE_VALUE) && (TTY.devicetype==DEV_IBVA))
-								{
-									write_string_to_comport("SR 256\r");
-								}
-							}
-							CheckDlgButton(hDlg, IDC_CONNECTED, TTY.CONNECTED);
+					
+					if (st->LSL_CONNECTED) {
+						    
+						// KDS 240901 close stream 
+						st->LSL_CONNECTED = FALSE;
+						CheckDlgButton(hDlg, IDC_CONNECTED, FALSE);
+						st->m_inlet->close_stream();
+						st->select_stream = 0;
+						st->state = 0;
+						delete st->m_inlet;
+
+						//lsl_destroy_inlet(st->m_inlet);
+					} else {
+						if (st->select_stream > 0)
+						{
+							st->m_inlet = new lsl::stream_inlet(st->m_streams[st->select_stream-1]);
+							st->m_inlet->open_stream();
+							st->outports = st->m_inlet->info().channel_count();
+
+							open_current_stream(st);
+
+							st->LSL_CONNECTED = TRUE;
+						} else
+						{ 
+							st->LSL_CONNECTED = FALSE;
 						}
-						*/
-						
+						CheckDlgButton(hDlg, IDC_CONNECTED, st->LSL_CONNECTED);
+					}
+
 					break;
 			}	
 			return(TRUE);
@@ -216,49 +174,27 @@ LSL_RECEIVEOBJ::LSL_RECEIVEOBJ(int num) : BASE_CL()
     state = 0;
     inlet = NULL;
     strcpy(stream_name, "none");
+	LSL_CONNECTED = FALSE;
+
 }
 
 void LSL_RECEIVEOBJ::session_start(void) 
 {	
-    if (inlet && outports > 0)
-    {
-        state = 1;
-        if (hDlg == ghWndToolbox)
-        {
-            SetDlgItemText(hDlg, IDC_FILESTATUS, "Reading LSL Stream");
-            EnableWindow(GetDlgItem(hDlg, IDC_START), FALSE);
-            EnableWindow(GetDlgItem(hDlg, IDC_STOP), TRUE);
-            EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), FALSE);
-        }
-    }
+	state = 1;
 }
 
 void LSL_RECEIVEOBJ::session_stop(void) 
 {	
-    if (inlet) state = 0;
-    if (hDlg == ghWndToolbox)
-    {
-        SetDlgItemText(hDlg, IDC_FILESTATUS, "Stopped");
-        EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-        EnableWindow(GetDlgItem(hDlg, IDC_OPENFILE), TRUE);
-        EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
-        EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
-    }
+    if (m_inlet) state = 0;
+ 
 }
 
 void LSL_RECEIVEOBJ::session_reset(void) 
 {	
     state = 0;
-    if (inlet)
+    if (m_inlet)
     { 
-        if (hDlg == ghWndToolbox)
-        {  
-            SetDlgItemText(hDlg, IDC_FILESTATUS, "Stopped");
-            EnableWindow(GetDlgItem(hDlg, IDC_START), TRUE);
-            EnableWindow(GetDlgItem(hDlg, IDC_OPENFILE), TRUE);
-            EnableWindow(GetDlgItem(hDlg, IDC_STOP), FALSE);
-            EnableWindow(GetDlgItem(hDlg, IDC_CLOSE), TRUE);
-        } 
+ 
     }	
 }
 
@@ -286,27 +222,25 @@ void LSL_RECEIVEOBJ::save(HANDLE hFile)
 void LSL_RECEIVEOBJ::work(void) 
 {
     int x;
-    float sample[1];
-    int32_t timestamp;
-    
-    if ((outports == 0) || (state == 0) || (inlet == NULL)) return;
+    std::vector<float>   sample;
+    double timestamp;
 
-    // Receive a sample from the LSL stream
-	/*
-    if (lsl_pull_sample_f(inlet, sample, 1, 0, &timestamp) > 0)
+	if ((outports == 0) || (state == 0) || (m_inlet == NULL)) return;
+	if (!LSL_CONNECTED) return;
+	timestamp = m_inlet->pull_sample(sample);
+    
+	// Receive a sample from the LSL stream
+	for (x = 0; x < outports; x++)
     {
-        for (x = 0; x < outports; x++)
-        {
-            pass_values(x, sample[0]);
-        }
-    } */
+            pass_values(x, sample[x]);
+    }
 }
 
 LSL_RECEIVEOBJ::~LSL_RECEIVEOBJ()
 {	
-    /*
-	if (inlet)
+    
+	if (m_inlet)
     {
-        lsl_destroy_inlet(inlet);
-    } */
+		//delete m_inlet;
+    } 
 }
