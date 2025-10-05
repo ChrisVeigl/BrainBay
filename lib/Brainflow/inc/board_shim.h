@@ -153,7 +153,14 @@ public:
     static std::vector<int> get_accel_channels (
         int board_id, int preset = (int)BrainFlowPresets::DEFAULT_PRESET);
     /**
-     * get row indices which hold analog data
+     * get row indices which hold rotation data
+     * @param board_id board id of your device
+     * @throw BrainFlowException If this board has no such data exit code is UNSUPPORTED_BOARD_ERROR
+     */
+    static std::vector<int> get_rotation_channels (
+        int board_id, int preset = (int)BrainFlowPresets::DEFAULT_PRESET);
+    /**
+     * get row indices which hold rotation calib data
      * @param board_id board id of your device
      * @throw BrainFlowException If this board has no such data exit code is UNSUPPORTED_BOARD_ERROR
      */
@@ -256,6 +263,8 @@ public:
     BrainFlowArray<double, 2> get_board_data (int num_datapoints, int preset);
     /// send string to a board, use it carefully and only if you understand what you are doing
     std::string config_board (std::string config);
+    /// send raw bytes to a board, not implemented for majority of devices, not recommended to use
+    void config_board_with_bytes (const char *bytes, int len);
     /// insert marker in data stream
     void insert_marker (double value, int preset = (int)BrainFlowPresets::DEFAULT_PRESET);
 };
