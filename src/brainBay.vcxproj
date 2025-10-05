@@ -213,8 +213,8 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Brainflow32.lib;MLModule32.lib;DataHandler32.lib;BoardController32.lib;odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;Msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\videoInput\lib;..\lib\ComputerVision\opencv\lib;..\lib\Brainflow\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Brainflow32.lib;MLModule32.lib;DataHandler32.lib;BoardController32.lib;odbc32.lib;odbccp32.lib;comctl32.lib;winmm.lib;opengl32.lib;glu32.lib;SDL.lib;SDL_net.lib;matheval.lib;SDL_sound.lib;modplug.lib;vfw32.lib;glaux.lib;skinstyle.lib;ole32.lib;strmiids.lib;uuid.lib;Msimg32.lib;lsl.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\lib\libmsvc;..\lib\ComputerVision\videoInput\lib;..\lib\ComputerVision\opencv\lib;..\lib\Brainflow\lib;..\lib\liblsl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>libc.lib;libcd.lib;LIBCMTD.lib</IgnoreSpecificDefaultLibraries>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
