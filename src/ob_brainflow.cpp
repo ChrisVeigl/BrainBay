@@ -45,57 +45,70 @@ struct board_id {
 };
 
 struct board_id supported_boards[] = {
-    { "Synthetic Board (simulated data)", -1 } ,
-    { "BrainAlive Device"               , 40 },
-    { "Callibri EEG"                    , 9 },
-    { "Callibri EMG"                    , 10 },
-    { "Callibri ECG"                    , 11 },
-    { "EmotiBit Board"                  , 47 },
-    { "Enophone"                        , 37 },
-    { "GTec Unicorn"                    , 8 },
-    { "Mentalab Explore 4 Channel"      , 44 },
-    { "Mentalab Explore 8 Channel"      , 45 },
-    { "Muse S"                          , 39 },
-    { "Muse 2"                          , 38 },
-    { "Muse 2016"                       , 41 },
-    { "Muse S BLED"                     , 21 },
-    { "Muse 2 BLED"                     , 22 },
-    { "Muse 2016 BLED"                  , 42 },
-    { "Neuroidss FreeEEG32"             , 17 },
-    { "NeuroMD Brainbit"                , 7 },
-    { "NeuroMD Brainbit BLED"           , 18 },
-    { "Neurosity Crown"                 , 23 },
-    { "Neurosity Notion OSC1"           , 13 },
-    { "Neurosity Notion 2"              , 14 },
-    { "NTL WIFI"                        , 50 },
-    { "OpenBCI Cyton"                   , 0 } ,
-    { "OpenBCI Cyton-Daisy"             , 2 } ,
-    { "OpenBCI Cyton Wifi"              , 5 } ,
-    { "OpenBCI Cyton-Daisy Wifi "       , 6 },
-    { "OpenBCI Ganglion"                , 1 } ,
-    { "OpenBCI Ganglion Native"         , 46 },
-    { "OpenBCI Ganglion Wifi"           , 4 } ,
-    { "OpenBCI Galea Serial V4"         , 49 },
-    { "OpenBCI Galea V4"                , 48 },
-//    { "OpenBCI Galea", 3 } ,
-//    { "OpenBCI Galea Serial", 20 },
+    { "Synthetic Board (simulated data)", -1 } , //
+    { "AAVAA V3"                        , 53 },  //
+    { "Biolistener"                     , 64 },  //
+    { "BrainAlive Device"               , 40 },  //
+    { "Callibri EEG"                    , 9 },   //
+    { "Callibri EMG"                    , 10 },  //
+    { "Callibri ECG"                    , 11 },  //
+    { "EmotiBit Board"                  , 47 }, //
+    { "Enophone"                        , 37 }, //
+    { "GTec Unicorn"                    , 8 },  //
+    { "Mentalab Explore 4 Channel"      , 44 }, //
+    { "Mentalab Explore 8 Channel"      , 45 }, //
+    { "Mentalab ExplorePlus 8 Channel"  , 54 }, //
+    { "Mentalab ExplorePlus 32 Channel" , 55 }, //
+    { "Muse S"                          , 39 },  //
+    { "Muse 2"                          , 38 },  //
+    { "Muse 2016"                       , 41 },  //
+    { "Muse S BLED"                     , 21 },  //
+    { "Muse 2 BLED"                     , 22 },  //
+    { "Muse 2016 BLED"                  , 42 }, //
+    { "Neuroidss FreeEEG32"             , 17 }, //
+    { "Neuroidss FreeEEG128"            , 52 }, //
+    { "NeuroMD Brainbit"                , 7 },  //
+    { "NeuroMD Brainbit BLED"           , 18 }, //
+    { "NeuroPawn Knight"                , 57 }, //
+    { "Neurosity Crown"                 , 23 },  //
+    { "Neurosity Notion OSC1"           , 13 },  //
+    { "Neurosity Notion 2"              , 14 },  //
+    { "NTL WIFI"                        , 50 },  //
+    { "OB 3000 24 Channel"              , 63 } ,  //
+    { "OB 5000 8 Channel"               , 60 } ,  //
+    { "OpenBCI Cyton"                   , 0 } ,  //
+    { "OpenBCI Cyton-Daisy"             , 2 } ,  //
+    { "OpenBCI Cyton Wifi"              , 5 } ,  //
+    { "OpenBCI Cyton-Daisy Wifi "       , 6 },   //
+    { "OpenBCI Ganglion"                , 1 } ,  //
+    { "OpenBCI Ganglion Native"         , 46 },  //
+    { "OpenBCI Ganglion Wifi"           , 4 } ,  //
+    { "OpenBCI Galea Serial V4"         , 49 },  //
+    { "OpenBCI Galea V4"                , 48 },  //
+    { "OpenBCI Galea", 3 } ,                     //
+    { "OpenBCI Galea Serial", 20 },              // 
 //    { "Fascia", 12 },
-    { "OYMotion gForce Pro EMG"         , 16 },
-    { "OYMotion gForce Dual EMG"        , 19 },
-    { "Ant Neuro EE 410"                , 24 },
-    { "Ant Neuro EE 411"                , 25 },
-    { "Ant Neuro EE 430"                , 26 },
-    { "Ant Neuro EE 211"                , 27 },
-    { "Ant Neuro EE 212"                , 28 },
-    { "Ant Neuro EE 213"                , 29 },
-    { "Ant Neuro EE 214"                , 30 },
-    { "Ant Neuro EE 215"                , 31 },
-    { "Ant Neuro EE 221"                , 32 },
-    { "Ant Neuro EE 222"                , 33 },
-    { "Ant Neuro EE 223"                , 34 },
-    { "Ant Neuro EE 224"                , 35 },
-    { "Ant Neuro EE 225"                , 36 },
-    { "Ant Neuro EE 511"                , 51 }
+    { "OYMotion gForce Pro EMG"         , 16 },  //
+    { "OYMotion gForce Dual EMG"        , 19 },  //
+    { "PIEEG"                           , 56 },  //
+    { "Synchroni Octo"                  , 59 },  //
+    { "Synchroni Pento"                 , 61 },  //
+    { "Synchroni Trio"                  , 58 },  //
+    { "Synchroni Uno"                   , 62 },  //
+    { "Ant Neuro EE 410"                , 24 },  //
+    { "Ant Neuro EE 411"                , 25 },  //
+    { "Ant Neuro EE 430"                , 26 },  //
+    { "Ant Neuro EE 211"                , 27 },  //
+    { "Ant Neuro EE 212"                , 28 },  //
+    { "Ant Neuro EE 213"                , 29 },  //
+    { "Ant Neuro EE 214"                , 30 },  //
+    { "Ant Neuro EE 215"                , 31 },  //
+    { "Ant Neuro EE 221"                , 32 },  //
+    { "Ant Neuro EE 222"                , 33 },  //
+    { "Ant Neuro EE 223"                , 34 },  //
+    { "Ant Neuro EE 224"                , 35 },  //
+    { "Ant Neuro EE 225"                , 36 },  //
+    { "Ant Neuro EE 511"                , 51 }   //
 
 };
 
@@ -785,8 +798,8 @@ void BRAINFLOWOBJ::session_stop(void)
     {
         board->stop_stream();
         cout << "Brainflow: Stream stopped." << std::endl;
-        board->release_session();
-        cout << "Brainflow: session released" << std::endl;
+        // board->release_session();
+        // cout << "Brainflow: session released" << std::endl;
     }
     catch (const BrainFlowException& err) { cout << "Brainflow: Exception handler triggered." << std::endl;   BoardShim::log_message((int)LogLevels::LEVEL_ERROR, err.what()); }
 
