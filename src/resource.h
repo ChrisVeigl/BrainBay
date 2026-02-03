@@ -101,6 +101,8 @@
 #define IDD_TCP_RECEIVEBOX1             267
 #define IDD_EEGBOX_GENERIC1             267
 #define IDD_LSLBOX                      268
+#define IDD_GENERICUDPBOX               269
+#define IDD_GENERICBLE_RECEIVER         270
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -817,6 +819,7 @@
 #define IDC_BF_CONFIG2                  1580
 #define IDC_BF_TIMEOUT                  1580
 #define IDC_STREAMCOMBO                 1580
+#define IDC_OPENED                      1581
 #define IDM_SETTINGS                    32771
 #define IDM_LOADCONFIG                  32779
 #define IDM_SAVECONFIG                  32780
@@ -993,15 +996,23 @@
 #define IDM_INSERT_BRAINFLOW            32969
 #define IDM_INSERTLSLRECEIVER           32970
 #define ID_SOURCE_LSL                   32970
+#define IDM_INSERTUDPRECEIVER           32971
+#define ID_SOURCE_GENERIC               32971
+#define IDM_INSERT_GENERIC_UDP_RECEIVER 32972
+#define IDM_IDM_INSERTUDPRECEIVER       32973
+#define IDM_INSERT_GENERIC_BLE_RECEIVER 32974
+#define ID_SOURCE_GENERIC32975          32975
+#define IDM_INSERT_BLERECEIVER          32976
+#define IDM_INSERTBLERECEIVER           32977
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        272
-#define _APS_NEXT_COMMAND_VALUE         32971
-#define _APS_NEXT_CONTROL_VALUE         1581
+#define _APS_NEXT_RESOURCE_VALUE        273
+#define _APS_NEXT_COMMAND_VALUE         32978
+#define _APS_NEXT_CONTROL_VALUE         1567
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

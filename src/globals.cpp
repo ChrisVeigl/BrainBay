@@ -41,6 +41,7 @@
 #include "ob_wav.h"
 #include "ob_tcp_receive.h"
 #include "ob_lsl_receive.h"
+#include "ob_genericUdp_receiver.h"
 #include "ob_doku.h"
 #include "ob_average.h"
 #include "ob_correlation.h"
@@ -188,6 +189,8 @@ void create_object(int type)
 							 actobject->object_size=sizeof(WAVOBJ);break;
 		case OB_TCP_RECEIVER:actobject=new TCP_RECEIVEOBJ(GLOBAL.objects); 
 							 actobject->object_size=sizeof(TCP_RECEIVEOBJ);break;
+		case OB_GENERIC_UDP_RECEIVER: actobject=new GENERIC_UDP_RECEIVEROBJ(GLOBAL.objects);
+					 		 actobject->object_size=sizeof(GENERIC_UDP_RECEIVEROBJ); break;
 		case OB_LSL_RECEIVER:actobject=new LSL_RECEIVEOBJ(GLOBAL.objects);             // KDS  240829
 							 actobject->object_size=sizeof(LSL_RECEIVEOBJ);break;							 
 		case OB_DOKU:        actobject=new DOKUOBJ(GLOBAL.objects); 
