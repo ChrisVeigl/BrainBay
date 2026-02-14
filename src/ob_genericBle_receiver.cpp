@@ -76,7 +76,7 @@ wstring connectedDeviceId = L"";
 int bleThreadDone = 1;
 int bleThreadRunning = 0;
 DWORD bleStatId = 0;
-uint32_t packetCount = 0;
+uint32_t bleSampleCount = 0;
 
 union to_guid
 {
@@ -371,14 +371,14 @@ void Characteristic_ValueChanged(GattCharacteristic const& characteristic, GattV
             /*
             // Print the data
             cout << fixed << setprecision(4);
-            cout << "Packet #" << packetCount << " - ";
+            cout << "Packet #" << bleSampleCount << " - ";
             cout << "Ch1: " << setw(7) << values[0] << " | ";
             cout << "Ch2: " << setw(7) << values[1] << " | ";
             cout << "Ch3: " << setw(7) << values[2] << " | ";
             cout << "Ch4: " << setw(7) << values[3] << endl;
             */
             process_packets(); // trigger signal processing workers!
-            packetCount++;
+            bleSampleCount++;
         }
     }
     catch (hresult_error& ex) {
@@ -445,7 +445,7 @@ DWORD WINAPI BleProc(LPVOID lpv)
 {
     bleThreadRunning = 1;
     bleThreadDone = 0;
-    packetCount = 0;
+    bleSampleCount = 0;
 
     LOG_ERROR("Trying to connect device: " << ble_name) // XIAO-ESP32S3-WebBT
 
@@ -586,9 +586,9 @@ void GENERIC_BLE_RECEIVEROBJ::save(HANDLE hFile)
 
 void GENERIC_BLE_RECEIVEROBJ::work(void)
 {
-    if ((packetCount % 100 == 0) && (hDlg == ghWndToolbox)) {
+    if ((bleSampleCount % 100 == 0) && (hDlg == ghWndToolbox)) {
         char szdata[100];
-        sprintf(szdata, "%d Packets read\n", packetCount);
+        sprintf(szdata, "%d Samples read\n", bleSampleCount);
         add_to_listbox(hDlg, IDC_LIST, szdata);
     }
 

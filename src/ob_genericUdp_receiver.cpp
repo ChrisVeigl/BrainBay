@@ -24,23 +24,24 @@
 // Shared buffer for received values (one float per channel)
 float udp_values[MAX_CHANNELS] = { 0 };
 
-// Thread control
-int udpThreadDone = 1;
-int udpThreadRunning = 0;
-DWORD udpStatId = 0;
-uint32_t udpPacketCount = 0;
+// Note: thread control is now per-instance (members of GENERIC_UDP_RECEIVEROBJ)
 
 LRESULT CALLBACK GenericUdpDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 DWORD WINAPI UdpProc(LPVOID lpv)
 {
-    udpThreadRunning = 1;
-    udpThreadDone = 0;
     GENERIC_UDP_RECEIVEROBJ* st = (GENERIC_UDP_RECEIVEROBJ*)lpv;
     if (!st) return 0;
-    while (!udpThreadDone) {
-        if (st->sock && st->packet) {
-            if (SDLNet_UDP_Recv(st->sock, st->packet)) {
+    st->udpThreadRunning = 1;
+    st->udpThreadDone = 0;
+    // take local snapshots to minimize races if the object fields change
+    UDPsocket local_sock = NULL;
+    UDPpacket* local_packet = NULL;
+    while (!st->udpThreadDone) {
+        local_sock = st->sock;
+        local_packet = st->packet;
+        if (local_sock && local_packet) {
+            if (SDLNet_UDP_Recv(local_sock, local_packet)) {
                 int len = st->packet->len;
                 int total_floats = len / sizeof(float);
                 if (total_floats <= 0) continue;
@@ -54,20 +55,20 @@ DWORD WINAPI UdpProc(LPVOID lpv)
 
                 if (st->num_samples > 0 && samples > st->num_samples) samples = st->num_samples;
 
-                for (int s = 0; s < samples && !udpThreadDone; s++) {
+                for (int s = 0; s < samples && !st->udpThreadDone; s++) {
                     for (int c = 0; c < channels; c++) {
                         float v = 0.0f;
-                        memcpy(&v, st->packet->data + (s * channels + c) * sizeof(float), sizeof(float));
+                        memcpy(&v, local_packet->data + (s * channels + c) * sizeof(float), sizeof(float));
                         if (c < MAX_CHANNELS) udp_values[c] = v;
                     }
                     process_packets();
-                    udpPacketCount++;
+                    st->updSampleCount++;
                 }
             }
         }
         Sleep(1);
     }
-    udpThreadRunning = 0;
+    st->udpThreadRunning = 0;
     return 0;
 }
 
@@ -84,6 +85,11 @@ GENERIC_UDP_RECEIVEROBJ::GENERIC_UDP_RECEIVEROBJ(int num) : BASE_CL()
     num_channels = 1;  // default to 1 channel 
     num_samples = 10;  // 10 samples per channel
     strcpy(host, "");
+    // initialize thread control
+    udpThreadDone = 1;
+    udpThreadRunning = 0;
+    udpThreadHandle = NULL;
+    updSampleCount = 0;
 
     // determine local IP address and store in host
     // prefer wireless adapter (IF_TYPE_IEEE80211) then any private IPv4
@@ -166,7 +172,6 @@ GENERIC_UDP_RECEIVEROBJ::~GENERIC_UDP_RECEIVEROBJ()
 {
     close_socket();
     printf("UDP-socket closed!\n");
-    WSACleanup();
 }
 
 int GENERIC_UDP_RECEIVEROBJ::open_socket()
@@ -192,8 +197,10 @@ int GENERIC_UDP_RECEIVEROBJ::open_socket()
     // start receiver thread
     if (!udpThreadRunning) {
         udpThreadDone = 0;
-        udpPacketCount = 0;
-        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)UdpProc, this, 0, &udpStatId);
+        updSampleCount = 0;
+        // create thread and keep handle so we can wait for it on close
+        HANDLE h = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)UdpProc, this, 0, NULL);
+        if (h) udpThreadHandle = h;
     }
     return 1;
 }
@@ -202,8 +209,23 @@ void GENERIC_UDP_RECEIVEROBJ::close_socket()
 {
     // signal thread to stop and wait briefly
     udpThreadDone = 1;
-    int timeout = 0;
-    while (udpThreadRunning && timeout < 50) { Sleep(20); timeout++; }
+    // prefer waiting on the thread handle if available
+    if (udpThreadHandle) {
+        // wait up to 2s for thread to exit
+        DWORD r = WaitForSingleObject(udpThreadHandle, 2000);
+        if (r == WAIT_OBJECT_0) {
+            // thread terminated
+        } else {
+            // timeout or failed - as a last resort, wait briefly using the running flag
+            int timeout = 0;
+            while (udpThreadRunning && timeout < 50) { Sleep(20); timeout++; }
+        }
+        CloseHandle(udpThreadHandle);
+        udpThreadHandle = NULL;
+    } else {
+        int timeout = 0;
+        while (udpThreadRunning && timeout < 50) { Sleep(20); timeout++; }
+    }
 
     if (packet) { SDLNet_FreePacket(packet); packet = NULL; }
     if (sock) { SDLNet_UDP_Close(sock); sock = NULL; }
@@ -261,9 +283,9 @@ void GENERIC_UDP_RECEIVEROBJ::save(HANDLE hFile)
 void GENERIC_UDP_RECEIVEROBJ::work(void)
 {
     // simply forward latest values populated by receiver thread
-    if ((udpPacketCount % 100 == 0) && (hDlg == ghWndToolbox)) {
+    if ((updSampleCount % 100 == 0) && (hDlg == ghWndToolbox)) {
         char szdata[100];
-        sprintf(szdata, "%u UDP Packets read\n", udpPacketCount);
+        sprintf(szdata, "%u Samples read\n", updSampleCount);
         add_to_listbox(hDlg, IDC_LIST, szdata);
     }
     
@@ -275,9 +297,14 @@ void GENERIC_UDP_RECEIVEROBJ::work(void)
 void GENERIC_UDP_RECEIVEROBJ::session_start(void)
 {
     // flush UDP packet buffer at session start
-    if (sock && packet) {
-        while (SDLNet_UDP_Recv(sock, packet)) {
-            // discard all pending packets 
+    if (sock) {
+        // allocate a temporary packet for flushing so we don't race with the receiver thread
+        UDPpacket* tmp = SDLNet_AllocPacket(65536);
+        if (tmp) {
+            while (SDLNet_UDP_Recv(sock, tmp)) {
+                // discard all pending packets
+            }
+            SDLNet_FreePacket(tmp);
         }
     }
 

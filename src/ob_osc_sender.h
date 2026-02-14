@@ -65,8 +65,8 @@ public:
     }
     ~UDPConnection()
     {
-        SDLNet_FreePacket(packet);
-        SDLNet_Quit();
+        if (packet) SDLNet_FreePacket(packet);
+        packet = nullptr;
     }
 
 	bool Init(char *ip, int32_t remotePort, int32_t localPort)
@@ -189,7 +189,11 @@ public:
     }
     bool ClosePort()
     {
-	  SDLNet_UDP_Close(ourSocket);
+            if (ourSocket != nullptr) {
+                    SDLNet_UDP_Close(ourSocket);
+                    ourSocket = nullptr;
+            }
+            return true;
 	}
 
     bool SetIPAndPort(char * ip, uint16_t port)

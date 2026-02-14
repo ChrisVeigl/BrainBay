@@ -24,6 +24,11 @@ public:
     int opened;
     int num_channels;
     int num_samples;
+    // Thread control - per-instance to avoid cross-instance races
+    volatile int udpThreadDone;
+    volatile int udpThreadRunning;
+    HANDLE udpThreadHandle;
+    uint32_t updSampleCount;
 
     GENERIC_UDP_RECEIVEROBJ(int num);
     ~GENERIC_UDP_RECEIVEROBJ();

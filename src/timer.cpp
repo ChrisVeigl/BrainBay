@@ -50,6 +50,8 @@ void process_packets(void)
 	static double calc;
 	int t;
 
+	if (GLOBAL.loading) return;
+
     TIMING.ppscounter++;
     TIMING.packetcounter++;
 	
