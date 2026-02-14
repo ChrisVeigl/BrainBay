@@ -378,6 +378,7 @@ void Characteristic_ValueChanged(GattCharacteristic const& characteristic, GattV
             cout << "Ch4: " << setw(7) << values[3] << endl;
             */
             process_packets(); // trigger signal processing workers!
+            packetCount++;
         }
     }
     catch (hresult_error& ex) {
@@ -568,6 +569,8 @@ void GENERIC_BLE_RECEIVEROBJ::load(HANDLE hFile)
     load_property("ble_name", P_STRING, ble_name);
     load_property("serviceUUID", P_STRING, serviceUUID);
     load_property("readUUID", P_STRING, readUUID);
+    load_property("num_channels", P_INT, &num_channels);
+    load_property("num_samples", P_INT, &num_samples);
 
 }
 
@@ -577,17 +580,17 @@ void GENERIC_BLE_RECEIVEROBJ::save(HANDLE hFile)
     save_property(hFile, "ble_name", P_STRING, ble_name);
     save_property(hFile, "serviceUUID", P_STRING, serviceUUID);
     save_property(hFile, "readUUID", P_STRING, readUUID);
+    save_property(hFile, "num_channels", P_INT, &num_channels);
+    save_property(hFile, "num_samples", P_INT, &num_samples);
 }
 
 void GENERIC_BLE_RECEIVEROBJ::work(void)
 {
-    char szdata[100];
-    packetCount++;
-    sprintf(szdata, "%d Packets read\n", packetCount);
-
-    if ((packetCount % 100 == 0) && (hDlg == ghWndToolbox))
+    if ((packetCount % 100 == 0) && (hDlg == ghWndToolbox)) {
+        char szdata[100];
+        sprintf(szdata, "%d Packets read\n", packetCount);
         add_to_listbox(hDlg, IDC_LIST, szdata);
-
+    }
 
     // send float values
     for (int i = 0; i < num_channels; i++) {
