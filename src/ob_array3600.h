@@ -35,13 +35,13 @@ class ARRAY3600OBJ : public BASE_CL
 	int maxcurrent,maxvoltage,maxpower,voltage,address;
 	DWORD dwWritten;
 	
-	byte getCheckByte(byte * command);
-    byte getHighByte(int val);
-    byte getLowByte(int val);
+	unsigned char getCheckByte(unsigned char* command);
+	unsigned char getHighByte(int val);
+	unsigned char getLowByte(int val);
     void setToSelfControl();
     void setToPcControlOn();
     void setToPcControlOff();
-    void setParameters(byte address, int maxI, int maxU, int maxP, int u);
+    void setParameters(unsigned char address, int maxI, int maxU, int maxP, int u);
 
 	BOOL ARRAY3600OBJ::SetupComPort(int port);
 	BOOL ARRAY3600OBJ::WriteComPort(HANDLE device, unsigned char * data, unsigned int len);
