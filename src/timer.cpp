@@ -132,7 +132,8 @@ void CALLBACK TimerProc(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
 
 			// process packets in case of no File-Read and no Com-Read
 			else if ((TTY.read_pause) && (!GLOBAL.neurobit_available) && (!GLOBAL.emotiv_available) 
-				      && (!GLOBAL.biosemi_available) && (!GLOBAL.ganglion_available) && (!GLOBAL.brainflow_available) && (!GLOBAL.bleReceiver_available)) {
+				      && (!GLOBAL.biosemi_available) && (!GLOBAL.ganglion_available) && (!GLOBAL.brainflow_available) 
+					  && (!GLOBAL.bleReceiver_available) && (!GLOBAL.udpReceiver_available)) {
 				process_packets();
 			}
 

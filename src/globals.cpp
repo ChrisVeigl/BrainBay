@@ -823,6 +823,7 @@ void GlobalInitialize()
 	GLOBAL.biosemi_available = 0;
 	GLOBAL.ganglion_available = 0;
 	GLOBAL.bleReceiver_available = 0;
+	GLOBAL.udpReceiver_available = 0;
 	GLOBAL.brainflow_available = 0;
 	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;

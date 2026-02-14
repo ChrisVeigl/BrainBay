@@ -19,7 +19,57 @@
 
 #define DISCOVERY_PORT 5555
 
+#define MAX_CHANNELS 16
+
+// Shared buffer for received values (one float per channel)
+float udp_values[MAX_CHANNELS] = { 0 };
+
+// Thread control
+int udpThreadDone = 1;
+int udpThreadRunning = 0;
+DWORD udpStatId = 0;
+uint32_t udpPacketCount = 0;
+
 LRESULT CALLBACK GenericUdpDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+
+DWORD WINAPI UdpProc(LPVOID lpv)
+{
+    udpThreadRunning = 1;
+    udpThreadDone = 0;
+    GENERIC_UDP_RECEIVEROBJ* st = (GENERIC_UDP_RECEIVEROBJ*)lpv;
+    if (!st) return 0;
+    while (!udpThreadDone) {
+        if (st->sock && st->packet) {
+            if (SDLNet_UDP_Recv(st->sock, st->packet)) {
+                int len = st->packet->len;
+                int total_floats = len / sizeof(float);
+                if (total_floats <= 0) continue;
+
+                int channels = st->num_channels;
+                if (channels <= 0) channels = 1;
+                if (channels > MAX_CHANNELS) channels = MAX_CHANNELS;
+
+                int samples = total_floats / channels;
+                if (samples <= 0) continue;
+
+                if (st->num_samples > 0 && samples > st->num_samples) samples = st->num_samples;
+
+                for (int s = 0; s < samples && !udpThreadDone; s++) {
+                    for (int c = 0; c < channels; c++) {
+                        float v = 0.0f;
+                        memcpy(&v, st->packet->data + (s * channels + c) * sizeof(float), sizeof(float));
+                        if (c < MAX_CHANNELS) udp_values[c] = v;
+                    }
+                    process_packets();
+                    udpPacketCount++;
+                }
+            }
+        }
+        Sleep(1);
+    }
+    udpThreadRunning = 0;
+    return 0;
+}
 
 GENERIC_UDP_RECEIVEROBJ::GENERIC_UDP_RECEIVEROBJ(int num) : BASE_CL()
 {
@@ -31,6 +81,8 @@ GENERIC_UDP_RECEIVEROBJ::GENERIC_UDP_RECEIVEROBJ(int num) : BASE_CL()
     packet = NULL;
     port = DEFAULT_UDP_PORT;
     opened = 0;
+    num_channels = 1;  // default to 1 channel 
+    num_samples = 10;  // 10 samples per channel
     strcpy(host, "");
 
     // determine local IP address and store in host
@@ -136,14 +188,27 @@ int GENERIC_UDP_RECEIVEROBJ::open_socket()
     }
     printf("UDP-socket created!\n");
     opened = 1;
+    GLOBAL.udpReceiver_available = 1;
+    // start receiver thread
+    if (!udpThreadRunning) {
+        udpThreadDone = 0;
+        udpPacketCount = 0;
+        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)UdpProc, this, 0, &udpStatId);
+    }
     return 1;
 }
 
 void GENERIC_UDP_RECEIVEROBJ::close_socket()
 {
+    // signal thread to stop and wait briefly
+    udpThreadDone = 1;
+    int timeout = 0;
+    while (udpThreadRunning && timeout < 50) { Sleep(20); timeout++; }
+
     if (packet) { SDLNet_FreePacket(packet); packet = NULL; }
     if (sock) { SDLNet_UDP_Close(sock); sock = NULL; }
     opened = 0;
+    GLOBAL.udpReceiver_available = 0;
 }
 
 void GENERIC_UDP_RECEIVEROBJ::get_captions(void)
@@ -171,6 +236,10 @@ void GENERIC_UDP_RECEIVEROBJ::load(HANDLE hFile)
     // load_property("host", P_STRING, &host);
     load_property("port", P_INT, &port);
     load_property("opened", P_INT, &opened);
+    load_property("num_channels", P_INT, &num_channels);
+    load_property("num_samples", P_INT, &num_samples);
+
+
     if (opened) {
         if (!open_socket()) {
             opened = 0;
@@ -185,29 +254,21 @@ void GENERIC_UDP_RECEIVEROBJ::save(HANDLE hFile)
     save_property(hFile, "host", P_STRING, &host);
     save_property(hFile, "port", P_INT, &port);
     save_property(hFile, "opened", P_INT, &opened);
+    save_property(hFile, "num_channels", P_INT, &num_channels);
+    save_property(hFile, "num_samples", P_INT, &num_samples);
 }
 
 void GENERIC_UDP_RECEIVEROBJ::work(void)
 {
-    if (!sock) return; // not opened
-    if (!packet) return;
-
-    if (SDLNet_UDP_Recv(sock, packet))
-    {
-        int len = packet->len;
-        int channels = len / 4;
-
-        // printf("udp-packed len %d received\n", len);
-
-        if (channels <= 0) return;
-        if (channels > outports) return; // discard if more than available
-
-        // interpret as float32 values
-        for (int i = 0; i < channels; i++) {
-            float v;
-            memcpy(&v, packet->data + i * 4, sizeof(float));
-            pass_values(i, v);
-        }
+    // simply forward latest values populated by receiver thread
+    if ((udpPacketCount % 100 == 0) && (hDlg == ghWndToolbox)) {
+        char szdata[100];
+        sprintf(szdata, "%u UDP Packets read\n", udpPacketCount);
+        add_to_listbox(hDlg, IDC_LIST, szdata);
+    }
+    
+    for (int i = 0; i < num_channels && i < outports && i < MAX_CHANNELS; i++) {
+        pass_values(i, udp_values[i]);
     }
 }
 
@@ -219,6 +280,8 @@ void GENERIC_UDP_RECEIVEROBJ::session_start(void)
             // discard all pending packets 
         }
     }
+
+    // receiver thread is started on open_socket()
 
     /*
     // send UDP broadcast message to announce this receiver
@@ -272,8 +335,17 @@ LRESULT CALLBACK GenericUdpDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LP
         if (st) {
             SetDlgItemText(hDlg, IDC_HOST, st->host);
             SetDlgItemInt(hDlg, IDC_PORT, st->port, FALSE);
+            SetDlgItemInt(hDlg, IDC_NUM_CHANNELS, st->num_channels, FALSE);
+            SetDlgItemInt(hDlg, IDC_NUM_SAMPLES, st->num_samples, FALSE);
+
             // reflect opened state in checkbox (IDC_OPENED must exist in resource)
             SendDlgItemMessage(hDlg, IDC_OPENED, BM_SETCHECK, st->opened ? BST_CHECKED : BST_UNCHECKED, 0);
+            if (GLOBAL.udpReceiver_available) {
+                add_to_listbox(hDlg, IDC_LIST, "UDP device connected.");
+            }
+            else {
+                add_to_listbox(hDlg, IDC_LIST, "UDP device disconnected");
+            }
         }
         return TRUE;
     case WM_COMMAND:
@@ -283,17 +355,21 @@ LRESULT CALLBACK GenericUdpDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LP
             if (st) {
                 //GetDlgItemText(hDlg, IDC_HOST, st->host, sizeof(st->host));
                 st->port = GetDlgItemInt(hDlg, IDC_PORT, NULL, FALSE);
+                st->num_channels = GetDlgItemInt(hDlg, IDC_NUM_CHANNELS, NULL, FALSE);
+                st->num_samples = GetDlgItemInt(hDlg, IDC_NUM_SAMPLES, NULL, FALSE);
                 if (!st->open_socket()) {
                     MessageBox(hDlg, "Could not open UDP socket", "UDP Receiver", MB_OK | MB_ICONERROR);
                 }
                 else {
                     SendDlgItemMessage(hDlg, IDC_OPENED, BM_SETCHECK, BST_CHECKED, 0);
                     st->opened = 1;
+                    add_to_listbox(hDlg, IDC_LIST, "UDP socket created.");
                 }
             }
             return TRUE;
         case IDC_CLOSE:
             if (st) { st->close_socket(); SendDlgItemMessage(hDlg, IDC_OPENED, BM_SETCHECK, BST_UNCHECKED, 0); st->opened = 0; }
+            add_to_listbox(hDlg, IDC_LIST, "UDP device disconnected");
             return TRUE;
         case IDC_OPENED:
             if (st) {
@@ -304,10 +380,12 @@ LRESULT CALLBACK GenericUdpDlgHandler(HWND hDlg, UINT message, WPARAM wParam, LP
                         SendDlgItemMessage(hDlg, IDC_OPENED, BM_SETCHECK, BST_UNCHECKED, 0);
                     }
                     else st->opened = 1;
+                    add_to_listbox(hDlg, IDC_LIST, "UDP socket created.");
                 }
                 else {
                     st->close_socket();
                     st->opened = 0;
+                    add_to_listbox(hDlg, IDC_LIST, "UDP device disconnected");
                 }
             }
             return TRUE;

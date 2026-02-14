@@ -374,6 +374,7 @@ typedef struct GLOBALStruct
 	int biosemi_available;
 	int ganglion_available;
 	int bleReceiver_available;
+	int udpReceiver_available;
 	int brainflow_available;
 
 	int ganglion_bledongle;

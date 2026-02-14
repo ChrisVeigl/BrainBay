@@ -22,6 +22,8 @@ public:
     char host[101];
     int port;
     int opened;
+    int num_channels;
+    int num_samples;
 
     GENERIC_UDP_RECEIVEROBJ(int num);
     ~GENERIC_UDP_RECEIVEROBJ();
