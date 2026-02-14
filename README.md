@@ -14,12 +14,13 @@ please have a look at ReadMe_License.txt
 Version Info
 ------------
  
-* The current release version is 2.81  (2024-07-25)
+* The current release version is 2.8.3  (2026-02-14)
 
 * Recent changes for this release:
-  * support for the new Neurobit Runtime v5.4!
+  * the elements added: generic BLE and UDP receivers are now available!
   
 * Not-so-recent changes in recent releases worth mentioning:
+  * support for the new Neurobit Runtime v5.4!
   * support for new Brainflow version, serveral new compatible EEG amplifiers!
   * improved element captions
   * New elements Shadow and Volume allow control of volume and desktop transparency
@@ -31,6 +32,8 @@ Version Info
   * Cursorkey integration for Oscilloscope and Threshold Windows
   * Oscilloscope features snapshots for training reporting
   * SessionManager and Sessiontime elements for menu-based selection of design
+
+Note that the recently added LSL-support is still buggy.. fixing this will need more time!
 
 Link to Release and other Infos
 -------------------------------
