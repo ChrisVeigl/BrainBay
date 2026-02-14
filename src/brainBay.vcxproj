@@ -91,7 +91,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\lib\BioSemi\release;..\lib;..\lib\ComputerVision\opencv\include;..\lib\ComputerVision;..\lib\neurobit_api;..\lib\BioSemi\DLL\Win64;..\lib\BioSemi;..\lib\Brainflow\inc</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -198,7 +198,7 @@
       <WarningLevel>Level1</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalIncludeDirectories>..\lib;..\lib\ComputerVision;..\lib\ComputerVision\opencv\include;..\lib\neurobit_api;..\lib\Brainflow\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/bigobj /std:c++17 /await %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -526,6 +526,7 @@
     </ClCompile>
     <ClCompile Include="ob_floatvector.cpp" />
     <ClCompile Include="ob_ganglion.cpp" />
+    <ClCompile Include="ob_genericBle_receiver.cpp" />
     <ClCompile Include="ob_genericUdp_receiver.cpp" />
     <ClCompile Include="ob_integrate.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
@@ -846,6 +847,7 @@
     <ClInclude Include="ob_filter.h" />
     <ClInclude Include="ob_floatvector.h" />
     <ClInclude Include="ob_ganglion.h" />
+    <ClInclude Include="ob_genericBle_receiver.h" />
     <ClInclude Include="ob_genericUdp_receiver.h" />
     <ClInclude Include="ob_integrate.h" />
     <ClInclude Include="ob_keycapture.h" />

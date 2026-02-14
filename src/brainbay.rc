@@ -86,6 +86,7 @@ BEGIN
             MENUITEM "Constant",                    IDM_INSERTCONSTANT
             MENUITEM "EDF-Reader",                  IDM_INSERTEDFREADER
             MENUITEM "File-Reader",                 IDM_INSERTFILE_READER
+            MENUITEM "Generic-BLE-Receiver",        IDM_INSERTBLERECEIVER
             MENUITEM "Generic-UDP-Receiver",        IDM_INSERTUDPRECEIVER
             MENUITEM "KeyCapture",                  IDM_INSERTKEYCAPTURE
             MENUITEM "LSL-Receiver",                IDM_INSERTLSLRECEIVER
@@ -125,7 +126,7 @@ BEGIN
             MENUITEM "Threshold / Meter",           IDM_INSERTTHRESHOLD
             MENUITEM "Translate",                   IDM_INSERTTRANSLATE
             MENUITEM "Vector-To-Float",             IDM_INSERTVECTORFLOAT
-            MENUITEM "Vectorbuffer",                32896
+            MENUITEM "Vectorbuffer",                IDM_INSERTVECTORBUFFER
         END
         POPUP "Target"
         BEGIN
@@ -1538,6 +1539,30 @@ BEGIN
     LTEXT           "Status",IDC_STATIC,37,103,21,8
 END
 
+IDD_GENERICBLEBOX DIALOGEX 0, 0, 338, 198
+STYLE DS_ABSALIGN | DS_SYSMODAL | DS_SETFONT | DS_SETFOREGROUND | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW | WS_EX_STATICEDGE
+CAPTION "Generic BLE-Receive"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Connect and  Start",IDC_CONNECT,55,146,100,14,BS_FLAT
+    PUSHBUTTON      "Disconnect",IDC_CLOSE,175,146,99,14,BS_FLAT
+    LISTBOX         IDC_LIST,54,165,220,18,NOT WS_BORDER | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
+    LTEXT           "BLE Device Name:",-1,40,23,68,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_BLE_NAME,115,21,160,14,ES_AUTOHSCROLL
+    CONTROL         "BLE device connected",IDC_OPENED,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_DISABLED | WS_TABSTOP,248,7,84,10
+    LTEXT           "Status",-1,27,165,21,8
+    LTEXT           "Service-UUID:",-1,40,39,68,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_SERVICE_UUID,115,37,160,14,ES_AUTOHSCROLL
+    LTEXT           "Read-UUID:",-1,40,55,68,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_READ_UUID,115,53,160,14,ES_AUTOHSCROLL
+    LTEXT           "Note: a binary packet with Channels * Samples 32-bit float values is expected in little-endian byte order. Channel samples are interleaved.",-1,53,114,259,22
+    LTEXT           "Channels:",-1,16,77,91,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_NUM_CHANNELS,115,74,79,14,ES_AUTOHSCROLL
+    LTEXT           "Samples per Channel:",-1,17,93,91,8,0,WS_EX_RIGHT
+    EDITTEXT        IDC_NUM_SAMPLES,115,90,79,14,ES_AUTOHSCROLL
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -1910,6 +1935,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 131
     END
+
+    IDD_GENERICBLEBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 332
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 188
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1945,6 +1978,11 @@ BEGIN
 END
 
 IDD_GENERICUDPBOX AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_GENERICBLEBOX AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

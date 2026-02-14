@@ -103,6 +103,7 @@
 #define IDD_LSLBOX                      268
 #define IDD_GENERICUDPBOX               269
 #define IDD_GENERICBLE_RECEIVER         270
+#define IDD_GENERICBLEBOX               270
 #define IDC_PORTCOMBO                   1000
 #define IDC_BAUDCOMBO                   1001
 #define IDC_DEVICECOMBO                 1002
@@ -804,10 +805,16 @@
 #define IDC_BIOSEMI_MAXMIN              1566
 #define IDC_BF_DEVICECOMBO              1566
 #define IDC_BF_APPLY_DEVICE             1567
+#define IDC_BLE_NAME                    1567
 #define IDC_BF_ARCHIVEFILE              1568
+#define IDC_SERVICE_UUID                1568
 #define IDC_OPEN_BF_ARCHIVE             1569
+#define IDC_READ_UUID                   1569
 #define IDC_CLOSE_BF_ARCHIVE            1570
+#define IDC_NUM_CHANNELS                1570
 #define IDC_REC_BF_ARCHIVE              1571
+#define IDC_READ_UUID3                  1571
+#define IDC_NUM_SAMPLES                 1571
 #define IDC_END_BF_RECORDING            1572
 #define IDC_BF_SERIALPORT               1573
 #define IDC_BF_IPADDRESS                1574
@@ -1004,6 +1011,7 @@
 #define ID_SOURCE_GENERIC32975          32975
 #define IDM_INSERT_BLERECEIVER          32976
 #define IDM_INSERTBLERECEIVER           32977
+#define ID_SOURCE_GENERIC32978          32978
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -1011,8 +1019,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        273
-#define _APS_NEXT_COMMAND_VALUE         32978
-#define _APS_NEXT_CONTROL_VALUE         1567
+#define _APS_NEXT_COMMAND_VALUE         32979
+#define _APS_NEXT_CONTROL_VALUE         1568
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

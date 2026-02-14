@@ -42,6 +42,7 @@
 #include "ob_tcp_receive.h"
 #include "ob_lsl_receive.h"
 #include "ob_genericUdp_receiver.h"
+#include "ob_genericBle_receiver.h"
 #include "ob_doku.h"
 #include "ob_average.h"
 #include "ob_correlation.h"
@@ -134,7 +135,7 @@ char objnames[OBJECT_COUNT][20]      = { OBJNAMES };
 char dimensions[10][10]      = {"uV","mV","V","Hz","%","DegC","DegF","uS","kOhm","BPM" };
 int  fft_bin_values[10]    = { 32,64,128,256,512,1024,2048,4096,0 };
 
-int singletonObjects [] = {OB_EEG,OB_WAV,OB_CAM,OB_SKINDIALOG,OB_NEUROBIT,OB_GANGLION,OB_SESSIONMANAGER,OB_BRAINFLOW,-1};
+int singletonObjects [] = {OB_EEG,OB_WAV,OB_CAM,OB_SKINDIALOG,OB_NEUROBIT,OB_GANGLION,OB_SESSIONMANAGER,OB_BRAINFLOW,OB_GENERIC_UDP_RECEIVER, OB_GENERIC_BLE_RECEIVER,-1};
 	
 
 //
@@ -191,6 +192,8 @@ void create_object(int type)
 							 actobject->object_size=sizeof(TCP_RECEIVEOBJ);break;
 		case OB_GENERIC_UDP_RECEIVER: actobject=new GENERIC_UDP_RECEIVEROBJ(GLOBAL.objects);
 					 		 actobject->object_size=sizeof(GENERIC_UDP_RECEIVEROBJ); break;
+		case OB_GENERIC_BLE_RECEIVER: actobject = new GENERIC_BLE_RECEIVEROBJ(GLOBAL.objects);
+							 actobject->object_size = sizeof(GENERIC_BLE_RECEIVEROBJ); break;
 		case OB_LSL_RECEIVER:actobject=new LSL_RECEIVEOBJ(GLOBAL.objects);             // KDS  240829
 							 actobject->object_size=sizeof(LSL_RECEIVEOBJ);break;							 
 		case OB_DOKU:        actobject=new DOKUOBJ(GLOBAL.objects); 
@@ -818,7 +821,8 @@ void GlobalInitialize()
 	strcpy(GLOBAL.neurobit_device,DEFAULT_NEUROBIT_DEVICE);
 	GLOBAL.emotiv_available=0;
 	GLOBAL.biosemi_available = 0;
-	GLOBAL.ganglion_available=0;
+	GLOBAL.ganglion_available = 0;
+	GLOBAL.bleReceiver_available = 0;
 	GLOBAL.brainflow_available = 0;
 	GLOBAL.ganglion_bledongle=1;  // BLED112 dongle is default
 	GLOBAL.use_cv_capture=0;

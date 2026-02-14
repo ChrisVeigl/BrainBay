@@ -145,8 +145,9 @@ extern "C" {
 #define OB_BRAINFLOW	70
 #define OB_LSL_RECEIVER 71
 #define OB_GENERIC_UDP_RECEIVER 72
+#define OB_GENERIC_BLE_RECEIVER 73
 
-#define OBJECT_COUNT 	73
+#define OBJECT_COUNT 	74
 
 
 
@@ -164,7 +165,7 @@ extern "C" {
 				 "DIFFERENTIATE", "DELAY", "LIMITER", "EMOTIV", "FLOAT_VECTOR", \
 				 "VECTOR_FLOAT", "DISPLAY_VECTOR", "VECTORBUFFER", "GANGLION", \
 				 "SESSIONTIME", "SESSIONMANAGER", "KEYCAPTURE", "BUTTON", "EVALUATOR EXPR-TK", \
-				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI", "BRAINFLOW", "LSL", "UDP_RECEIVE"
+				 "SHADOW", "VOLUME", "OSC-SENDER", "BIOSEMI", "BRAINFLOW", "LSL", "UDP_RECEIVE", "BLE_RECEIVE"
 
 //
 // use the main menu handler in brainbay.cpp 
@@ -372,6 +373,7 @@ typedef struct GLOBALStruct
 	int emotiv_available;
 	int biosemi_available;
 	int ganglion_available;
+	int bleReceiver_available;
 	int brainflow_available;
 
 	int ganglion_bledongle;

@@ -430,6 +430,8 @@ LRESULT CALLBACK MainWndHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					break;
 				case IDM_INSERTUDPRECEIVER:create_object(OB_GENERIC_UDP_RECEIVER);
 					break;
+				case IDM_INSERTBLERECEIVER:create_object(OB_GENERIC_BLE_RECEIVER);
+					break;
 				case IDM_INSERTLSLRECEIVER:create_object(OB_LSL_RECEIVER);  // KDS 240829
 					break;					
 				case IDM_INSERTDOKU:create_object(OB_DOKU);
