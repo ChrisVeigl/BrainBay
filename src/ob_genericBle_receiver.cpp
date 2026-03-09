@@ -37,6 +37,7 @@
 #include <string>
 #include <iomanip>
 #include <optional>
+#include <chrono>
 
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Web.Syndication.h>
@@ -44,6 +45,7 @@
 #include "winrt/Windows.Devices.Bluetooth.GenericAttributeProfile.h"
 #include "winrt/Windows.Devices.Enumeration.h"
 #include "winrt/Windows.Storage.Streams.h"
+#include <winrt/Windows.Devices.Bluetooth.Advertisement.h>
 #pragma comment(lib, "windowsapp")
 
 
@@ -148,6 +150,7 @@ struct CharacteristicCacheKey {
 struct DeviceCacheEntry {
     BluetoothLEDevice device = nullptr;
     GattDeviceService service = nullptr;
+    GattSession session = nullptr;
 };
 
 map<wstring, DeviceCacheEntry> cache;
@@ -173,53 +176,134 @@ condition_variable deviceListSignal;
 
 #pragma region CACHE FUNCTIONS
 
-//Call this function to get a device from cache or async if it wasn't found
-IAsyncOperation<BluetoothLEDevice> getDevice(wchar_t* deviceId) {
-    if (cache.count(wstring(deviceId)) && cache[wstring(deviceId)].device)
-        co_return cache[wstring(deviceId)].device;
-    BluetoothLEDevice result = co_await BluetoothLEDevice::FromIdAsync(deviceId);
-    if (result == nullptr) {
-        LOG_ERROR("Failed to connect to device.")
-        co_return nullptr;
+// Invalidate all cached BLE objects for a given device
+void clearDeviceCache(const wstring& deviceId) {
+    // Remove characteristic cache entries for this device
+    auto it = characteristicCache.begin();
+    while (it != characteristicCache.end()) {
+        if (it->first.deviceId == deviceId)
+            it = characteristicCache.erase(it);
+        else
+            ++it;
     }
-    else {
-        DeviceCacheEntry d;
-        d.device = result;
-        if (!cache.count(wstring(deviceId))) {
-            cache.insert({ wstring(deviceId), d });
+    // Close GattSession and device before removing
+    if (cache.count(deviceId)) {
+        if (cache[deviceId].session != nullptr) {
+            cache[deviceId].session.Close();
+            cache[deviceId].session = nullptr;
         }
-        else {
-            cache[wstring(deviceId)] = d;
+        if (cache[deviceId].service != nullptr) {
+            cache[deviceId].service.Close();
+            cache[deviceId].service = nullptr;
         }
-        co_return cache[wstring(deviceId)].device;
+        if (cache[deviceId].device != nullptr) {
+            cache[deviceId].device.Close();
+            cache[deviceId].device = nullptr;
+        }
     }
+    cache.erase(deviceId);
 }
 
-//Call this function to get a service from cache or async if it wasn't found
+//Call this function to get a device from cache or async if it wasn't found.
+// On Win11, we also create a GattSession with MaintainConnection=true to force
+// the actual BLE radio connection, and wait for ConnectionStatus==Connected.
+IAsyncOperation<BluetoothLEDevice> getDevice(wchar_t* deviceId) {
+    if (cache.count(wstring(deviceId)) && cache[wstring(deviceId)].device) {
+        // Check if still connected
+        auto cachedDev = cache[wstring(deviceId)].device;
+        if (cachedDev.ConnectionStatus() == BluetoothConnectionStatus::Connected)
+            co_return cachedDev;
+        // Device object exists but disconnected - clear and re-acquire
+        LOG_ERROR("Cached device is disconnected, re-acquiring...")
+        clearDeviceCache(wstring(deviceId));
+    }
+
+    BluetoothLEDevice result = co_await BluetoothLEDevice::FromIdAsync(deviceId);
+    if (result == nullptr) {
+        LOG_ERROR("Failed to get device from FromIdAsync.")
+        co_return nullptr;
+    }
+
+    // Create a GattSession to force the BLE connection (critical for Win11)
+    try {
+        GattSession session = co_await GattSession::FromDeviceIdAsync(result.BluetoothDeviceId());
+        if (session != nullptr) {
+            session.MaintainConnection(true);
+            LOG_ERROR("GattSession created with MaintainConnection=true")
+
+            DeviceCacheEntry d;
+            d.device = result;
+            d.session = session;
+            cache[wstring(deviceId)] = d;
+        }
+        else {
+            LOG_ERROR("Warning: GattSession creation returned null")
+            DeviceCacheEntry d;
+            d.device = result;
+            cache[wstring(deviceId)] = d;
+        }
+    }
+    catch (hresult_error& ex) {
+        LOG_ERROR("GattSession creation failed: " << to_string(ex.message().c_str()))
+        DeviceCacheEntry d;
+        d.device = result;
+        cache[wstring(deviceId)] = d;
+    }
+
+    // Wait for the device to actually connect (up to 10 seconds)
+    // On Win11, the connection is not immediate after FromIdAsync
+    for (int waitAttempt = 0; waitAttempt < 20; waitAttempt++) {
+        if (result.ConnectionStatus() == BluetoothConnectionStatus::Connected) {
+            LOG_ERROR("Device connected after " << (waitAttempt * 500) << "ms")
+            break;
+        }
+        if (waitAttempt == 19) {
+            LOG_ERROR("Warning: Device did not reach Connected status within timeout")
+        }
+        co_await winrt::resume_after(std::chrono::milliseconds(500));
+    }
+
+    co_return cache[wstring(deviceId)].device;
+}
+
+//Call this function to get a service from cache or async if it wasn't found.
+// On Win11, GetGattServicesForUuidAsync throws ERROR_BAD_COMMAND (0x80070016),
+// so we discover ALL services and manually filter by UUID.
 IAsyncOperation<GattDeviceService> getService(wchar_t* deviceId, wchar_t* serviceId) {
     if (cache.count(wstring(deviceId)) && cache[wstring(deviceId)].service)
         co_return cache[wstring(deviceId)].service;
     auto device = co_await getDevice(deviceId);
     if (device == nullptr)
         co_return nullptr;
-    GattDeviceServicesResult result = co_await device.GetGattServicesForUuidAsync(make_guid(serviceId), BluetoothCacheMode::Cached);
-    if (result.Status() != GattCommunicationStatus::Success) {
-        LOG_ERROR("Failed getting services. Status: " << (int)result.Status())
+
+    // Discover ALL services (Uncached) - the only reliable method on Win11
+    LOG_ERROR("Requesting all GATT services...")
+    auto allServicesResult = co_await device.GetGattServicesAsync(BluetoothCacheMode::Uncached);
+    if (allServicesResult.Status() != GattCommunicationStatus::Success) {
+        LOG_ERROR("GATT service discovery failed. Status: " << (int)allServicesResult.Status())
         co_return nullptr;
     }
-    else if (result.Services().Size() == 0) {
-        LOG_ERROR("No service found with uuid")
-        co_return nullptr;
-    }
-    else {
-        if (cache.count(wstring(deviceId))) {
-            cache[wstring(deviceId)].service = result.Services().GetAt(0);
+    LOG_ERROR("GATT service discovery successful, found " << allServicesResult.Services().Size() << " services")
+
+    // Manually find the service matching the requested UUID
+    guid targetGuid = make_guid(serviceId);
+    for (uint32_t i = 0; i < allServicesResult.Services().Size(); i++) {
+        auto svc = allServicesResult.Services().GetAt(i);
+        if (svc.Uuid() == targetGuid) {
+            LOG_ERROR("Found matching service UUID")
+            if (cache.count(wstring(deviceId))) {
+                cache[wstring(deviceId)].service = svc;
+            }
+            co_return svc;
         }
-        co_return cache[wstring(deviceId)].service;
     }
+    LOG_ERROR("No service found matching the target UUID")
+    co_return nullptr;
 }
 
-//Call this function to get a characteristic from cache or async if it wasn't found
+//Call this function to get a characteristic from cache or async if it wasn't found.
+// On Win11, GetCharacteristicsForUuidAsync throws ERROR_BAD_COMMAND (0x80070016),
+// so we discover ALL characteristics and manually filter by UUID.
 IAsyncOperation<GattCharacteristic> getCharacteristic(wchar_t* deviceId, wchar_t* serviceId, wchar_t* characteristicId) {
     try {
         CharacteristicCacheKey key;
@@ -236,22 +320,45 @@ IAsyncOperation<GattCharacteristic> getCharacteristic(wchar_t* deviceId, wchar_t
         if (service == nullptr)
             co_return nullptr;
 
-        GattCharacteristicsResult result = co_await service.GetCharacteristicsForUuidAsync(make_guid(characteristicId), BluetoothCacheMode::Cached);
+        // Discover ALL characteristics (Cached mode to avoid re-query, service is already connected)
+        // Avoid GetCharacteristicsForUuidAsync which throws ERROR_BAD_COMMAND on Win11
+        LOG_ERROR("Discovering all characteristics for service...")
+        GattCharacteristicsResult result = co_await service.GetCharacteristicsAsync(BluetoothCacheMode::Cached);
         if (result.Status() != GattCommunicationStatus::Success) {
-            LOG_ERROR("Error scanning characteristics from service. Status: " << (int)result.Status())
+            // Retry with Uncached if Cached fails
+            LOG_ERROR("Cached characteristic discovery failed (status " << (int)result.Status() << "), trying Uncached...")
+            result = co_await service.GetCharacteristicsAsync(BluetoothCacheMode::Uncached);
+        }
+        if (result.Status() != GattCommunicationStatus::Success) {
+            LOG_ERROR("Error discovering characteristics. Status: " << (int)result.Status())
             co_return nullptr;
         }
-        else if (result.Characteristics().Size() == 0) {
-            LOG_ERROR("No characteristic found with uuid")
-            co_return nullptr;
+
+        LOG_ERROR("Found " << result.Characteristics().Size() << " characteristics in service")
+
+        // Manually find the characteristic matching the requested UUID
+        guid targetGuid = make_guid(characteristicId);
+        for (uint32_t i = 0; i < result.Characteristics().Size(); i++) {
+            auto ch = result.Characteristics().GetAt(i);
+            if (ch.Uuid() == targetGuid) {
+                LOG_ERROR("Found matching characteristic UUID")
+                characteristicCache[key] = ch;
+                co_return ch;
+            }
         }
-        else {
-            characteristicCache[key] = result.Characteristics().GetAt(0);
-            co_return characteristicCache[key].value();
-        }
+        LOG_ERROR("No characteristic found matching the target UUID")
+        co_return nullptr;
+    }
+    catch (hresult_error& ex) {
+        LOG_ERROR("Exception in getCharacteristic: " << to_string(ex.message().c_str()) << " (0x" << hex << (uint32_t)ex.code() << dec << ")")
+        co_return nullptr;
+    }
+    catch (std::exception& ex) {
+        LOG_ERROR("std::exception in getCharacteristic: " << ex.what())
+        co_return nullptr;
     }
     catch (...) {
-        LOG_ERROR("Exception while trying to get characteristic")
+        LOG_ERROR("Unknown exception in getCharacteristic")
         co_return nullptr;
     }
 }
@@ -300,7 +407,8 @@ void DeviceWatcher_Removed(DeviceWatcher sender, DeviceInformationUpdate deviceI
 void DeviceWatcher_EnumerationCompleted(DeviceWatcher sender, IInspectable const&) {
     LOG_ERROR("Enumeration completed.")
     BLE_StopDeviceScan();
-    if (bleThreadRunning) BLE_ScanDevices();
+    // Only restart scanning if we haven't subscribed yet
+    if (bleThreadRunning && !hasSubscribed) BLE_ScanDevices();
 }
 
 //Call this function to scan async all BLE devices
@@ -390,16 +498,31 @@ void Characteristic_ValueChanged(GattCharacteristic const& characteristic, GattV
 }
 
 //Function used to subscribe async to the specific device
+// Includes retry logic: clears stale cache and retries with delay on failure (Win11 compat)
 fire_and_forget SubscribeCharacteristicAsync(wstring deviceId, wstring serviceId, wstring characteristicId, bool* result) {
-    try {
-        auto characteristic = co_await getCharacteristic(&deviceId[0], &serviceId[0], &characteristicId[0]);
-        if (characteristic != nullptr) {
-            auto status = co_await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
-            if (status != GattCommunicationStatus::Success) {
-                LOG_ERROR("Error subscribing to characteristic. Status: " << (int)status)
+    const int MAX_RETRIES = 5;
+    const int RETRY_DELAY_MS = 2000;
+
+    for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+            if (attempt > 1) {
+                LOG_ERROR("Retry attempt " << attempt << "/" << MAX_RETRIES << " - clearing cache and waiting...")
+                // Clear stale cached BLE objects before retrying
+                clearDeviceCache(deviceId);
+                // Wait before retry to let the BLE stack settle
+                co_await winrt::resume_after(std::chrono::milliseconds(RETRY_DELAY_MS));
             }
-            else {
-                LOG_ERROR("Successfully subscribed to characteristic!")
+
+            auto characteristic = co_await getCharacteristic(&deviceId[0], &serviceId[0], &characteristicId[0]);
+            if (characteristic != nullptr) {
+                auto status = co_await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(GattClientCharacteristicConfigurationDescriptorValue::Notify);
+                if (status != GattCommunicationStatus::Success) {
+                    LOG_ERROR("Error subscribing to characteristic. Status: " << (int)status)
+                    // Retry on Unreachable or ProtocolError
+                    if (attempt < MAX_RETRIES) continue;
+                }
+                else {
+                    LOG_ERROR("Successfully subscribed to characteristic!")
                     for (int i = 0; i < deviceList.size(); i++) {
                         if (deviceList[i].id == deviceId) {
                             deviceList[i].subscription = new Subscription();
@@ -407,17 +530,19 @@ fire_and_forget SubscribeCharacteristicAsync(wstring deviceId, wstring serviceId
                             break;
                         }
                     }
-                if (result != 0)
-                    *result = true;
+                    if (result != 0)
+                        *result = true;
+                    break; // Success - exit retry loop
+                }
+            }
+            else {
+                LOG_ERROR("Failed to get characteristic for subscription (attempt " << attempt << "/" << MAX_RETRIES << ")")
+                if (attempt < MAX_RETRIES) continue;
             }
         }
-        else {
-            LOG_ERROR("Failed to get characteristic for subscription")
-        }
-    }
-    catch (hresult_error& ex)
-    {
-        LOG_ERROR("SubscribeCharacteristicAsync error: " << to_string(ex.message().c_str()))
+        catch (hresult_error& ex)
+        {
+            LOG_ERROR("SubscribeCharacteristicAsync error: " << to_string(ex.message().c_str()))
             for (int i = 0; i < deviceList.size(); i++) {
                 if (deviceList[i].id == deviceId && deviceList[i].subscription) {
                     delete deviceList[i].subscription;
@@ -425,6 +550,8 @@ fire_and_forget SubscribeCharacteristicAsync(wstring deviceId, wstring serviceId
                     break;
                 }
             }
+            if (attempt < MAX_RETRIES) continue;
+        }
     }
     subscribeSignal.notify_one();
 }
@@ -458,11 +585,16 @@ DWORD WINAPI BleProc(LPVOID lpv)
         for (int i = 0; i < deviceList.size(); i++) {
             //If the device is connectable we will try to connect if we aren't subscribed yet
             if (deviceList[i].isConnectable) {
-                // Look for the XIAO-ESP32S3 device by name
+                // Look for the target device by name
                 string deviceName = to_string(deviceList[i].name);
                 if (!hasSubscribed && deviceName.find(ble_name) != string::npos) {
                     cout << "Found device: " << deviceName << endl;
                     cout << "Device ID: " << to_string(deviceList[i].id) << endl;
+
+                    // Small delay after discovery before attempting GATT operations
+                    LOG_ERROR("Device found, waiting briefly before connection attempt...")
+                    Sleep(500);
+
                     LOG_ERROR("Attempting to subscribe to notifications...");
 
                     connectedDeviceId = deviceList[i].id; // Save the device ID
@@ -475,7 +607,9 @@ DWORD WINAPI BleProc(LPVOID lpv)
                         GLOBAL.bleReceiver_available = 1;
                     }
                     else {
-                        LOG_ERROR("Subscription failed!")
+                        LOG_ERROR("Subscription failed after all retries!")
+                        // Clear caches so next attempt starts fresh
+                        clearDeviceCache(deviceList[i].id);
                     }
                 }
             }
@@ -518,6 +652,20 @@ int GENERIC_BLE_RECEIVEROBJ::close(void) {
             if (deviceList[i].subscription) {
                 delete deviceList[i].subscription;
                 deviceList[i].subscription = NULL;
+            }
+        }
+
+        // Properly close all cached BLE objects
+        for (auto& entry : cache) {
+            if (entry.second.session != nullptr) {
+                entry.second.session.MaintainConnection(false);
+                entry.second.session.Close();
+            }
+            if (entry.second.service != nullptr) {
+                entry.second.service.Close();
+            }
+            if (entry.second.device != nullptr) {
+                entry.second.device.Close();
             }
         }
 
