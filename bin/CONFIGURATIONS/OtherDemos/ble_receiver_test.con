@@ -1,8 +1,8 @@
 objects=2
-main-top=51
-main-left=157
-main-right=1161
-main-bottom=814
+main-top=12
+main-left=19
+main-right=1023
+main-bottom=775
 anim-top=350
 anim-left=20
 anim-right=420
@@ -13,8 +13,8 @@ design-right=316
 design-bottom=414
 tool-top=456
 tool-left=474
-tool-right=1085
-tool-bottom=909
+tool-right=995
+tool-bottom=815
 showdesign=1
 hidestatus=0
 showtoolbox=-1
@@ -122,6 +122,8 @@ outport16range=0
 ble_name=ESP32S3-BLE-Sender
 serviceuuid=12345678-1234-5678-1234-56789abcdef0
 readuuid=12345678-1234-5678-1234-56789abcdef1
+num_channels=1
+num_samples=10
 linkport 0-1,0
 linkport 1-1,1
 linkport 2-1,2
